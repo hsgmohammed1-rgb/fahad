@@ -7,7 +7,16 @@ import type { Language } from '../types';
    الذي طلبه فهد. تُصل إليها عبر #story وتعود للموقع عند الخروج.
    ============================================================ */
 
-const CHAPTER_MS = 35000;
+/* Every chapter runs for 10 seconds. A chapter whose text is heavy gets
+   exactly 12 extra seconds — nothing longer, so the pace stays snappy. */
+const BASE_CHAPTER_MS = 10000;
+const LONG_CHAPTER_MS = 12000;
+const LONG_TEXT_CHARS = 150;
+
+const chapterMs = (c: Chapter) => {
+    const len = c.textAr.length + c.headAr.length;
+    return len > LONG_TEXT_CHARS ? BASE_CHAPTER_MS + LONG_CHAPTER_MS : BASE_CHAPTER_MS;
+};
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const ext = (n: number) => (n >= 8 && n <= 13 ? 'png' : 'jpg');
@@ -96,7 +105,7 @@ const CHAPTERS: Chapter[] = [
     },
     {
         photo: 13,
-        img: '/album3/13.png',
+        img: '/album3/22.jpg',
         kickerAr: 'الفصل 7', kickerEn: 'Chapter 7',
         headAr: 'عزلة الجبل',
         headEn: 'The mountain\'s isolation',
@@ -219,6 +228,10 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
     const [ch, setCh] = useState(0);
     const [ended, setEnded] = useState(false);
     const [playing, setPlaying] = useState<boolean>(() => typeof window === 'undefined' ? true : !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    /* seconds left in the current chapter — drives the visible countdown */
+    const [left, setLeft] = useState(0);
+    /* black wipe that covers the cut between two chapters */
+    const [wipe, setWipe] = useState(0);
     const touchX = useRef<number | null>(null);
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -251,15 +264,46 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
         else { window.location.hash = to; }
     }, []);
 
-    const next = useCallback(() => {
-        if (ended) return;
-        if (ch >= total - 1) setEnded(true);
-        else setCh((p) => p + 1);
-    }, [ch, ended, total]);
-    const prev = useCallback(() => {
-        if (ended) { setEnded(false); return; }
-        setCh((p) => (p - 1 + total) % total);
-    }, [ended, total]);
+    /* --- black wipe between chapters -------------------------------
+       phase 0 = clear, 1 = fading to black, 2 = black then back.
+       The chapter only swaps while the screen is fully black, so the
+       viewer never sees a hard cut.                                    */
+    const wipeTimer = useRef<number | null>(null);
+    const wipeRef = useRef(0);
+    const chRef = useRef(0);
+    const endedRef = useRef(false);
+    useEffect(() => { chRef.current = ch; }, [ch]);
+    useEffect(() => { endedRef.current = ended; }, [ended]);
+
+    const swap = useCallback((delta: number) => {
+        if (wipeRef.current) return;              // a wipe is already running
+        wipeRef.current = 1;
+        setWipe(1);
+        wipeTimer.current = window.setTimeout(() => {
+            wipeRef.current = 2;
+            setWipe(2);
+            const cur = chRef.current;
+            const wasEnded = endedRef.current;
+            if (wasEnded) {
+                setEnded(false);
+                setCh(delta > 0 ? 0 : total - 1);
+            } else if (delta < 0) {
+                setCh((p) => (p - 1 + total) % total);
+            } else if (cur >= total - 1) {
+                setEnded(true);
+            } else {
+                setCh(cur + 1);
+            }
+            wipeTimer.current = window.setTimeout(() => {
+                wipeRef.current = 0;
+                setWipe(0);
+            }, 60);
+        }, 420);
+    }, [total]);
+    useEffect(() => () => { if (wipeTimer.current) window.clearTimeout(wipeTimer.current); }, []);
+
+    const next = useCallback(() => { swap(1); }, [swap]);
+    const prev = useCallback(() => { swap(-1); }, [swap]);
 
     useEffect(() => {
         const prev = document.body.style.overflow;
@@ -267,11 +311,24 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
         return () => { document.body.style.overflow = prev; };
     }, []);
 
+    /* per-chapter runtime — the longer the text, the longer the scene holds */
+    const sceneMs = chapterMs(CHAPTERS[ch]);
+
     useEffect(() => {
         if (!started || ended || !playing) return;
-        const id = window.setTimeout(next, CHAPTER_MS);
+        const id = window.setTimeout(() => swap(1), sceneMs);
         return () => window.clearTimeout(id);
-    }, [started, ended, playing, ch, next]);
+    }, [started, ended, playing, ch, sceneMs, swap]);
+
+    /* visible countdown — ticks every second, resets on every chapter change */
+    useEffect(() => {
+        if (!started || ended || !playing) return;
+        setLeft(Math.round(sceneMs / 1000));
+        const id = window.setInterval(() => {
+            setLeft((s) => (s <= 1 ? 0 : s - 1));
+        }, 1000);
+        return () => window.clearInterval(id);
+    }, [started, ended, playing, ch, sceneMs]);
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -290,6 +347,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
     return (
         <div
             className="st-root"
+            style={{ ['--chapms' as string]: `${sceneMs}ms` }}
             onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
             onTouchEnd={(e) => {
                 if (touchX.current === null) return;
@@ -303,7 +361,9 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
                 font-family:inherit;animation:st-in .7s ease both}
             @keyframes st-in{from{opacity:0}to{opacity:1}}
             .st-photo{position:absolute;inset:0;background-size:cover;
-                animation:st-kb 9.5s ease-out forwards;will-change:transform;filter:saturate(1.05) contrast(1.03)}
+                animation:st-kb var(--chapms,20s) ease-out forwards,st-photo-in .7s ease-out both;
+                will-change:transform;filter:saturate(1.05) contrast(1.03)}
+            @keyframes st-photo-in{from{opacity:0}to{opacity:1}}
             @keyframes st-kb{from{transform:scale(1)}to{transform:scale(var(--kb,1.14))}}
             .st-scrim{position:absolute;inset:0;pointer-events:none;
                 background:linear-gradient(180deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.22) 26%,rgba(0,0,0,.16) 52%,rgba(0,0,0,.66) 76%,rgba(0,0,0,.96) 100%)}
@@ -313,6 +373,11 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             @keyframes st-gr{0%{transform:translate(0,0)}33%{transform:translate(-1.5%,1%)}66%{transform:translate(1%, -1.5%)}100%{transform:translate(0,0)}}
             .st-scan{position:absolute;inset:0;pointer-events:none;opacity:.2;background:repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 1px, transparent 1px 4px);mix-blend-mode:overlay}
             .st-rain{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;mix-blend-mode:screen;z-index:5}
+            /* black wipe between chapters */
+            .st-wipe{position:absolute;inset:0;z-index:11;pointer-events:none;background:#000;opacity:0;
+                transition:opacity .42s cubic-bezier(.4,0,.2,1)}
+            .st-wipe.on{opacity:1}
+            .st-wipe.peak{opacity:1;transition:opacity .06s linear}
             .st-bolt{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5;
                 background:radial-gradient(70% 40% at 64% 6%, rgba(214,240,255,.3), transparent 66%);
                 animation:st-bolt 14s ease-out infinite}
@@ -334,6 +399,10 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             .st-replay:hover{color:#08060A;background:${CREAM};border-color:transparent;transform:none}
             .st-count{margin-inline-start:auto;display:inline-flex;align-items:baseline;gap:.5rem;font-size:11px;font-weight:900;letter-spacing:.2em;color:rgba(255,255,255,.75)}
             .st-count b{font-size:20px;color:#fff}.st-count span{color:rgba(255,255,255,.35)}
+            .st-timer{margin-inline-start:.35rem;display:inline-flex;align-items:center;gap:.3rem;
+                font-size:11px;font-weight:900;letter-spacing:.12em;color:rgba(247,227,176,.75);
+                background:rgba(242,179,61,.1);border:1px solid rgba(242,179,61,.28);
+                border-radius:999px;padding:.3rem .6rem;font-variant-numeric:tabular-nums}
             .st-play{width:42px;height:42px;border-radius:14px;flex:none;cursor:pointer;font-family:inherit;
                 display:inline-flex;align-items:center;justify-content:center;color:${CREAM};background:rgba(242,179,61,.12);border:1px solid rgba(242,179,61,.35);transition:all .3s ease}
             .st-play:hover{background:rgba(242,179,61,.25)}
@@ -355,7 +424,8 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             .st-seg{position:relative;flex:1;height:4px;border-radius:999px;background:rgba(255,255,255,.14);overflow:hidden}
             .st-seg.done{background:linear-gradient(90deg,${GOLD_DEEP},${CREAM} 60%,${GOLD})}
             .st-seg.cur .st-seg-fill{position:absolute;inset-block:0;inset-inline-start:0;border-radius:999px;
-                background:linear-gradient(90deg,#F2CE7C,${CREAM} 55%,${GOLD});box-shadow:0 0 12px rgba(247,227,176,.8);animation:st-fill 9s linear forwards}
+                background:linear-gradient(90deg,#F2CE7C,${CREAM} 55%,${GOLD});box-shadow:0 0 12px rgba(247,227,176,.8);
+                animation:st-fill var(--chapms,20s) linear forwards}
             @keyframes st-fill{from{width:0%}to{width:100%}}
             .st-hint{display:none;font-size:10px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.35);text-transform:uppercase;white-space:nowrap}
             @media(min-width:640px){.st-hint{display:block}}
@@ -385,28 +455,32 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             .st-end-btns{position:relative;z-index:2;margin-top:2.6rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.8rem}
             a:focus-visible,button:focus-visible{outline:2px solid ${GOLD};outline-offset:3px;border-radius:14px}
             /* vertical photo — full art with blurred edges */
-            .st-photo-vert{position:absolute;inset:0;overflow:hidden;background:#000;animation:st-kb 9.5s ease-out forwards;will-change:transform}
+            .st-photo-vert{position:absolute;inset:0;overflow:hidden;background:#000;
+                animation:st-kb var(--chapms,20s) ease-out forwards,st-photo-in .7s ease-out both;will-change:transform}
             .st-photo-vert-blur{position:absolute;inset:-20%;width:140%;height:140%;background-size:cover;background-position:center;filter:blur(46px) brightness(.55);opacity:.9;transform:scale(var(--kbv,1.1))}
             .st-photo-vert-img{position:absolute;inset:50% 50% 0 0;width:100%;height:100%;object-fit:contain;object-position:center;transform:translate(0,-50%);will-change:transform}
             @media(prefers-reduced-motion:reduce){
                 .st-photo,.st-grain,.st-bolt,.st-pol,.st-seg.cur .st-seg-fill,.st-photo-vert,.st-photo-vert-blur,.st-photo-vert-img{animation:none!important}
                 .st-rise{opacity:1!important;transform:none!important}.st-rain{display:none}
+                .st-wipe{transition:none!important}
             }
             `}</style>
 
             {started && !ended && c.vertical ? (
-                <div className="st-photo-vert" style={{
+                <div key={`vert-${ch}`} className="st-photo-vert" style={{
                     ['--kbv' as string]: c.zoom || 1.06,
+                    ['--chapms' as string]: `${sceneMs}ms`,
                     zIndex: 1,
                 }} aria-hidden="true">
                     <div className="st-photo-vert-blur" style={{ backgroundImage: `url(${c.img})`, backgroundPosition: c.pos || 'center' }} />
                     <img className="st-photo-vert-img" src={c.img} alt="" decoding="async" loading="lazy" />
                 </div>
             ) : (
-                <div className="st-photo" style={{
+                <div key={ended ? 'end' : `photo-${ch}`} className="st-photo" style={{
                     backgroundImage: ended ? `url(${END_IMG})` : `url(${started ? c.img : '/album3/' + pad(1) + '.jpg'})`,
                     backgroundPosition: started ? (c.pos || 'center') : 'center',
                     ['--kb' as string]: started ? (c.zoom || 1.14) : 1.06,
+                    ['--chapms' as string]: `${sceneMs}ms`,
                     zIndex: 1,
                 }} aria-hidden="true" />
             )}
@@ -417,6 +491,9 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             <span className="st-bolt" aria-hidden="true" />
 
             <span className="st-bar top" aria-hidden="true" /><span className="st-bar bot" aria-hidden="true" /><span className="st-vig" aria-hidden="true" />
+
+            {/* black wipe — covers the cut between two chapters */}
+            <span className={`st-wipe${wipe === 1 ? ' on' : wipe === 2 ? ' peak' : ''}`} aria-hidden="true" />
 
             {!started && (
                 <div className="st-intro" style={{ backgroundImage: `url(/album3/09.png)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
@@ -446,6 +523,9 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
                         </button>
                         <span className="st-count" dir="ltr"><b>{pad(ch + 1)}</b><span>/ {pad(total)}</span></span>
+                        <span className="st-timer" dir="ltr" aria-label={isAr ? 'الوقت المتبقي' : 'Time remaining'}>
+                            {pad(Math.floor(left / 60))}:{pad(left % 60)}
+                        </span>
                         <button type="button" className="st-play" onClick={() => setMusicOn((m) => !m)} aria-label={isAr ? (musicOn ? 'كتم الموسيقى' : 'تشغيل الموسيقى') : (musicOn ? 'Mute music' : 'Play music')}>
                             {musicOn ? (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18V6l11-3.5V16" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="17.5" cy="16" r="2.5" /></svg>) : (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 18V6l11-3.5V16" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="17.5" cy="16" r="2.5" /><path d="M3 3l18 18" /></svg>)}
                         </button>
