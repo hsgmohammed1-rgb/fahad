@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Language } from '../types';
+import { ALBUM3_FILES } from './album3Images';
 
 /* ============================================================
    ALBUM — final section of the FAHAD hub.
@@ -7,8 +8,8 @@ import type { Language } from '../types';
    swipe, filmstrip, keyboard, autoplay and a full lightbox.
    ============================================================ */
 
-const PHOTOS = Array.from({ length: 23 }, (_, i) => ({
-    src: `/album3/${String(i + 1).padStart(2, '0')}.${(i + 1) >= 8 && (i + 1) <= 13 ? 'png' : 'jpg'}`,
+const PHOTOS = ALBUM3_FILES.map((f, i) => ({
+    src: `/album3/${f}`,
     n: i + 1,
 }));
 

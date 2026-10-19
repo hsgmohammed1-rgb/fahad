@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Language } from '../types';
+import { ALBUM3_FILES } from './album3Images';
 
 /* ============================================================
    STORY — سيرة فهد المطيري. صفحة سينمائية مستقلة تملأ الشاشة.
@@ -19,7 +20,7 @@ const chapterMs = (c: Chapter) => {
 };
 
 const pad = (n: number) => String(n).padStart(2, '0');
-const ext = (n: number) => (n >= 8 && n <= 13 ? 'png' : 'jpg');
+const ext = (n: number) => (ALBUM3_FILES[n - 1]?.endsWith('.png') ? 'png' : 'jpg');
 
 interface Chapter {
     photo: number;
@@ -34,128 +35,150 @@ interface Chapter {
     vertical?: boolean;
 }
 
-const END_IMG = `/album3/${pad(20)}.png`;
+const END_IMG = `/album3/20.png`;
 
 const CHAPTERS: Chapter[] = [
     {
         photo: 8,
         img: '/album3/08.png',
         kickerAr: 'الفصل 1', kickerEn: 'Chapter 1',
-        headAr: 'شرارة الطموح',
+        headAr: 'شَرارَةُ الطُّموح',
         headEn: 'The spark of ambition',
-        textAr: 'لم تكن النجوم على كتفه مجرد صدفة.. بدأ فهد المطيري مسيرته باجتهادات شخصية في أروقة المركز، عسكريٌ صاعد يربط ليله بنهاره.',
-        textEn: 'The stars on his shoulder were no coincidence. Fahad Al-Mutairi began his career with personal efforts within the center\'s halls.',
-        pos: 'center 25%',
+        textAr: 'لم تكن النجوم على كتفه هبةً من أحد. بدأ مسيرته بعرق الجبين، عسكريٌ يربط ليله بنهاره، مؤمناً بأن الاجتهاد هو السبيل الوحيد لفرض النظام وكتابة التاريخ.',
+        textEn: 'The stars on his shoulder were no gift from anyone. He began his career with sweat and discipline, a soldier who ties his nights to his days, believing hard work is the only path to impose order and write history.',
+        pos: 'center 30%',
         zoom: 1.12,
     },
     {
         photo: 11,
         img: '/album3/11.png',
         kickerAr: 'الفصل 2', kickerEn: 'Chapter 2',
-        headAr: 'حارس ليالي المدينة',
+        headAr: 'حَارِسُ لَيَالي المَدينَة',
         headEn: 'Guardian of the city nights',
-        textAr: 'في الوقت الذي نام فيه الكثيرون، كان فهد يجوب شوارع المدينة المظلمة. صعد السلم خطوة بخطوة حتى تربع على عرش قيادة قطاع الشيرف.',
-        textEn: 'While many slept, Fahad patrolled the dark streets of the city. He climbed the ladder step by step until he sat on the throne of the sheriff sector command.',
-        pos: 'center 75%',
+        textAr: 'جاب شوارع المدينة المظلمة حتى تربع على قيادة قطاع الشيرف. لم تغيره المناصب، بل زادته صرامة ورغبة جامحة في تطهير القطاع من كل متخاذل.',
+        textEn: 'He rode the dark streets of the city until he took command of the sheriff sector. Posts never changed him — they only sharpened him, and fed his fierce will to cleanse the sector of every slacker.',
+        pos: 'center 35%',
         zoom: 1.12,
     },
     {
         photo: 12,
         img: '/album3/12.png',
         kickerAr: 'الفصل 3', kickerEn: 'Chapter 3',
-        headAr: 'شرارة ساندي شواطئ',
-        headEn: 'The Sandy Beaches spark',
-        textAr: 'دوى الإنذار معلناً سرقة بنك ساندي، وهناك بدأت القصة التي ستغير كل شيء. اصطدمت صرامة القائد فهد المطيري ببرود العسكري العائد من إجازته الطويلة "عبدالصمد".. وكان لا بد للقائد أن يفرض هيبته.',
-        textEn: 'The alarm sounded, announcing the Sandy Bank robbery — and there began the story that would change everything. Commander Fahad Al-Mutairi\'s sternness clashed with the coldness of "Abdulsamad".. and the commander had to impose his authority.',
-        pos: 'center 0%',
-        zoom: 1.14,
-    },
-    {
-        photo: 11,
-        img: '/album3/04.jpg',
-        kickerAr: 'الفصل 4', kickerEn: 'Chapter 4',
-        headAr: 'كبرياء القائد وتأديب المتخاذل',
-        headEn: 'The commander\'s pride and disciplining the slacker',
-        textAr: 'بنظرة ثاقبة وحزم عسكري، رفض فهد تهاون عبدالصمد، وأمر بإحالته لإعادة التأهيل لعدم كفاءته. كانت إهانة عسكرية في محلها لضبط القطاع، لكنها في قلب عبدالصمد تحولت إلى حقد أسود وبداية لعداوة لا ترحم.',
-        textEn: 'With a piercing look and military firmness, Fahad refused Abdulsamad\'s negligence and ordered his referral to rehabilitation for incompetence. It was a deserved military insult to discipline the sector, but in Abdulsamad\'s heart it turned into black hatred and the beginning of a merciless enmity.',
-        pos: 'center 5%',
-        zoom: 1.1,
-    },
-    {
-        photo: 18,
-        img: '/album3/17.jpg',
-        kickerAr: 'الفصل 5', kickerEn: 'Chapter 5',
-        headAr: 'تحالف الأقوياء',
-        headEn: 'Alliance of the strong',
-        textAr: 'بدأ عبدالصمد بتكوين فرقة كاملة هدفها إسقاط فهد. لكن القائد المحنك لم يكن فريسة سهلة؛ أخذ احتياطاته ووحّد الصفوف مع كبار المدينة.',
-        textEn: 'Abdulsamad began forming a full squad aiming to topple Fahad. But the seasoned commander was no easy prey; he took precautions and united ranks with the city\'s elders.',
-        pos: 'center 0%',
-        zoom: 1.1,
-    },
-    {
-        photo: 5,
-        img: '/album3/23.jpg',
-        kickerAr: 'الفصل 6', kickerEn: 'Chapter 6',
-        headAr: 'خناجر الكواليس',
-        headEn: 'Backstage daggers',
-        textAr: 'كثرت الشكاوى الكيدية وتصيد الأخطاء. لم تكن الحرب في الميدان بل في الغرف المغلقة.',
-        textEn: 'Malicious complaints and fault-finding multiplied. The war was no longer on the field but behind closed doors.',
-        pos: 'center 45%',
+        headAr: 'هَيبَةُ القِيَادَة',
+        headEn: 'The authority of command',
+        textAr: 'فرض شخصيته القيادية بقوة لا تقبل المساومة. كان يرى في الانضباط درعاً للمدينة، ولم يكن في قاموسه مكان لمن يختلق الأعذار أو يتقاعس عن واجبه.',
+        textEn: 'He imposed his commanding presence with a force that accepted no compromise. He saw discipline as the city\'s shield, and his vocabulary held no room for those who invent excuses or shirk their duty.',
+        pos: 'center 25%',
         zoom: 1.12,
     },
     {
-        photo: 13,
-        img: '/album3/22.jpg',
+        photo: 24,
+        img: '/album3/24.png',
+        kickerAr: 'الفصل 4', kickerEn: 'Chapter 4',
+        headAr: 'شَرَارَةُ العَدَاوَة',
+        headEn: 'The spark of enmity',
+        textAr: 'في واقعة بنك ساندي، اصطدمت صرامة فهد بتراخي "عبدالصمد" العائد من إجازته. فأصدر القائد قراراً حازماً بإعادة تأهيله لعدم كفاءته، لتشتعل شرارة الحقد.',
+        textEn: 'At the Sandy bank incident, Fahad\'s sternness collided with the negligence of "Abdulsamad", back from leave. The commander issued a firm order sending him back for rehabilitation — and the spark of hatred lit.',
+        pos: 'center 30%',
+        zoom: 1.1,
+    },
+    {
+        photo: 26,
+        img: '/album3/26.png',
+        kickerAr: 'الفصل 5', kickerEn: 'Chapter 5',
+        headAr: 'تَحالُفُ الأَقوِيَاء',
+        headEn: 'Alliance of the strong',
+        textAr: 'تحول قرار التأهيل إلى عداوة وتأسيس لفرقة متمردة. لم يقف فهد مكتوف الأيدي، بل وحّد صفوفه مع كبار قادة المدينة لردع هذا التمرد الناشئ في مهده.',
+        textEn: 'The rehabilitation order turned into enmity and the seed of a rebel squad. Fahad did not stand idle — he united his ranks with the city\'s senior commanders to deter the rebellion in its cradle.',
+        pos: 'center 30%',
+        zoom: 1.1,
+    },
+    {
+        photo: 17,
+        img: '/album3/17.jpg',
+        kickerAr: 'الفصل 6', kickerEn: 'Chapter 6',
+        headAr: 'دِرعُ الشِّيرِف',
+        headEn: 'The sheriff\'s shield',
+        textAr: 'استند القائد المحنك إلى رجال يثق بهم، مثل الشريف "بكر باكور" والقائد "كيلر تشاندلر". ظن أن قوة التحالفات ستكون كافية لتحطيم موجة الغدر قبل أن تكبر.',
+        textEn: 'The seasoned commander leaned on men he trusted, like Sheriff "Bakr Bakur" and Commander "Killer Chandler". He believed the strength of the alliances would crush the wave of betrayal before it grew.',
+        pos: 'center 30%',
+        zoom: 1.12,
+    },
+    {
+        photo: 23,
+        img: '/album3/23.jpg',
         kickerAr: 'الفصل 7', kickerEn: 'Chapter 7',
-        headAr: 'عزلة الجبل',
+        headAr: 'خَنَاجِرُ الكَوَالِيس',
+        headEn: 'Backstage daggers',
+        textAr: 'انتقلت الحرب من الميدان إلى الغرف المغلقة. كثرت الشكاوى الكيدية وتصيد الأخطاء، وتحولت الزمالة العسكرية إلى ساحة دنيئة لتصفية الحسابات الشخصية.',
+        textEn: 'The war moved from the field into closed rooms. Malicious complaints and fault-finding multiplied, and military fellowship turned into a dirty arena for settling personal scores.',
+        pos: 'center 30%',
+        zoom: 1.1,
+    },
+    {
+        photo: 22,
+        img: '/album3/22.jpg',
+        kickerAr: 'الفصل 8', kickerEn: 'Chapter 8',
+        headAr: 'عُزلَةُ الجَبَل',
         headEn: 'The mountain\'s isolation',
-        textAr: 'مهما كان الجبل قوياً، فإن رياح الغدر تنحت فيه. ترك القائد وحيداً يواجه مصيراً نسجته خيوط الحقد.',
-        textEn: 'However strong the mountain, the winds of betrayal carve into it. The commander was left alone to face a fate woven by spite.',
-        pos: 'center 20%',
-        zoom: 1.04,
+        textAr: 'مهما كان الجبل شامخاً، فإن رياح الغدر تنحت فيه. وجد القائد نفسه يصارع نظاماً تم اختراقه، ليُترك وحيداً في مكتبه يواجه مؤامرة حُيكت في الظلام.',
+        textEn: 'However lofty the mountain, the winds of betrayal carve into it. The commander found himself fighting a system that had been infiltrated, left alone in his office against a plot woven in the dark.',
+        pos: 'center 30%',
+        zoom: 1.06,
     },
     {
         photo: 10,
         img: '/album3/10.png',
-        kickerAr: 'الفصل 8', kickerEn: 'Chapter 8',
-        headAr: 'ميزان الظلم',
-        headEn: 'The scale of injustice',
-        textAr: 'سقطت العدالة في قاعة المحكمة قبل أن يسقط القائد. تم القبض على فهد بظلم قاهر وتهم ملفقة.',
-        textEn: 'Justice fell in the courtroom before the commander fell. Fahad was arrested with oppressive injustice and fabricated charges.',
-        pos: 'center 50%',
-        zoom: 1.08,
+        kickerAr: 'الفصل 9', kickerEn: 'Chapter 9',
+        headAr: 'فَخُّ الذِّئَاب',
+        headEn: 'The wolves\' trap',
+        textAr: 'اكتملت فصول المؤامرة وسقطت الأقنعة. حُوصر القائد بخيانة من أقسموا على حماية الشعار ذاته، ليدرك أن أقسى طعنة هي تلك التي تأتيك من سلاح زميلك.',
+        textEn: 'The chapters of the plot were complete and the masks fell. The commander was surrounded by the betrayal of those who swore to protect the very same banner — learning that the cruelest blow is the one dealt by a comrade\'s blade.',
+        pos: 'center 30%',
+        zoom: 1.1,
     },
     {
         photo: 21,
         img: '/album3/21.png',
-        kickerAr: 'الفصل 9', kickerEn: 'Chapter 9',
-        headAr: 'فصل الغدر',
-        headEn: 'The betrayal chapter',
-        textAr: 'قبل النهاية جاء الحساب — ما تبقى من قائد وثق بالرجال الخطأ.',
-        textEn: 'Before the end came the reckoning — what remained of a commander who trusted the wrong men.',
-        pos: 'center 50%',
+        kickerAr: 'الفصل 10', kickerEn: 'Chapter 10',
+        headAr: 'مِيزَانُ الظُّلم',
+        headEn: 'The scale of injustice',
+        textAr: 'سِيق القائد إلى قاعة المحكمة بتهم ملفقة وظلم قاهر. غابت الحقيقة وحضرت المصالح الشخصية، لتُذبح العدالة على طاولة القضاء قبل أن يُذبح فهد.',
+        textEn: 'The commander was dragged into the courtroom on fabricated charges and flagrant injustice. Truth vanished and personal interests took its place, so justice was slaughtered on the bench before Fahad was.',
+        pos: 'center 30%',
+        zoom: 1.08,
+    },
+    {
+        photo: 25,
+        img: '/album3/25.png',
+        kickerAr: 'الفصل 11', kickerEn: 'Chapter 11',
+        headAr: 'اغتِيَالُ العَدالَة',
+        headEn: 'The murder of justice',
+        textAr: 'بدم بارد وأمام أعين "شبيب" و"عبدالله المهنا"، نُفذ حكم الإعدام الجائر. سقط جسد القائد فهد المطيري، لتسقط معه هيبة القانون وشرف العسكرية.',
+        textEn: 'With cold blood and before the eyes of "Shuaib" and "Abdullah Al-Muhanna", the unjust execution sentence was carried out. Commander Fahad Al-Mutairi\'s body fell — and with it, the authority of law and military honor.',
+        pos: 'center 30%',
         zoom: 1.1,
     },
     {
         photo: 15,
         img: '/album3/15.jpg',
-        kickerAr: 'الفصل 10', kickerEn: 'Chapter 10',
-        headAr: 'خلود الأساطير (النهاية)',
-        headEn: 'The immortality of legends (The end)',
-        textAr: 'في مشهد تقشعر له الأبدان، نُفذ حكم الإعدام الجائر بحق القائد فهد المطيري ليروي بدمائه قصة غدر لن تنساها المدينة.',
-        textEn: 'In a chilling scene, the unjust execution sentence was carried out against Commander Fahad Al-Mutairi, narrating with his blood a story of betrayal the city will never forget.',
-        pos: 'center 0%',
-        zoom: 1.03,
+        kickerAr: 'الفصل 12', kickerEn: 'Chapter 12',
+        headAr: 'خُلُودُ الأَسَاطِير',
+        headEn: 'The immortality of legends',
+        textAr: 'رحل القائد وترك إرثاً لا يُمحى. ظنوا أن رصاصهم سينهي قصته، لكن دماءه كتبت تاريخاً جديداً، ليصبح اسمه أسطورة تطارد قاتليه إلى الأبد.',
+        textEn: 'The commander departed leaving a legacy no one can erase. They thought their bullets would end his story, but his blood wrote a new history — and his name became a legend that will hunt his killers forever.',
+        pos: 'center 25%',
+        zoom: 1.04,
     },
 ];
 
 /* scattered polaroid prints for the intro collage */
 const POLAROIDS = [
-    { src: '/album3/05.jpg', rot: -9, x: '6%', y: '12%', s: 1 },
-    { src: '/album3/17.jpg', rot: 7, x: '82%', y: '10%', s: 0.92 },
-    { src: '/album3/03.jpg', rot: -6, x: '12%', y: '66%', s: 0.95 },
-    { src: '/album3/11.png', rot: 8, x: '76%', y: '64%', s: 1.05 },
-    { src: '/album3/14.jpg', rot: -4, x: '46%', y: '78%', s: 0.8 },
+    { src: '/album3/08.png', rot: -9, x: '6%', y: '12%', s: 1 },
+    { src: '/album3/26.png', rot: 7, x: '82%', y: '10%', s: 0.92 },
+    { src: '/album3/12.png', rot: -6, x: '12%', y: '66%', s: 0.95 },
+    { src: '/album3/25.png', rot: 8, x: '76%', y: '64%', s: 1.05 },
+    { src: '/album3/24.png', rot: -4, x: '46%', y: '78%', s: 0.8 },
 ];
 
 const RAIN_COLOR = 'rgba(214,240,255,';
@@ -506,7 +529,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
                     <div className="relative" style={{ zIndex: 2 }}>
                         <span className="st-eyebrow"><span className="w-1.5 h-1.5 rounded-full bg-[#F2B33D] animate-pulse" aria-hidden="true" /><span dir="ltr">فيلم قصير</span></span>
                         <h1 className={`st-title ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'سيرة فهد المطيري' : 'The saga of Fahad Al-Mutairi'}</h1>
-                        <div className="st-meta"><span>{isAr ? 'فهد' : 'FAHAD'}</span><i aria-hidden="true" /><span dir="ltr">FAHAD ERA</span><i aria-hidden="true" />                            <span>{isAr ? '١٠ فصول' : '10 chapters'}</span></div>
+                        <div className="st-meta"><span>{isAr ? 'فهد' : 'FAHAD'}</span><i aria-hidden="true" /><span dir="ltr">FAHAD ERA</span><i aria-hidden="true" />                            <span>{isAr ? '١٢ فصلًا' : '12 chapters'}</span></div>
                         <div><button type="button" className="st-begin" onClick={() => setStarted(true)} autoFocus>
                             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#08060A] text-[#F2CE7C]" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
                             {isAr ? 'ابدأ السيرة' : 'Begin the story'}
@@ -565,7 +588,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
                 <div className="st-end" style={{ backgroundImage: `url(${END_IMG})` }}>
                     <span className="st-end-scrim" aria-hidden="true" />
                     <div>
-                        <span className="st-eyebrow"><span className="w-1.5 h-1.5 rotate-45 bg-[#F2B33D]" aria-hidden="true" /><span dir="ltr">FAHAD</span></span>
+                        <span className="st-eyebrow"><span className="w-1.5 h-1.5 rotate-45 bg-[#F2B33D]" aria-hidden="true" /><span dir="ltr">{isAr ? 'النهاية' : 'THE END'}</span></span>
                         <p className={`st-end-quote mt-6 ${isAr ? 'font-arabic' : ''}`}>
                             {isAr ? '«قد يغتالون الجسد بحقدهم، لكن التاريخ لا يرحم الخائنين.. لم تسقط هيبة فهد المطيري حين ركع، بل سقط شرف العسكرية في وحل الغدر.»' : '“They may assassinate the body with their hatred, but history does not forgive the traitors.. Fahad Al-Mutairi\'s prestige did not fall when he knelt — military honor fell into the mire of betrayal.”'}
                         </p>
