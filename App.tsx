@@ -1214,14 +1214,17 @@ export default function App() {
                             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#F2B33D]/80 to-transparent" />
                             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[280px] max-w-[90vw] rounded-full bg-[#F2B33D]/[0.09] blur-[90px] pointer-events-none" aria-hidden="true" />
                             <div className="px-8 pt-8 pb-16 md:px-12 md:pt-12 md:pb-24 text-center relative">
-                                {/* emblem */}
-                                <div className="relative mx-auto w-fit mb-5">
-                                    <span className="halo-conic -inset-2.5" aria-hidden="true" />
-                                    <img src={branding.profileImage} alt="FAHAD" className="relative w-16 h-16 rounded-full object-cover border-2 border-[#FDEFC9]/70 shadow-[0_0_44px_rgba(242,179,61,0.5)]" loading="lazy" />
+                                {/* crest — the ghost FAHAD is a background layer, the logo sits on top of it */}
+                                <div className="relative mx-auto w-fit">
+                                    <p className="font-gaming text-[16vw] md:text-[96px] leading-none text-stroke opacity-35 select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" dir="ltr" aria-hidden="true">FAHAD</p>
+                                    <div className="relative z-10 w-16 h-16">
+                                        <span className="halo-conic -inset-2.5" aria-hidden="true" />
+                                        <img src={branding.profileImage} alt="FAHAD" className="relative w-16 h-16 rounded-full object-cover border-2 border-[#FDEFC9]/70 shadow-[0_0_44px_rgba(242,179,61,0.5)]" loading="lazy" />
+                                    </div>
                                 </div>
 
-                                <p className="font-gaming text-[22vw] md:text-[150px] leading-none text-stroke opacity-40 select-none" dir="ltr" aria-hidden="true">FAHAD</p>
-                                <p className="fahad-text text-2xl md:text-3xl font-black tracking-[0.30em] -mt-3 md:-mt-6 relative" dir="ltr">FAHAD</p>
+                                {/* solid name */}
+                                <p className="fahad-text text-2xl md:text-3xl font-black tracking-[0.30em] mt-6 md:mt-8 relative z-10" dir="ltr">FAHAD</p>
 
                                 {/* every social */}
                                 <div className="flex flex-wrap justify-center gap-2.5 mt-7 relative">
@@ -1259,7 +1262,7 @@ export default function App() {
                                             <span className="text-[9.5px] font-black tracking-[0.22em] uppercase text-white/40">{t.licenseLabel}</span>
                                             <span className="text-[15px] font-black text-[#F2CE7C] tabular-nums" dir="ltr">{t.licenseNo}</span>
                                         </span>
-                                        <span className="text-[9.5px] font-black tracking-[0.18em] uppercase text-white/25 ms-2 ps-3 border-s border-white/10" dir="ltr">VERIFIED</span>
+                                        <span className="self-stretch flex items-center text-[9.5px] font-black tracking-[0.18em] uppercase text-white/25 ms-2 ps-3 border-s border-white/10" dir="ltr">VERIFIED</span>
                                     </div>
 
                                     {/* 2 — copyright */}
