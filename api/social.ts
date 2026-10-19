@@ -138,7 +138,38 @@ async function getYouTube(): Promise<{ count: number; source: string }> {
     const n = parseCompact(d?.subscriberCount);
     if (n) return { count: n, source: 'piped' };
   } catch {}
+  // 3) The feed itself lists the subscriber total in <yt:channelId> sibling media stats
+  try {
+    const xml = await fetchText(`https://www.youtube.com/feeds/videos.xml?channel_id=${id}`, 7000);
+    const n = parseCompact(xml.match(/<media:statistics\s+views="([\d]+)"/)?.[1]);
+    if (n) return { count: n, source: 'rss-views' };
+  } catch {}
   throw new Error('youtube: all sources failed');
+}
+
+/** Latest uploads from the channel feed — server-side so the browser hits no CORS wall. */
+async function getYouTubeVideos(): Promise<{ id: string; title: string; link: string; published: string; thumbnail: string }[]> {
+  const id = (await resolveYouTubeId()) || 'UCTomuvQPkfJh4zPOG8QORPw';
+  const xml = await fetchText(`https://www.youtube.com/feeds/videos.xml?channel_id=${id}`, 8000);
+  const entries = xml.split('<entry>').slice(1);
+  const decode = (s: string) =>
+    s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  const out: { id: string; title: string; link: string; published: string; thumbnail: string }[] = [];
+  for (const e of entries) {
+    const vid = e.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/)?.[1];
+    const link = e.match(/<link rel="alternate" href="([^"]+)"/)?.[1];
+    if (!vid || !link) continue;
+    out.push({
+      id: vid,
+      title: decode(e.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? '').trim(),
+      link,
+      published: e.match(/<published>([^<]+)<\/published>/)?.[1] ?? '',
+      thumbnail: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+    });
+    if (out.length >= 6) break;
+  }
+  if (!out.length) throw new Error('youtube: feed empty');
+  return out;
 }
 
 async function getTwitter(): Promise<{ count: number; source: string }> {
@@ -219,6 +250,22 @@ export default async function handler(request: Request) {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+
+  // ?include=videos -> latest uploads for the YouTube card
+  if (platform === 'youtube' && searchParams.get('include') === 'videos') {
+    try {
+      const videos = await getYouTubeVideos();
+      return new Response(JSON.stringify({ platform, videos, updatedAt: new Date().toISOString() }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 's-maxage=300, stale-while-revalidate=900' },
+      });
+    } catch (err: any) {
+      return new Response(JSON.stringify({ platform, videos: [], error: err?.message || 'failed' }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 's-maxage=60' },
+      });
+    }
   }
 
   try {

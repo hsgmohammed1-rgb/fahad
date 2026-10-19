@@ -3,7 +3,7 @@ import { KickIcon, XIcon, SnapchatIcon, DiscordIcon, TikTokIcon, YoutubeIcon, Wh
 import { SocialLink, Language } from './types';
 import { StreamPlayer } from './components/StreamPlayer';
 import { SiteHeader } from './components/SiteHeader';
-import { ChatWidget } from './components/Chat';
+import CommunityInviteCard from './components/CommunityInviteCard';
 import { DiscordWidget, YoutubeWidget } from './components/CommunityWidgets';
 
 // Heavy below-fold / on-demand chunks — split out of the first paint
@@ -1163,7 +1163,7 @@ export default function App() {
                                         </div>
                                         <div className="w-full xl:w-[360px] shrink-0 min-w-0 p-3 md:p-4 xl:ps-0">
                                             <div className="h-[480px] xl:h-[620px] xl:max-h-[78vh] rounded-2xl overflow-hidden border border-white/10 min-h-0">
-                                                <ChatWidget lang={lang} isDemo={false} />
+                                                <CommunityInviteCard lang={lang} viewers={streamInfo.viewers} />
                                             </div>
                                         </div>
                                     </div>

@@ -326,7 +326,7 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
    Live channel data, refreshed every 5 minutes:
      • Latest video  → YouTube RSS feed (public, no key)
      • Subscribers   → Mixerno counter, Piped fallback */
-const CLAN_CHANNEL_ID = 'UCzTrJVRcJjcpUMKojPsgbDw';
+const CLAN_CHANNEL_ID = 'UCTomuvQPkfJh4zPOG8QORPw';
 const CLAN_CHANNEL_URL = 'https://www.youtube.com/@fhd-gm';
 // FAHAD obsidian-gold identity — the channel banner + the site logo mark.
 const CLAN_BANNER = '/youtube-banner.jpg';
@@ -351,8 +351,25 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
        const fmtSubs = (count: number) =>
           count >= 1000000 ? `${(count / 1000000).toFixed(1)}M+` : count >= 1000 ? `${(count / 1000).toFixed(1)}K+` : `${count}`;
        const fetchVideo = async () => {
+          // 0) Our own API — resolves @fhd-gm to the channel id and parses the feed server-side
           try {
-             // FAHAD channel uses handle @fhd-gm — try handle-based RSS via third-party, fallback to banner
+             const res = await fetch(`/api/social?platform=youtube&include=videos`);
+             const j = await res.json();
+             const latest = Array.isArray(j?.videos) ? j.videos[0] : null;
+             if (latest && !dead) {
+                setVideo({
+                   title: latest.title,
+                   link: latest.link,
+                   date: latest.published
+                      ? new Date(latest.published).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                      : '',
+                   thumbnail: String(latest.thumbnail || '').replace('hqdefault.jpg', 'maxresdefault.jpg')
+                });
+                return;
+             }
+          } catch {}
+          // 1) Public feed via rss2json fallback
+          try {
              const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
              const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
              const response = await fetch(apiUrl);
