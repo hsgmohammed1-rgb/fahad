@@ -8,7 +8,7 @@ import type { Language } from '../types';
    ============================================================ */
 
 const PHOTOS = Array.from({ length: 19 }, (_, i) => ({
-    src: `/album3/${String(i + 1).padStart(2, '0')}.jpg`,
+    src: `/album3/${String(i + 1).padStart(2, '0')}.${(i + 1) >= 8 && (i + 1) <= 13 ? 'png' : 'jpg'}`,
     n: i + 1,
 }));
 

@@ -9,6 +9,9 @@ import type { Language } from '../types';
 
 const CHAPTER_MS = 9000;
 
+const pad = (n: number) => String(n).padStart(2, '0');
+const ext = (n: number) => (n >= 8 && n <= 13 ? 'png' : 'jpg');
+
 interface Chapter {
     photo: number;
     img: string;
@@ -19,7 +22,7 @@ interface Chapter {
     zoom?: number;
 }
 
-const END_IMG = '/album3/01.jpg';
+const END_IMG = `/album3/${pad(1)}.jpg`;
 
 const CHAPTERS: Chapter[] = [
     {
@@ -57,7 +60,7 @@ const CHAPTERS: Chapter[] = [
     },
     {
         photo: 11,
-        img: '/album3/11.jpg',
+        img: '/album3/11.png',
         kickerAr: 'الفصل 4', kickerEn: 'Chapter 4',
         headAr: 'كبرياء القائد وتأديب المتخاذل',
         headEn: 'The commander\'s pride and disciplining the slacker',
@@ -90,7 +93,7 @@ const CHAPTERS: Chapter[] = [
     },
     {
         photo: 9,
-        img: '/album3/09.jpg',
+        img: '/album3/09.png',
         kickerAr: 'الفصل 7', kickerEn: 'Chapter 7',
         headAr: 'عزلة الجبل',
         headEn: 'The mountain\'s isolation',
@@ -123,14 +126,12 @@ const CHAPTERS: Chapter[] = [
     },
 ];
 
-const pad = (n: number) => String(n).padStart(2, '0');
-
 /* scattered polaroid prints for the intro collage */
 const POLAROIDS = [
     { src: '/album3/05.jpg', rot: -9, x: '6%', y: '12%', s: 1 },
     { src: '/album3/17.jpg', rot: 7, x: '82%', y: '10%', s: 0.92 },
     { src: '/album3/03.jpg', rot: -6, x: '12%', y: '66%', s: 0.95 },
-    { src: '/album3/11.jpg', rot: 8, x: '76%', y: '64%', s: 1.05 },
+    { src: '/album3/11.png', rot: 8, x: '76%', y: '64%', s: 1.05 },
     { src: '/album3/14.jpg', rot: -4, x: '46%', y: '78%', s: 0.8 },
 ];
 
