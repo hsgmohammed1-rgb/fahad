@@ -8,16 +8,11 @@ import { ALBUM3_FILES } from './album3Images';
    الذي طلبه فهد. تُصل إليها عبر #story وتعود للموقع عند الخروج.
    ============================================================ */
 
-/* Every chapter runs for 10 seconds. A chapter whose text is heavy gets
-   exactly 12 extra seconds — nothing longer, so the pace stays snappy. */
-const BASE_CHAPTER_MS = 10000;
-const LONG_CHAPTER_MS = 12000;
-const LONG_TEXT_CHARS = 150;
+/* Every chapter holds for 9 seconds — a steady, cinematic pace for
+   the whole story regardless of how much text a scene carries. */
+const BASE_CHAPTER_MS = 9000;
 
-const chapterMs = (c: Chapter) => {
-    const len = c.textAr.length + c.headAr.length;
-    return len > LONG_TEXT_CHARS ? BASE_CHAPTER_MS + LONG_CHAPTER_MS : BASE_CHAPTER_MS;
-};
+const chapterMs = (c: Chapter) => BASE_CHAPTER_MS;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const ext = (n: number) => (ALBUM3_FILES[n - 1]?.endsWith('.png') ? 'png' : 'jpg');
@@ -387,7 +382,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
                 font-family:inherit;animation:st-in .7s ease both}
             @keyframes st-in{from{opacity:0}to{opacity:1}}
             .st-photo{position:absolute;inset:0;background-size:cover;
-                animation:st-kb var(--chapms,20s) ease-out forwards,st-photo-in .7s ease-out both;
+                animation:st-kb var(--chapms,9s) ease-out forwards,st-photo-in .7s ease-out both;
                 will-change:transform;filter:saturate(1.05) contrast(1.03)}
             @keyframes st-photo-in{from{opacity:0}to{opacity:1}}
             @keyframes st-kb{from{transform:scale(1)}to{transform:scale(var(--kb,1.14))}}
@@ -451,7 +446,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             .st-seg.done{background:linear-gradient(90deg,${GOLD_DEEP},${CREAM} 60%,${GOLD})}
             .st-seg.cur .st-seg-fill{position:absolute;inset-block:0;inset-inline-start:0;border-radius:999px;
                 background:linear-gradient(90deg,#F2CE7C,${CREAM} 55%,${GOLD});box-shadow:0 0 12px rgba(247,227,176,.8);
-                animation:st-fill var(--chapms,20s) linear forwards}
+                animation:st-fill var(--chapms,9s) linear forwards}
             @keyframes st-fill{from{width:0%}to{width:100%}}
             .st-hint{display:none;font-size:10px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.35);text-transform:uppercase;white-space:nowrap}
             @media(min-width:640px){.st-hint{display:block}}
@@ -488,7 +483,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             a:focus-visible,button:focus-visible{outline:2px solid ${GOLD};outline-offset:3px;border-radius:14px}
             /* vertical photo — full art with blurred edges */
             .st-photo-vert{position:absolute;inset:0;overflow:hidden;background:#000;
-                animation:st-kb var(--chapms,20s) ease-out forwards,st-photo-in .7s ease-out both;will-change:transform}
+                animation:st-kb var(--chapms,9s) ease-out forwards,st-photo-in .7s ease-out both;will-change:transform}
             .st-photo-vert-blur{position:absolute;inset:-20%;width:140%;height:140%;background-size:cover;background-position:center;filter:blur(46px) brightness(.55);opacity:.9;transform:scale(var(--kbv,1.1))}
             .st-photo-vert-img{position:absolute;inset:50% 50% 0 0;width:100%;height:100%;object-fit:contain;object-position:center;transform:translate(0,-50%);will-change:transform}
             @media(prefers-reduced-motion:reduce){
