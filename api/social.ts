@@ -1,5 +1,5 @@
 // Vercel Edge Function — Live Social Counters API
-// GET /api/social?platform=tiktok|instagram|youtube|twitter
+// GET /api/social?platform=tiktok|youtube|twitter|snapchat
 // Server-side fetch = no CORS issues, fresh numbers every call.
 // Vercel caches success responses for 4 minutes (s-maxage).
 
@@ -10,12 +10,12 @@ export const config = {
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 
+/** FAHAD handles — the only channels the site counts. */
 const HANDLES = {
-  tiktok: 'ixtroet',
-  instagram: 'xtroet',
-  twitter: 'xtroet',
-  snapchat: 'xtroet',
-  youtube: 'UCzTrJVRcJjcpUMKojPsgbDw', // @XTROET — verified channel id
+  tiktok: 'ifhd89',
+  twitter: 'iiFHD89',
+  snapchat: 'fahad898',
+  youtube: 'fhd-gm', // @fhd-gm — resolved to a UC id on first call
 } as const;
 
 type Platform = keyof typeof HANDLES;
@@ -123,7 +123,7 @@ async function getTikTok(): Promise<{ count: number; source: string }> {
 
 async function getYouTube(): Promise<{ count: number; source: string }> {
   // 0) Resolve @handle -> UC channel id (cached per isolate)
-  const id = (await resolveYouTubeId()) || (HANDLES.youtube.startsWith('UC') ? HANDLES.youtube : null);
+  const id = await resolveYouTubeId();
   if (!id) throw new Error('youtube: could not resolve channel id');
   // 1) Mixerno — exact subscriber count
   try {
@@ -159,49 +159,21 @@ async function getTwitter(): Promise<{ count: number; source: string }> {
   throw new Error('twitter: all sources failed');
 }
 
-async function getInstagram(): Promise<{ count: number; source: string }> {
-  // 1) Instagram web API with public app id (works server-side with proper headers)
-  try {
-    const d = await fetchJson(`https://i.instagram.com/api/v1/users/web_profile_info/?username=${HANDLES.instagram}`, 7000, {
-      'X-IG-App-ID': '936619743392459',
-      'X-Requested-With': 'XMLHttpRequest',
-      Referer: `https://www.instagram.com/${HANDLES.instagram}/`,
-    });
-    const n = parseCompact(d?.data?.user?.edge_followed_by?.count);
-    if (n) return { count: n, source: 'web_profile_info' };
-  } catch {}
-  // 2) Mixerno — dedicated Instagram counter (works from browsers)
-  try {
-    const d = await fetchJson(`https://mixerno.space/api/instagram-user-counter/user/${HANDLES.instagram}`);
-    const entry = Array.isArray(d?.counts) ? d.counts.find((c: any) => /follow/i.test(c?.value || '')) : null;
-    const n = parseCompact(entry?.count);
-    if (n) return { count: n, source: 'mixerno' };
-  } catch {}
-  // 3) og:description meta ("21.3K Followers, ...")
-  try {
-    const html = await fetchText(`https://www.instagram.com/${HANDLES.instagram}/`);
-    const og = html.match(/property="og:description"\s+content="([^"]+)"/)?.[1] || '';
-    const m = og.match(/([\d.,]+[KMB]?)\s+Followers/i);
-    const n = m ? parseCompact(m[1]) : null;
-    if (n) return { count: n, source: 'og_description' };
-  } catch {}
-  throw new Error('instagram: all sources failed (login-walled)');
-}
-
 /** Resolve a YouTube @handle to its UC channel id (cached). */
 let YT_CHANNEL_ID: string | null = null;
 
 async function resolveYouTubeId(): Promise<string | null> {
   if (YT_CHANNEL_ID) return YT_CHANNEL_ID;
-  if (HANDLES.youtube.startsWith('UC')) {
-    YT_CHANNEL_ID = HANDLES.youtube;
+  const handle = HANDLES.youtube.replace(/^@/, '');
+  if (handle.startsWith('UC')) {
+    YT_CHANNEL_ID = handle;
     return YT_CHANNEL_ID;
   }
   // YouTube serves a consent wall to datacenters — bypass with CONSENT cookie
   try {
     const c = new AbortController();
     const t = setTimeout(() => c.abort(), 7000);
-    const r = await fetch(`https://www.youtube.com/@${HANDLES.youtube.replace(/^@/, '')}/`, {
+    const r = await fetch(`https://www.youtube.com/@${handle}/`, {
       headers: {
         'User-Agent': UA,
         'Accept-Language': 'en-US,en;q=0.9',
@@ -243,7 +215,7 @@ export default async function handler(request: Request) {
   const platform = (searchParams.get('platform') || '').toLowerCase() as Platform;
 
   if (!platform || !(platform in HANDLES)) {
-    return new Response(JSON.stringify({ error: 'Use ?platform=tiktok|instagram|youtube|twitter|snapchat' }), {
+    return new Response(JSON.stringify({ error: 'Use ?platform=tiktok|youtube|twitter|snapchat' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -252,7 +224,6 @@ export default async function handler(request: Request) {
   try {
     const loaders: Record<Platform, () => Promise<{ count: number; source: string }>> = {
       tiktok: getTikTok,
-      instagram: getInstagram,
       youtube: getYouTube,
       twitter: getTwitter,
       snapchat: getSnapchat,

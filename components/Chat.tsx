@@ -9,7 +9,7 @@ interface ChatWidgetProps {
 
 // --- Icons for Badges ---
 const OwnerBadge = () => (
-  <div className="flex items-center justify-center w-4 h-4 rounded bg-[#10B981] text-[#04120D] shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.4)]" title="Broadcaster">
+  <div className="flex items-center justify-center w-4 h-4 rounded bg-[#F2B33D] text-[#08060A] shrink-0 shadow-[0_0_10px_rgba(242,179,61,0.4)]" title="Broadcaster">
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
       <path d="M5 19h14v2H5v-2zm7-13l3.5 7h-7L12 6zM6 17h12l-3-6H9l-3 6z" />
       <path d="M12 2L2 19h20L12 2zm0 3.5L18.5 17H5.5L12 5.5z" />
@@ -18,7 +18,7 @@ const OwnerBadge = () => (
 );
 
 const ModBadge = () => (
-  <div className="flex items-center justify-center w-4 h-4 rounded bg-[#10B981]/80 text-[#04120D] shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.4)]" title="Moderator">
+  <div className="flex items-center justify-center w-4 h-4 rounded bg-[#F2B33D]/80 text-[#08060A] shrink-0 shadow-[0_0_8px_rgba(242,179,61,0.4)]" title="Moderator">
     <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
       <path d="M18.828 2.343a3.001 3.001 0 00-4.243 0l-5.071 5.071-3.657-3.657a1 1 0 00-1.414 0l-1.414 1.414a1 1 0 000 1.414l3.657 3.657-5.071 5.071a1 1 0 000 1.414l2.828 2.828a1 1 0 001.414 0l5.071-5.071 3.657 3.657a1 1 0 001.414 0l1.414-1.414a1 1 0 000-1.414l-3.657-3.657 5.071-5.071a3.001 3.001 0 000-4.243zm-2.829 2.829a1 1 0 111.414-1.414 1 1 0 01-1.414 1.414z" />
     </svg>
@@ -71,8 +71,8 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ lang, isDemo }) => {
       setStatusText(details || '');
     });
 
-    // 4. Connect to XTROET channel
-    chatService.connect('xtroet');
+    // 4. Connect to the FAHAD channel
+    chatService.connect('fahad');
 
     // 5. Cleanup
     return () => {
@@ -148,7 +148,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ lang, isDemo }) => {
   };
 
   return (
-    <div className="flex flex-col h-full max-h-full min-h-0 w-full bg-[#0b0e0f]/80 backdrop-blur-2xl rounded-3xl overflow-hidden border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative ring-1 ring-white/5 isolate group">
+    <div className="flex flex-col h-full max-h-full min-h-0 w-full bg-[#0C0A0D]/80 backdrop-blur-2xl rounded-3xl overflow-hidden border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative ring-1 ring-white/5 isolate group">
 
       {/* Decorative Glow */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-kick/5 rounded-full blur-3xl -z-10 group-hover:bg-kick/10 transition-colors duration-500"></div>
@@ -156,7 +156,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ lang, isDemo }) => {
       {/* --- Header --- */}
       <div className="h-14 shrink-0 bg-white/5 border-b border-white/5 flex items-center justify-between px-5 z-20 shadow-lg backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className={`flex items-center justify-center w-8 h-8 rounded-lg bg-black/20 border border-white/5 transition-colors duration-500 ${isConnected ? 'text-[#10B981]' : connectionError ? 'text-red-500' : 'text-white/50'}`}>
+          <div className={`flex items-center justify-center w-8 h-8 rounded-lg bg-black/20 border border-white/5 transition-colors duration-500 ${isConnected ? 'text-[#F2B33D]' : connectionError ? 'text-[#E7A93C]' : 'text-white/50'}`}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -164,7 +164,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ lang, isDemo }) => {
           <div className="flex flex-col">
             <span className={`text-white font-bold tracking-wide text-sm uppercase ${lang === 'ar' ? 'font-arabic' : ''}`}>{t.title}</span>
             <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-[#10B981] shadow-[0_0_8px_#10B981]' : connectionError ? 'bg-red-500' : 'bg-yellow-500 animate-pulse'}`}></span>
+              <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-[#F2B33D] shadow-[0_0_8px_#F2B33D]' : connectionError ? 'bg-[#E7A93C] shadow-[0_0_8px_rgba(224,123,18,0.8)]' : 'bg-[#F2CE7C] animate-pulse'}`}></span>
               <span className="text-[10px] text-white/40 font-mono uppercase">
                 {isConnected ? t.connected : connectionError ? t.error : (statusText || t.connecting)}
               </span>
@@ -175,7 +175,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ lang, isDemo }) => {
         {/* Retry Button */}
         {connectionError && (
           <button
-            onClick={() => chatService.connect('xtroet')}
+            onClick={() => chatService.connect('fahad')}
             className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors text-xs flex items-center gap-1"
             title={t.retry}
           >
@@ -190,9 +190,9 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ lang, isDemo }) => {
       {/* --- Chat List --- */}
       <div
         ref={chatContainerRef}
-        className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1.5 scrollbar-hide bg-gradient-to-b from-[#0b0e0f]/50 to-transparent"
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1.5 scrollbar-hide bg-gradient-to-b from-[#0C0A0D]/50 to-transparent"
       >
-        <div className="sticky top-0 h-8 bg-gradient-to-b from-[#0b0e0f] to-transparent z-10 -mt-4 pointer-events-none"></div>
+        <div className="sticky top-0 h-8 bg-gradient-to-b from-[#0C0A0D] to-transparent z-10 -mt-4 pointer-events-none"></div>
 
         {messages.map((msg) => (
           <div key={msg.id} className="group flex items-start gap-2.5 py-1.5 px-3 rounded-xl hover:bg-white/5 transition-all duration-200 animate-fade-in-up border border-transparent hover:border-white/5">
@@ -225,7 +225,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({ lang, isDemo }) => {
       </div>
 
       {/* Decorative Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0b0e0f] to-transparent pointer-events-none z-10"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0C0A0D] to-transparent pointer-events-none z-10"></div>
     </div>
   );
 };

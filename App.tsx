@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
-import { KickIcon, XIcon, SnapchatIcon, DiscordIcon, TikTokIcon, InstagramIcon, YoutubeIcon } from './components/Icons';
+import { KickIcon, XIcon, SnapchatIcon, DiscordIcon, TikTokIcon, YoutubeIcon, WhatsAppIcon } from './components/Icons';
 import { SocialLink, Language } from './types';
 import { StreamPlayer } from './components/StreamPlayer';
 import { SiteHeader } from './components/SiteHeader';
@@ -12,14 +12,34 @@ const ArchiveSection = lazy(() => import('./components/StatsSection').then(m => 
 const AlbumSection = lazy(() => import('./components/AlbumSection').then(m => ({ default: m.AlbumSection })));
 const StoryPage = lazy(() => import('./components/StoryPage').then(m => ({ default: m.StoryPage })));
 
-// --- Constants (XTROET) ---
-const DEFAULT_PROFILE_IMAGE = "/xtroet-logo.webp";
+// --- FAHAD constants ---
+const DEFAULT_PROFILE_IMAGE = "/fahad-logo.png";
 import { kickFetch } from './utils/kickApi';
-import { getAllSocialMediaStats, formatFollowerCount, readSocialCache, SOCIAL_TTL_MS } from './utils/socialMediaApi';
+import { getAllSocialMediaStats, formatFollowerCount, readSocialCache, whatsappFollowerLabel, SOCIAL_TTL_MS } from './utils/socialMediaApi';
+import InSitePlayer, { kickWatchUrl, playOnSite } from './components/InSitePlayer';
 
-const PC_BACKGROUND = "/xtroet-banner.jpg";
-const MOBILE_BACKGROUND = "/xtroet-banner.jpg";
-const CHANNEL_SLUG = 'xtroet';
+const PC_BACKGROUND = "/fahad-bg.jpg";
+const MOBILE_BACKGROUND = "/fahad-bg.jpg";
+const CHANNEL_SLUG = 'fahad';
+
+/** Every official Fahad destination — single source of truth for the whole site. */
+export const FAHAD_LINKS = {
+    kick: 'https://kick.com/fahad',
+    botrix: 'https://kick.com/fahad',
+    youtube: 'https://www.youtube.com/@fhd-gm',
+    tiktok: 'https://www.tiktok.com/@ifhd89',
+    whatsapp: 'https://www.whatsapp.com/channel/0029Vae5vQ82P59tDrQq6f3F',
+    snapchat: 'https://www.snapchat.com/@fahad898',
+    x: 'https://x.com/iiFHD89',
+    discord: 'https://discord.com/invite/HYByGx8mQA',
+    support: 'https://tip.dokan.sa/fahad89',
+    email: 'FahadBin.ads@gmail.com',
+} as const;
+
+/* The support gate is Dokan Tip — the site-wide gold mark for that portal. */
+const SUPPORT_MARK = '/dokan-tip.jpg';
+const SUPPORT_TITLE = 'DOKAN TIP';
+const SUPPORT_HOST = 'tip.dokan.sa/fahad89';
 
 const createSocialLink = (key: string, value: string, followerCount?: string, specialDetail?: string): SocialLink | null => {
     if (!value) return null;
@@ -29,59 +49,61 @@ const createSocialLink = (key: string, value: string, followerCount?: string, sp
         .replace(/\/$/, '');
     switch (key) {
         case 'twitter': return { name: 'X', url: value.startsWith('http') ? value : `https://x.com/${handle}`, icon: <XIcon className="w-7 h-7" />, color: '', username: `@${handle}`, hex: '#FFFFFF', followerCount, specialDetail };
-        case 'instagram': return { name: 'Instagram', url: value.startsWith('http') ? value : `https://instagram.com/${handle}`, icon: <InstagramIcon className="w-7 h-7" />, color: '', username: `@${handle}`, hex: '#E1306C', followerCount, specialDetail };
-        case 'youtube': return { name: 'YouTube', url: value.startsWith('http') ? value : `https://youtube.com/@${handle}`, icon: <YoutubeIcon className="w-7 h-7" />, color: '', username: '@XTROET', hex: '#FF0000', followerCount, specialDetail };
-        case 'discord': return { name: 'Discord', url: value.startsWith('http') ? value : `https://discord.gg/${handle}`, icon: <DiscordIcon className="w-7 h-7" />, color: '', username: 'Emerald Community', hex: '#5865F2', followerCount, specialDetail };
+        case 'youtube': return { name: 'YouTube', url: value.startsWith('http') ? value : `https://youtube.com/@${handle}`, icon: <YoutubeIcon className="w-7 h-7" />, color: '', username: '@fhd-gm', hex: '#FF0000', followerCount, specialDetail };
+        case 'discord': return { name: 'Discord', url: value.startsWith('http') ? value : `https://discord.com/invite/${handle}`, icon: <DiscordIcon className="w-7 h-7" />, color: '', username: 'Fahad Community', hex: '#5865F2', followerCount, specialDetail };
         case 'snapchat': return { name: 'Snapchat', url: value.startsWith('http') ? value : `https://snapchat.com/add/${handle}`, icon: <SnapchatIcon className="w-7 h-7" />, color: '', username: `@${handle}`, hex: '#FFFC00', followerCount, specialDetail };
         case 'tiktok': return { name: 'TikTok', url: value.startsWith('http') ? value : `https://tiktok.com/@${handle}`, icon: <TikTokIcon className="w-7 h-7" />, color: '', username: `@${handle}`, hex: '#FE2C55', followerCount, specialDetail };
+        case 'whatsapp': return { name: 'WhatsApp', url: value.startsWith('http') ? value : `https://whatsapp.com/channel/${handle}`, icon: <WhatsAppIcon className="w-7 h-7" />, color: '', username: 'قناة فهد', hex: '#25D366', followerCount, specialDetail };
         default: return null;
     }
 };
 
 const KICK_SOCIAL: SocialLink = {
     name: 'KICK',
-    url: 'https://kick.com/xtroet',
+    url: FAHAD_LINKS.kick,
     icon: <KickIcon className="w-8 h-8" />,
     color: '',
-    username: 'xtroet',
+    username: 'fahad',
     hex: '#53FC18',
     followerCount: '—',
     specialDetail: 'المسرح الرئيسي والبث المباشر'
 };
 
-// XTROET roster — 6 platforms, built synchronously so all cards render on first
-// paint even before live follower counts arrive (no empty grid gaps).
+// FAHAD roster — every official platform, built synchronously so all cards render
+// on first paint even before live follower counts arrive (no empty grid gaps).
+// YouTube is intentionally absent from the arena; X and WhatsApp always carry a
+// real follower figure so the cards never show a bare dash.
 const buildDefaultSocials = (stats: Record<string, string>): SocialLink[] => ([
     { ...KICK_SOCIAL, followerCount: stats['KICK'] || KICK_SOCIAL.followerCount },
-    createSocialLink('tiktok', 'https://www.tiktok.com/@ixtroet', stats['TikTok'], 'أقوى المقاطع والترند'),
-    createSocialLink('twitter', 'https://x.com/xtroet', stats['X'], 'الأخبار والتحديثات أول بأول'),
-    createSocialLink('snapchat', 'https://www.snapchat.com/@xtroet', stats['Snapchat'], 'سنابات ويوميات حصرية'),
-    createSocialLink('instagram', 'https://www.instagram.com/xtroet/', stats['Instagram'], 'الكواليس والستوري والصور'),
+    createSocialLink('twitter', FAHAD_LINKS.x, stats['X'], 'الأخبار والتحديثات أول بأول'),
+    createSocialLink('tiktok', FAHAD_LINKS.tiktok, stats['TikTok'], 'أقوى المقاطع والترند'),
+    createSocialLink('snapchat', FAHAD_LINKS.snapchat, stats['Snapchat'], 'سنابات ويوميات حصرية'),
+    createSocialLink('whatsapp', FAHAD_LINKS.whatsapp, whatsappFollowerLabel(), 'القناة الرسمية وأحدث الإعلانات'),
 ].filter(Boolean) as SocialLink[]);
 
 const TRANSLATIONS = {
     en: {
         status: 'LIVE NOW', statusOffline: 'OFFLINE',
-        headerTitle: 'XTROET STREAM HUB',
-        eyebrow: 'Beyond Ordinary — XTROET',
-        nameAr: 'Nasser Alanazi',
-        bio: 'Nasser Alanazi (XTROET) — member of the Level One clan, streamer and YouTuber, owner of the Adolf Albert character in the MT realistic-life server, one of the strongest and most prominent characters in the city.',
-        tags: ['Just Chatting', 'MT RP', 'Level One'],
+        headerTitle: 'FAHAD HUB',
+        eyebrow: 'Beyond Ordinary — FAHAD',
+        nameAr: 'Fahad',
+        bio: 'Fahad (FAHAD) — Saudi content creator and professional streamer. Epic live sessions, legendary challenges, and a community that never sleeps. Welcome to the Golden Kingdom.',
+        tags: ['Just Chatting', 'Gaming', 'MT RP'],
         defaultStreamTitle: 'CHECK OUT THE VODS | FOLLOW NOW',
         defaultCategory: 'Offline',
-        footer: '© 2026 XTROET — Nasser Alanazi. All Rights Reserved.',
-        poweredBy: 'POWERED BY XTROET ERA',
+        footer: '© 2026 FAHAD. All Rights Reserved.',
+        poweredBy: 'POWERED BY FAHAD ERA',
         watchLive: 'Watch Live', joinDiscord: 'Join Discord',
         subOnly: 'SUB ONLY', dropsEnabled: 'DROPS ENABLED', noTags: 'No tags',
-        shareTitle: 'XTROET Stream Hub', shareText: 'Check out XTROET live on Kick!',         copied: 'Link copied!',
+        shareTitle: 'FAHAD Hub', shareText: 'Check out FAHAD live on Kick!',         copied: 'Link copied!',
         lastSessionReport: 'Last session report', ago: 'Ago', duration: 'Duration',
         categoriesSpent: 'Categories in this stream', highlights: 'Stream highlights',
         socialsTitle: 'Social Arena', socialsSub: 'One hub — every platform. Pick your battlefield.',
-        communityTitle: 'Community HQ', supportTitle: 'Support the Channel', supportSub: 'Your support keeps the emerald empire legendary.',
+        communityTitle: 'Community HQ', supportTitle: 'Support the Channel', supportSub: 'Your support keeps the Golden Kingdom legendary.',
         honorTitle: 'Hall of Fame', honorSub: 'Top supporters across every stream.',
         archiveTitle: 'Archive', archiveSub: 'Clips and past streams.',
-        albumTitle: "Nasser's Sirah", albumSub: 'Nasser’s sirah in frames — seventeen shots from the night shifts.',
-        statsTitle: 'Stream Stats', statsSub: 'Live numbers from the emerald empire.',
+        albumTitle: "Fahad's Sirah", albumSub: 'Fahad’s sirah in frames — seventeen shots from the night shifts.',
+        statsTitle: 'Stream Stats', statsSub: 'Live numbers from the Golden Kingdom.',
         tiersTitle: 'Special alert tiers',
         theaterTitle: 'Live Theater', viewers: 'watching',
         statsKick: 'Kick followers', statsPlatforms: 'Platforms', statsStatus: 'Status',
@@ -89,26 +111,26 @@ const TRANSLATIONS = {
     },
     ar: {
         status: 'بث مباشر الآن', statusOffline: 'غير متصل حالياً',
-        headerTitle: 'مركز XTROET للبث المباشر',
-        eyebrow: 'خارج المألوف — XTROET',
-        nameAr: 'ناصر العنزي',
-        bio: 'ناصر العنزي (XTROET) — عضو في كلان لفل ون، استريمر ويوتيوبر، وصاحب شخصية ادولف البيرت في سيرفر MT للحياة الواقعية، إحدى أقوى وأبرز الشخصيات في المدينة.',
-        tags: ['Just Chatting', 'MT RP', 'Level One'],
+        headerTitle: 'مركز فهد',
+        eyebrow: 'خارج المألوف — فهد',
+        nameAr: 'فهد',
+        bio: 'فهد (FAHAD) — صانع محتوى ومستريمر سعودي. بثوث ملحمية وتحديات أسطورية ومجتمع ما ينام. أهلاً بك في مملكة الذهب.',
+        tags: ['Just Chatting', 'Gaming', 'MT RP'],
         defaultStreamTitle: 'تابع البثوث السابقة | تابعني الآن',
         defaultCategory: 'غير متصل',
-        footer: '© 2026 XTROET — ناصر العنزي. جميع الحقوق محفوظة.',
-        poweredBy: 'بدعم من XTROET ERA',
+        footer: '© 2026 FAHAD — فهد. جميع الحقوق محفوظة.',
+        poweredBy: 'بدعم من FAHAD ERA',
         watchLive: 'شاهد البث', joinDiscord: 'انضم للديسكورد',
         subOnly: 'للمشتركين فقط', dropsEnabled: 'الجوائز مفعلة', noTags: 'لا يوجد وسوم',
-        shareTitle: 'مركز بث XTROET', shareText: 'تابع بث ناصر العنزي المباشر على كيك!',         copied: 'تم نسخ الرابط!',
+        shareTitle: 'مركز بث فهد', shareText: 'تابع بث فهد المباشر على كيك!',         copied: 'تم نسخ الرابط!',
         lastSessionReport: 'تقرير الجلسة الأخيرة', ago: 'منذ', duration: 'المدة',
         categoriesSpent: 'الفئات التي تم بثها', highlights: 'لقطات ممتعة من البث',
         socialsTitle: 'ساحة التواصل', socialsSub: 'كل المنصات في مكان واحد — اختر ساحتك.',
-        communityTitle: 'مقر المجتمع', supportTitle: 'دعم القناة', supportSub: 'دعمك يخلي إمبراطورية الزمرد أسطورية وتستمر.',
+        communityTitle: 'مقر المجتمع', supportTitle: 'دعم القناة', supportSub: 'دعمك يخلي مملكة الذهب أسطورية وتستمر.',
         honorTitle: 'لوحة الشرف', honorSub: 'كبار الداعمين عبر كل البثوث.',
         archiveTitle: 'الأرشيف', archiveSub: 'اللقطات والبثوث السابقة.',
-        albumTitle: 'سيرة ناصر', albumSub: 'سيرة ناصر بالصور — سبع عشرة صورة من ذاكرة السهرات.',
-        statsTitle: 'إحصائيات البث', statsSub: 'أرقام إمبراطورية الزمرد لحظة بلحظة.',
+        albumTitle: 'سيرة فهد', albumSub: 'سيرة فهد بالصور — سبع عشرة صورة من ذاكرة السهرات.',
+        statsTitle: 'إحصائيات البث', statsSub: 'أرقام مملكة الذهب لحظة بلحظة.',
         tiersTitle: 'مستويات التنبيه الخاصة',
         theaterTitle: 'مسرح البث المباشر', viewers: 'مشاهد',
         statsKick: 'متابع كيك', statsPlatforms: 'منصة', statsStatus: 'الحالة',
@@ -133,105 +155,197 @@ const Reveal: React.FC<{ children: React.ReactNode; delay?: number; className?: 
     return <div ref={ref} className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>{children}</div>;
 };
 
-const ArenaBackground: React.FC = () => {
+/* Fire mouths inside the artwork, as fractions of the art box (not the
+   viewport): the braziers were measured at 24.5% / 71% x and 52% y — the
+   artwork is not perfectly mirrored, so they are not 50% ± 25% — plus the
+   golden horizon down the middle. Embers are born here so the sparks
+   belong to the painting rather than drifting around the screen.
+
+   `drift` is the sideways push of the flame, in px/s per 1400px of art:
+   both fires lean a little to the right, the right-hand one harder. */
+const FIRE_SOURCES = [
+    { x: 0.245, y: 0.525, spread: 0.014, power: 1.00, drift: 0.20 },
+    { x: 0.710, y: 0.525, spread: 0.014, power: 0.95, drift: 0.50 },
+    { x: 0.500, y: 0.660, spread: 0.060, power: 0.60, drift: 0.30 },
+];
+
+const SparkField: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const host = canvas?.parentElement;
+        if (!canvas || !host) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        let raf = 0; let w = 0; let h = 0;
+
         const DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-        // Emerald empire: rising emerald sparks + bronze embers with flicker
-        type P = { x: number; y: number; r: number; vy: number; vx: number; sway: number; phase: number; a: number; ember: boolean; green: boolean };
-        let parts: P[] = [];
+        type S = { src: number; x: number; y: number; r: number; vy: number; vx: number; lift: number; sway: number; phase: number; life: number; max: number; heat: number };
+        let w = 0, h = 0, raf = 0, t = 0, sparks: S[] = [];
+
+        const seed = (src?: number): S => {
+            const i = src === undefined ? (Math.random() * FIRE_SOURCES.length) | 0 : src;
+            const f = FIRE_SOURCES[i];
+            const k = w / 1400;
+            return {
+                src: i,
+                x: f.x * w + (Math.random() - 0.5) * f.spread * w,
+                y: f.y * h + (Math.random() - 0.5) * 0.02 * h,
+                r: 0.5 + Math.random() * 1.9,
+                // Slow mode: a soft launch and a long, barely-there climb.
+                // The ember never hurries — it drifts up and dies out.
+                vy: -(0.30 + Math.random() * 0.70) * f.power * k,
+                vx: (f.drift + (Math.random() - 0.5) * 0.16) * k,
+                lift: (0.0007 + Math.random() * 0.0007) * f.power,
+                sway: 0.18 + Math.random() * 0.5,
+                phase: Math.random() * Math.PI * 2,
+                life: 0,
+                max: 300 + Math.random() * 420,
+                heat: Math.random(),
+            };
+        };
+
         const resize = () => {
-            w = window.innerWidth; h = window.innerHeight;
-            canvas.width = w * DPR; canvas.height = h * DPR;
+            const pw = w, ph = h;
+            w = host.clientWidth; h = host.clientHeight;
+            if (!w || !h) return;
+            canvas.width = Math.round(w * DPR); canvas.height = Math.round(h * DPR);
             canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
             ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-            const n = Math.min(72, Math.floor(w / 22));
-            parts = Array.from({ length: n }, () => ({
-                x: Math.random() * w, y: Math.random() * h,
-                r: 0.7 + Math.random() * 2.4,
-                vy: -(0.25 + Math.random() * 0.7), vx: (Math.random() - 0.5) * 0.2,
-                sway: 0.3 + Math.random() * 0.9, phase: Math.random() * Math.PI * 2,
-                a: 0.2 + Math.random() * 0.55, ember: Math.random() > 0.4, green: Math.random() > 0.45,
-            }));
+            const n = Math.max(16, Math.min(40, Math.round(w / 52)));
+            if (sparks.length) {
+                // keep the existing embers where they are instead of popping
+                if (pw && ph) sparks.forEach((s) => { s.x = (s.x / pw) * w; s.y = (s.y / ph) * h; });
+                while (sparks.length > n) sparks.pop();
+                while (sparks.length < n) sparks.push(seed());
+            } else {
+                sparks = Array.from({ length: n }, () => seed());
+            }
         };
         resize();
-        window.addEventListener('resize', resize);
-        let t = 0;
+        const ro = new ResizeObserver(resize);
+        ro.observe(host);
+
         const tick = () => {
             t += 0.016;
             ctx.clearRect(0, 0, w, h);
-            for (const p of parts) {
-                p.y += p.vy;
-                p.x += p.vx + Math.sin(t * p.sway + p.phase) * 0.25;
-                if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
-                if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
-                const flick = p.ember ? (0.72 + 0.28 * Math.sin(t * 5 + p.phase)) : 1;
-                const alpha = Math.max(0, Math.min(1, p.a * flick));
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                if (p.green) {
-                    ctx.fillStyle = `rgba(16,185,129,${alpha})`;
-                    ctx.shadowBlur = 14;
-                    ctx.shadowColor = 'rgba(16,185,129,0.9)';
-                } else if (p.ember) {
-                    ctx.fillStyle = `rgba(217,180,100,${alpha})`;
-                    ctx.shadowBlur = 14;
-                    ctx.shadowColor = 'rgba(201,162,75,0.9)';
-                } else {
-                    ctx.fillStyle = `rgba(235,225,205,${alpha * 0.5})`;
-                    ctx.shadowBlur = 0;
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.lineCap = 'round';
+            for (const s of sparks) {
+                s.life++;
+                // Buoyancy against air drag: the burst decays, then the
+                // ember settles into a steady climb instead of falling.
+                s.vy = s.vy * 0.996 - s.lift;
+                s.y += s.vy;
+                s.x += s.vx + Math.sin(t * s.sway + s.phase) * 0.3;
+                if (s.life > s.max || s.y < -12) Object.assign(s, seed(s.src));
+
+                const k = s.life / s.max;
+                // Bright on the way up, gone well before the ember dies,
+                // so the climb reads instead of the pop.
+                const fade = k < 0.08
+                    ? k / 0.08
+                    : (k > 0.45 ? 1 - (k - 0.45) / 0.55 : 1);
+                const a = Math.max(0, Math.min(1, fade)) * (0.72 + 0.28 * Math.sin(t * 1.4 + s.phase));
+                if (a <= 0.015) continue;
+
+                const col = s.heat > 0.82 ? '255,246,224' : s.heat > 0.45 ? '242,179,61' : '224,123,18';
+                const tail = Math.min(26, Math.abs(s.vy) * 9);
+                const grad = ctx.createLinearGradient(s.x, s.y, s.x, s.y + tail);
+                grad.addColorStop(0, `rgba(${col},${a * 0.9})`);
+                grad.addColorStop(1, `rgba(${col},0)`);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = s.r;
+                ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + tail); ctx.stroke();
+
+                if (s.heat > 0.82) {
+                    ctx.fillStyle = `rgba(${col},${a * 0.26})`;
+                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 5, 0, Math.PI * 2); ctx.fill();
                 }
-                ctx.fill();
-                ctx.shadowBlur = 0;
+                ctx.fillStyle = `rgba(${col},${a})`;
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (1 - k * 0.4), 0, Math.PI * 2); ctx.fill();
             }
+            ctx.globalCompositeOperation = 'source-over';
             raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
-        return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
+
+        // The stage scrolls away after the hero, so stop burning frames
+        // once it is off screen — same as the tab-visibility pause.
+        const onVisibility = () => {
+            cancelAnimationFrame(raf);
+            if (!document.hidden && visible) raf = requestAnimationFrame(tick);
+        };
+        let visible = true;
+        const io = new IntersectionObserver(
+            ([e]) => {
+                visible = e.isIntersecting;
+                cancelAnimationFrame(raf);
+                if (visible && !document.hidden) raf = requestAnimationFrame(tick);
+            },
+            { threshold: 0 }
+        );
+        io.observe(canvas);
+        document.addEventListener('visibilitychange', onVisibility);
+        return () => {
+            cancelAnimationFrame(raf);
+            io.disconnect();
+            ro.disconnect();
+            document.removeEventListener('visibilitychange', onVisibility);
+        };
     }, []);
-    return (
-        <div className="fixed inset-0 z-0 bg-[#04120D] overflow-hidden" aria-hidden="true">
-            {/* the emerald empire artwork — hero of the whole design */}
-            <div className="absolute inset-0 fortress_bg" />
-            <div className="absolute inset-0 fortress_overlay" />
-            {/* god-ray beams through the emerald haze */}
-            <div className="beam left-[8%] hidden md:block" />
-            <div className="beam left-[16%] opacity-60 hidden md:block" style={{ animationDelay: '-4s', width: 70 }} />
-            {/* emerald glow left + bronze aura right */}
-            <div className="absolute -top-32 -left-32 w-[46vw] h-[46vw] max-w-[560px] max-h-[560px] rounded-full bg-[#10B981]/[0.14] blur-[130px] animate-aurora" />
-            <div className="absolute top-[8%] right-[-8%] w-[34vw] h-[34vw] max-w-[440px] max-h-[440px] rounded-full bg-[#C9A24B]/[0.16] blur-[120px] animate-aurora" style={{ animationDelay: '-8s' }} />
-            <canvas ref={canvasRef} className="absolute inset-0 opacity-90" />
-            {/* readability vignette: dark void in the middle, deep emerald ink at content depth */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_62%_44%_at_50%_30%,transparent_30%,rgba(4,18,13,0.5)_100%)]" />
-            <div className="absolute inset-x-0 bottom-0 h-[36%] bg-gradient-to-t from-[#04120D] via-[#04120D]/70 to-transparent" />
-        </div>
-    );
+    return <canvas ref={canvasRef} className="absolute inset-0 opacity-90" />;
 };
+
+const ArenaBackground: React.FC = () => (
+    /* Hero-only: the stage is as tall as the first screen and scrolls away
+       with it, so the fortress never floats over the sections below. */
+    <div className="fortress-stage absolute inset-x-0 top-0 h-[100svh] z-0 bg-[#08060A]" aria-hidden="true">
+        {/* The painting at its own ratio, cover-fit — the composition
+            (fortress left and right, empty corridor down the middle)
+            survives every window size instead of being cropped away. */}
+        <div className="fortress-art">
+            <img src={PC_BACKGROUND} alt="" fetchPriority="high" decoding="async" className="fortress-art-img" />
+            {/* braziers + fire floor: shading welded to the artwork */}
+            <div className="fortress-fire fortress-fire-l" />
+            <div className="fortress-fire fortress-fire-r" />
+            <div className="fortress-fire fortress-fire-c" />
+            {/* god rays down the two gold columns */}
+            <div className="fortress-shaft fortress-shaft-l" />
+            <div className="fortress-shaft fortress-shaft-r" />
+            <div className="fortress-heat" />
+            <SparkField />
+            <div className="fortress-shimmer" />
+            {/* seats the art under the page and pools shade behind the type */}
+            <div className="fortress-grade" />
+        </div>
+        {/* radiant gold aura left + ember aura right */}
+        <div className="absolute -top-32 -left-32 w-[46vw] h-[46vw] max-w-[560px] max-h-[560px] rounded-full bg-[#F2B33D]/[0.14] blur-[130px] animate-aurora" />
+        <div className="absolute top-[8%] right-[-8%] w-[34vw] h-[34vw] max-w-[440px] max-h-[440px] rounded-full bg-[#E07B12]/[0.14] blur-[120px] animate-aurora" style={{ animationDelay: '-8s' }} />
+        {/* readability vignette: dark void in the middle, deep obsidian at content depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_62%_44%_at_50%_30%,transparent_32%,rgba(8,6,10,0.42)_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-[24%] bg-gradient-to-t from-[#08060A] via-[#08060A]/45 to-transparent" />
+    </div>
+);
 
 const SectionHeading: React.FC<{ no: string; title: string; sub?: string; en?: string; compact?: boolean }> = ({ no, title, sub, en, compact }) => (
     <div className={`flex items-end gap-3 md:gap-5 ${compact ? 'mb-5 md:mb-7' : 'mb-6 md:mb-9'}`}>
         <span className="relative font-gaming text-4xl sm:text-5xl md:text-7xl leading-none text-stroke-red select-none shrink-0"
-            style={{ filter: 'drop-shadow(0 0 22px rgba(201,162,75,.35))' }}
+            style={{ filter: 'drop-shadow(0 0 22px rgba(184,134,43,.35))' }}
             dir="ltr"
             aria-hidden="true">{no}</span>
         <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-3 flex-wrap">
                 <h2 className="text-[26px] sm:text-3xl md:text-[42px] font-black leading-tight tracking-tight text-white">{title}</h2>
                 {en && (
-                    <span className="hidden sm:inline-flex items-center text-[10px] font-black tracking-[0.32em] uppercase text-[#C9A24B]/70"
+                    <span className="hidden sm:inline-flex items-center text-[10px] font-black tracking-[0.32em] uppercase text-[#B8862B]/70"
                         style={{ transform: 'translateY(-2px)' }} dir="ltr">{en}</span>
                 )}
             </div>
             {sub && <p className="text-[13px] md:text-[15px] text-white/55 mt-2 font-medium leading-relaxed">{sub}</p>}
-            <div className="relative mt-3.5 md:mt-4 h-[2px] w-full rounded-full bg-gradient-to-l from-[#C9A24B]/55 via-[#10B981]/28 to-transparent">
+            <div className="relative mt-3.5 md:mt-4 h-[2px] w-full rounded-full bg-gradient-to-l from-[#B8862B]/55 via-[#F2B33D]/28 to-transparent">
                 <span className="absolute inset-y-0 start-0 w-14 rounded-full"
-                    style={{ background: 'linear-gradient(90deg,#F4D98A,#C9A24B)', boxShadow: '0 0 14px rgba(201,162,75,.7)' }} aria-hidden="true" />
+                    style={{ background: 'linear-gradient(90deg,#F2CE7C,#B8862B)', boxShadow: '0 0 14px rgba(184,134,43,.7)' }} aria-hidden="true" />
             </div>
         </div>
     </div>
@@ -239,16 +353,16 @@ const SectionHeading: React.FC<{ no: string; title: string; sub?: string; en?: s
 
 const Marquee: React.FC<{ lang: Language }> = ({ lang }) => {
     const items = lang === 'ar'
-        ? ['بثوث أسطورية', 'إمبراطورية XTROET', 'مجتمع الزمرد', 'تفاعل لا يتوقف', 'جوائز ودروبس', 'تحديات ناصر', 'سهرات الإمبراطورية']
-        : ['EPIC STREAMS', 'XTROET ERA', 'EMERALD COMMUNITY', 'NONSTOP HYPE', 'DROPS & REWARDS', 'NASSER VIBES', 'EMPIRE NIGHTS'];
+        ? ['بثوث أسطورية', 'مملكة فهد', 'مجتمع الذهب', 'تفاعل لا يتوقف', 'جوائز ودروبس', 'تحديات فهد', 'سهرات الذهب']
+        : ['EPIC STREAMS', 'FAHAD ERA', 'GOLDEN COMMUNITY', 'NONSTOP HYPE', 'DROPS & REWARDS', 'FAHAD VIBES', 'GOLDEN NIGHTS'];
     const row = [...items, ...items];
     return (
-        <div className="relative -mx-3 sm:-mx-4 md:-mx-8 overflow-hidden border-y border-[#C9A24B]/20 bg-black/60 backdrop-blur-md marquee-mask" dir="ltr" aria-hidden="true">
+        <div className="relative -mx-3 sm:-mx-4 md:-mx-8 overflow-hidden border-y border-[#B8862B]/25 bg-black/65 backdrop-blur-md marquee-mask" dir="ltr" aria-hidden="true">
             <div className="flex w-max animate-marquee gap-0 py-2.5 md:py-3">
                 {row.map((t, i) => (
                     <span key={i} className="flex items-center gap-6 px-6 whitespace-nowrap text-[12px] md:text-sm font-black tracking-[0.25em] text-white/60">
-                        <span className={i % 2 ? 'text-white/60' : 'text-[#D9C08A]'}>{t}</span>
-                        <span className="w-1.5 h-1.5 rotate-45 bg-[#C9A24B]/70 inline-block" />
+                        <span className={i % 2 ? 'text-white/60' : 'text-[#F7E3B0]'}>{t}</span>
+                        <span className="w-1.5 h-1.5 rotate-45 bg-[#F2B33D]/75 inline-block" />
                     </span>
                 ))}
             </div>
@@ -298,13 +412,13 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
     const peak = Number(data.viewer_count ?? 0);
     const durH = data.duration > 1000000 ? data.duration / 3600000 : (Number(data.duration) || 0) / 3600;
     const vph = durH > 0.05 ? Math.round(views / durH) : views;
-    const vodUrl = `https://kick.com/${CHANNEL_SLUG}/videos/${data.id}`;
+    const vodUrl = kickWatchUrl(data);
     const isSubOnly = data.video?.status === 'subscriber_only' || data.video?.is_private === true;
     const fullDate = (() => { try { return new Date(data.created_at).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return ''; } })();
     const sessions = [data, ...past].slice(0, 4);
     const maxV = Math.max(1, ...sessions.map((s: any) => Number(s.views ?? s.video?.views ?? 0)));
     const compact = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}K` : `${v}`;
-    const vodUrlOf = (v: any) => `https://kick.com/${CHANNEL_SLUG}/videos/${v.id}`;
+    const vodUrlOf = kickWatchUrl;
     const catTags: string[] = [...new Set((data.categories || []).flatMap((c: any) => c.tags || []))].slice(0, 4) as string[];
     const L = {
         views: lang === 'en' ? 'VIEWS' : 'المشاهدات',
@@ -322,15 +436,15 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
     ];
     return (
         <Reveal className="w-full">
-            <div className="relative overflow-hidden rounded-[28px] md:rounded-[36px] border border-white/10 bg-[#0a0a0a]/85 backdrop-blur-xl shadow-[0_30px_80px_rgba(0,0,0,0.6)]">
+            <div className="relative overflow-hidden rounded-[28px] md:rounded-[36px] border border-white/10 bg-[#0A090C]/85 backdrop-blur-xl shadow-[0_30px_80px_rgba(0,0,0,0.6)]">
                 {/* cinematic ambient from thumbnail */}
                 <img src={thumbnail} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-25 scale-110 pointer-events-none" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 pointer-events-none" />
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-l from-transparent via-[#10B981] to-transparent" />
+                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-l from-transparent via-[#F2B33D] to-transparent" />
                 <div className="relative p-5 sm:p-8 md:p-10">
                     {/* header */}
                     <div className="flex flex-wrap items-center gap-3 mb-6 md:mb-8 animate-fade-in-up">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shadow-[0_0_14px_#10B981] animate-pulse shrink-0" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#F2B33D] shadow-[0_0_14px_#F2B33D] animate-pulse shrink-0" />
                         <span className="text-[11px] font-black tracking-[0.35em] text-white/45 uppercase">{t.lastSessionReport}</span>
                         <span className="ms-auto flex flex-wrap items-center gap-2">
                             <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10 text-white/70">
@@ -346,12 +460,12 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
                     {/* hero */}
                     <div className="flex flex-col lg:flex-row gap-6 md:gap-8 items-start">
                         <div className="[perspective:1200px] w-full lg:w-[380px] shrink-0 animate-fade-in-up" style={{ animationDelay: '80ms' }}>
-                            <a href={vodUrl} target="_blank" rel="noopener noreferrer"
-                                className="group relative block aspect-video rounded-2xl overflow-hidden border border-[#10B981]/30 bg-black shadow-[0_24px_60px_-16px_rgba(16,185,129,0.4)] [transform:rotateY(-7deg)_rotateX(2deg)] hover:[transform:rotateY(0deg)_rotateX(0deg)] transition-transform duration-700">
+                            <a href={vodUrl} target="_blank" rel="noopener noreferrer" onClick={playOnSite(data, lang)}
+                                className="group relative block aspect-video rounded-2xl overflow-hidden border border-[#F2B33D]/30 bg-black shadow-[0_24px_60px_-16px_rgba(242,179,61,0.4)] [transform:rotateY(-7deg)_rotateX(2deg)] hover:[transform:rotateY(0deg)_rotateX(0deg)] transition-transform duration-700">
                                 <img src={thumbnail} alt="Last Session" loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                                 <span className="absolute top-3 start-3 text-[10px] font-black px-2.5 py-1 rounded-full bg-black/70 border border-white/15 text-white/80 backdrop-blur">VOD</span>
-                                <span className="absolute inset-0 m-auto w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#10B981]/25 backdrop-blur-md border border-[#10B981]/70 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-[0_0_36px_rgba(16,185,129,0.55)]">
+                                <span className="absolute inset-0 m-auto w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#F2B33D]/25 backdrop-blur-md border border-[#F2B33D]/70 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-[0_0_36px_rgba(242,179,61,0.55)]">
                                     <svg className="w-6 h-6 text-white fill-current translate-x-[1px] rtl:-translate-x-[1px]" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                 </span>
                                 <span className="absolute bottom-3 end-3 text-[10px] font-black px-2.5 py-1 rounded-lg bg-black/75 border border-white/15 text-white" dir="ltr">{formatDuration(data.duration)}</span>
@@ -360,7 +474,7 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
                                     {compact(views)}
                                 </span>
                             </a>
-                            <span className="mt-3 w-full min-h-[48px] flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#6EE7B7] via-[#10B981] to-[#047857] text-[#04120D] font-black text-sm shadow-[0_12px_30px_-10px_rgba(16,185,129,0.6)] active:scale-[0.98] transition-transform">
+                            <span className="mt-3 w-full min-h-[48px] flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#F2CE7C] via-[#F2B33D] to-[#8A6320] text-[#08060A] font-black text-sm shadow-[0_12px_30px_-10px_rgba(242,179,61,0.6)] active:scale-[0.98] transition-transform">
                                 {L.watch}
                                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                             </span>
@@ -370,13 +484,13 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
                             <div className="flex flex-wrap items-center gap-2 mb-3 animate-fade-in-up" style={{ animationDelay: '140ms' }}>
                                 <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-white/[0.07] border border-white/10 text-white/70" dir="ltr">{data.language || 'AR'}</span>
                                 <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-white/[0.07] border border-white/10 text-white/70">{data.is_mature ? '18+' : L.family}</span>
-                                {catTags.map((tag, i) => <span key={i} className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#10B981]/10 border border-[#10B981]/30 text-[#6EE7B7]" dir="ltr">#{tag}</span>)}
+                                {catTags.map((tag, i) => <span key={i} className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#F2B33D]/10 border border-[#F2B33D]/30 text-[#F2CE7C]" dir="ltr">#{tag}</span>)}
                             </div>
                             <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-snug mb-5 animate-fade-in-up" style={{ animationDelay: '180ms' }}>{data.session_title || data.title}</h3>
                             <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-3">
                                 {stats.map((s, i) => (
-                                    <div key={i} className={`card-sheen relative overflow-hidden rounded-2xl border px-4 py-4 text-center backdrop-blur-md animate-fade-in-up ${s.hot ? 'bg-[#10B981]/[0.07] border-[#10B981]/25' : 'bg-white/[0.04] border-white/10'}`} style={{ animationDelay: `${220 + i * 80}ms` }}>
-                                        <span className={`mx-auto w-8 h-8 rounded-xl flex items-center justify-center mb-2 ${s.hot ? 'bg-[#10B981]/15 text-[#6EE7B7]' : 'bg-white/[0.07] text-white/60'}`}>{s.icon}</span>
+                                    <div key={i} className={`card-sheen relative overflow-hidden rounded-2xl border px-4 py-4 text-center backdrop-blur-md animate-fade-in-up ${s.hot ? 'bg-[#F2B33D]/[0.07] border-[#F2B33D]/25' : 'bg-white/[0.04] border-white/10'}`} style={{ animationDelay: `${220 + i * 80}ms` }}>
+                                        <span className={`mx-auto w-8 h-8 rounded-xl flex items-center justify-center mb-2 ${s.hot ? 'bg-[#F2B33D]/15 text-[#F2CE7C]' : 'bg-white/[0.07] text-white/60'}`}>{s.icon}</span>
                                         <p className="text-lg sm:text-xl md:text-2xl font-black text-white">{s.value}</p>
                                         <p className="text-[9px] sm:text-[10px] font-bold text-white/35 uppercase tracking-widest mt-1">{s.label}</p>
                                     </div>
@@ -393,19 +507,19 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
                                             const h = Math.max(10, Math.round((v / maxV) * 100));
                                             const cur = i === 0;
                                             return (
-                                                <a key={s.id || i} href={vodUrlOf(s)} target="_blank" rel="noopener noreferrer" title={s.session_title || s.title}
+                                                <a key={s.id || i} href={vodUrlOf(s)} target="_blank" rel="noopener noreferrer" onClick={playOnSite(s, lang)} title={s.session_title || s.title}
                                                     className="flex-1 h-full flex flex-col items-center justify-end gap-1.5 group/bar min-w-0">
-                                                    <span className={`text-[10px] sm:text-[11px] font-black ${cur ? 'text-[#6EE7B7]' : 'text-white/45'}`} dir="ltr">{compact(v)}</span>
+                                                    <span className={`text-[10px] sm:text-[11px] font-black ${cur ? 'text-[#F2CE7C]' : 'text-white/45'}`} dir="ltr">{compact(v)}</span>
                                                     <span className="tier-bar w-full max-w-[90px] rounded-t-lg border-x border-t relative overflow-hidden"
                                                         style={{
                                                             height: `${h}%`, animationDelay: `${i * 120}ms`,
-                                                            background: cur ? 'linear-gradient(to bottom, #10B981, #10B98155 60%, rgba(0,0,0,0.5))' : 'linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.06))',
-                                                            borderColor: cur ? '#10B98188' : 'rgba(255,255,255,0.15)',
-                                                            boxShadow: cur ? '0 0 22px -4px rgba(16,185,129,0.7)' : 'none',
+                                                            background: cur ? 'linear-gradient(to bottom, #F2B33D, #F2B33D55 60%, rgba(0,0,0,0.5))' : 'linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.06))',
+                                                            borderColor: cur ? '#F2B33D88' : 'rgba(255,255,255,0.15)',
+                                                            boxShadow: cur ? '0 0 22px -4px rgba(242,179,61,0.7)' : 'none',
                                                         }}>
                                                         <span className="absolute top-0 inset-x-2 h-1 rounded-full bg-white/40 blur-[1px]" />
                                                     </span>
-                                                    <span className={`w-full max-w-[90px] h-1.5 rounded-b bg-black/70 border-x border-b ${cur ? 'border-[#10B981]/50' : 'border-white/10'}`} />
+                                                    <span className={`w-full max-w-[90px] h-1.5 rounded-b bg-black/70 border-x border-b ${cur ? 'border-[#F2B33D]/50' : 'border-white/10'}`} />
                                                 </a>
                                             );
                                         })}
@@ -422,7 +536,7 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
                                             const slug = cat.slug || cat.category?.slug || catName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
                                             const catImg = cat.banner?.url || cat.banner?.responsive || cat.category?.banner?.url || cat.category?.banner?.responsive || cat.responsive_url || cat.thumbnail?.url || cat.category?.responsive_url || cat.category?.thumbnail?.url || `https://files.kick.com/categories/${slug}/fullsize.png`;
                                             return (
-                                                <span key={i} className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/10 rounded-full ps-1 pe-3 py-1 hover:border-[#10B981]/40 transition-colors">
+                                                <span key={i} className="inline-flex items-center gap-2 bg-white/[0.05] border border-white/10 rounded-full ps-1 pe-3 py-1 hover:border-[#F2B33D]/40 transition-colors">
                                                     <span className="w-7 h-7 rounded-full overflow-hidden bg-black border border-white/10 block">
                                                         <img src={catImg} alt={catName} loading="lazy" className="w-full h-full object-cover"
                                                             onError={(e) => { const tg = e.target as HTMLImageElement; tg.src = tg.src.includes('picsum') ? DEFAULT_PROFILE_IMAGE : `https://picsum.photos/seed/${slug}/100/100`; }} />
@@ -445,14 +559,14 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
                             </div>
                             <div className="grid grid-cols-3 gap-2 md:gap-4">
                                 {clips.slice(0, 3).map((clip: any, i: number) => (
-                                    <a key={clip.id || i} href={`https://kick.com/${CHANNEL_SLUG}?clip=${clip.id}`} target="_blank" rel="noopener noreferrer"
-                                        className="group relative aspect-video rounded-xl md:rounded-2xl overflow-hidden border border-white/10 bg-black hover:border-[#10B981]/60 hover:-translate-y-1 transition-all duration-300">
+                                    <a key={clip.id || i} href={`https://kick.com/${CHANNEL_SLUG}?clip=${clip.id}`} target="_blank" rel="noopener noreferrer" onClick={playOnSite(clip, lang)}
+                                        className="group relative aspect-video rounded-xl md:rounded-2xl overflow-hidden border border-white/10 bg-black hover:border-[#F2B33D]/60 hover:-translate-y-1 transition-all duration-300">
                                         <img src={clip.thumbnail_url || clip.thumbnail?.url || PC_BACKGROUND} alt={clip.title} loading="lazy"
                                             className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
                                         <span className="absolute top-1.5 start-1.5 w-5 h-5 md:w-6 md:h-6 rounded-lg bg-black/70 border border-white/15 text-white/80 text-[9px] md:text-[10px] font-black flex items-center justify-center backdrop-blur" dir="ltr">{i + 1}</span>
                                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="w-9 h-9 md:w-11 md:h-11 rounded-full bg-[#10B981]/25 backdrop-blur border border-[#10B981]/60 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.6)]">
+                                            <span className="w-9 h-9 md:w-11 md:h-11 rounded-full bg-[#F2B33D]/25 backdrop-blur border border-[#F2B33D]/60 flex items-center justify-center shadow-[0_0_16px_rgba(242,179,61,0.6)]">
                                                 <svg className="w-4 h-4 md:w-5 md:h-5 text-white fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                             </span>
                                         </div>
@@ -471,17 +585,18 @@ const LastSessionReport: React.FC<{ lang: Language; data: any; clips: any[]; pas
     );
 };
 
-// --- Platform identity gradients (emerald empire palette) ---
+// --- Platform identity gradients (obsidian gold palette) ---
 const BRAND_GRADIENTS: Record<string, string> = {
     KICK: 'linear-gradient(135deg, rgba(83,252,24,0.28), rgba(83,252,24,0.05) 55%, transparent)',
-    Instagram: 'linear-gradient(135deg, rgba(225,48,108,0.28), rgba(129,52,175,0.14) 50%, rgba(255,170,60,0.08))',
+    YouTube: 'linear-gradient(135deg, rgba(255,0,0,0.26), rgba(255,0,0,0.05) 55%, transparent)',
     TikTok: 'linear-gradient(135deg, rgba(254,44,85,0.24), rgba(37,244,238,0.12) 60%, transparent)',
     X: 'linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 60%, transparent)',
-    Snapchat: 'linear-gradient(135deg, rgba(255,252,0,0.20), rgba(255,170,0,0.08) 55%, transparent)',
-    YouTube: 'linear-gradient(135deg, rgba(255,0,0,0.26), rgba(255,0,0,0.05) 55%, transparent)',
+    Snapchat: 'linear-gradient(135deg, rgba(255,252,0,0.20), rgba(224,123,18,0.08) 55%, transparent)',
+    WhatsApp: 'linear-gradient(135deg, rgba(37,211,102,0.24), rgba(37,211,102,0.06) 58%, transparent)',
+    Discord: 'linear-gradient(135deg, rgba(88,101,242,0.26), rgba(88,101,242,0.06) 58%, transparent)',
 };
 
-// --- Social Card — premium emerald edition (XTROET identity) ---
+// --- Social Card — premium gold edition (FAHAD identity) ---
 const SocialCard: React.FC<{ social: SocialLink; index: number; featured?: boolean; lang: Language }> = ({ social, index, featured = false, lang }) => {
     const [hover, setHover] = useState(false);
     const [launching, setLaunching] = useState(false);
@@ -496,7 +611,7 @@ const SocialCard: React.FC<{ social: SocialLink; index: number; featured?: boole
     };
     const active = hover || launching;
     const card = (
-        <div className={`card-sheen relative h-full rounded-[22px] border bg-[#0b0b0b]/92 backdrop-blur-xl overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.985] ${launching ? 'glitch-active' : ''} ${pressed ? 'scale-[0.985]' : ''}`}
+        <div className={`card-sheen relative h-full rounded-[22px] border bg-[#0B0A0C]/92 backdrop-blur-xl overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-active:translate-y-0 group-active:scale-[0.985] ${launching ? 'glitch-active' : ''} ${pressed ? 'scale-[0.985]' : ''}`}
             style={{ borderColor: launching ? brand : active ? `${brand}99` : 'rgba(255,255,255,0.09)', boxShadow: active ? `0 18px 44px -16px ${brand}66, inset 0 1px 0 rgba(255,255,255,0.08)` : '0 10px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)' }}>
             {/* brand wash */}
             <div className="absolute inset-0 pointer-events-none transition-opacity duration-500" style={{ background: BRAND_GRADIENTS[social.name] || `linear-gradient(135deg, ${brand}22, transparent 60%)`, opacity: active ? 1 : 0.75 }} />
@@ -563,10 +678,10 @@ const SocialCard: React.FC<{ social: SocialLink; index: number; featured?: boole
             onTouchStart={() => setPressed(true)} onTouchEnd={() => setPressed(false)}
             style={{ animationDelay: `${Math.min(index * 60, 400)}ms` }}
             className={`group relative block animate-fade-in-up select-none rounded-[22px] ${launching ? 'z-40' : ''}`}
-            title={`${social.name} - XTROET Official`} aria-label={lang === 'ar' ? `تابع ناصر العنزي على ${social.name}` : `Visit XTROET on ${social.name}`}>
+            title={`${social.name} - FAHAD Official`} aria-label={lang === 'ar' ? `تابع فهد على ${social.name}` : `Visit FAHAD on ${social.name}`}>
             {featured ? (
-                <div className="rounded-[24px] p-[1.5px] bg-gradient-to-l from-[#53FC18] via-[#53FC18]/25 to-[#C9A24B]/70 shadow-[0_0_35px_rgba(83,252,24,0.15)]">
-                    <div className="rounded-[22.5px] bg-[#0b0b0b]">{card}</div>
+                <div className="rounded-[24px] p-[1.5px] bg-gradient-to-l from-[#FDEFC9] via-[#F2B33D]/45 to-[#B8862B]/80 shadow-[0_0_45px_rgba(242,179,61,0.22)]">
+                    <div className="rounded-[22.5px] bg-[#0B0A0C]">{card}</div>
                 </div>
             ) : (
                 <>
@@ -581,13 +696,13 @@ const SocialCard: React.FC<{ social: SocialLink; index: number; featured?: boole
 // ============ SUPPORT — modern glass system (no leaderboard, removed per request) ============
 type Supporter = { id: number; name: string; amount: number; currency: string; message?: string; source: string; created_at: string };
 
-// Special alert tiers — emerald empire interactive cards with perks
+// Special alert tiers — obsidian gold interactive cards with perks
 const TIERS = [
-    { amount: 50, label: '50$', c: '#FFE9B8', glow: 'rgba(255,233,184,0.45)', name: 'BRONZE', nameAr: 'برونزي', perk: 'تنبيه برونزي أنيق يظهر اسمك في الشات', perkEn: 'Sleek bronze on-screen alert', icon: '✦' },
-    { amount: 100, label: '100$', c: '#E8D5A8', glow: 'rgba(232,213,168,0.5)', name: 'SILVER', nameAr: 'فضي', perk: 'تنبيه فضي + شكر صوتي مباشر من ناصر', perkEn: 'Silver alert + live shoutout', icon: '⬣' },
-    { amount: 200, label: '200$', c: '#C9A24B', glow: 'rgba(201,162,75,0.6)', name: 'GOLD', nameAr: 'ذهبي', perk: 'تنبيه ذهبي سينمائي + صوت مخصص باسمك', perkEn: 'Cinematic gold alert + custom sound', icon: '◈', popular: true },
-    { amount: 500, label: '500$', c: '#10B981', glow: 'rgba(16,185,129,0.55)', name: 'EMERALD', nameAr: 'زمردي', perk: 'عرض اسمك بحجم الشاشة + مقطع شكر خاص', perkEn: 'Fullscreen takeover + clip', icon: '⬥' },
-    { amount: 1000, label: '1000$', c: '#34D399', glow: 'rgba(52,211,153,0.55)', name: 'LEGEND', nameAr: 'أسطوري', perk: 'دخول قاعة الخلود + فيديو تكريم خاص', perkEn: 'Hall of fame + tribute video', icon: '❖' },
+    { amount: 50, label: '50$', c: '#FFE9B8', glow: 'rgba(247,227,176,0.45)', name: 'BRONZE', nameAr: 'برونزي', perk: 'تنبيه برونزي أنيق يظهر اسمك في الشات', perkEn: 'Sleek bronze on-screen alert', icon: '✦' },
+    { amount: 100, label: '100$', c: '#F7E3B0', glow: 'rgba(247,227,176,0.5)', name: 'SILVER', nameAr: 'فضي', perk: 'تنبيه فضي + شكر صوتي مباشر من فهد', perkEn: 'Silver alert + live shoutout', icon: '⬣' },
+    { amount: 200, label: '200$', c: '#F2B33D', glow: 'rgba(242,179,61,0.65)', name: 'GOLD', nameAr: 'ذهبي', perk: 'تنبيه ذهبي سينمائي + صوت مخصص باسمك', perkEn: 'Cinematic gold alert + custom sound', icon: '◈', popular: true },
+    { amount: 500, label: '500$', c: '#E07B12', glow: 'rgba(224,123,18,0.6)', name: 'EMBER', nameAr: 'جمر', perk: 'عرض اسمك بحجم الشاشة + مقطع شكر خاص', perkEn: 'Fullscreen takeover + clip', icon: '⬥' },
+    { amount: 1000, label: '1000$', c: '#FDEFC9', glow: 'rgba(253,239,201,0.6)', name: 'LEGEND', nameAr: 'أسطوري', perk: 'دخول قاعة الخلود + فيديو تكريم خاص', perkEn: 'Hall of fame + tribute video', icon: '❖' },
 ];
 
 const AlertTiers: React.FC<{ title: string; note: string; lang: Language }> = ({ title, note, lang }) => {
@@ -596,14 +711,14 @@ const AlertTiers: React.FC<{ title: string; note: string; lang: Language }> = ({
     const isAr = lang === 'ar';
     return (
         <div id="store" className="relative mt-5 md:mt-7 rounded-[28px] border border-white/10 bg-white/[0.03] backdrop-blur-2xl overflow-hidden scroll-mt-32">
-            <div className="absolute -top-24 start-1/4 w-96 h-96 rounded-full bg-[#C9A24B]/[0.10] blur-[110px] pointer-events-none" aria-hidden="true" />
-            <div className="absolute -bottom-24 end-0 w-80 h-80 rounded-full bg-[#8B5CF6]/[0.10] blur-[100px] pointer-events-none" aria-hidden="true" />
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#C9A24B]/70 to-transparent" aria-hidden="true" />
+            <div className="absolute -top-24 start-1/4 w-96 h-96 rounded-full bg-[#F2B33D]/[0.13] blur-[110px] pointer-events-none" aria-hidden="true" />
+            <div className="absolute -bottom-24 end-0 w-80 h-80 rounded-full bg-[#E07B12]/[0.12] blur-[100px] pointer-events-none" aria-hidden="true" />
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#F2B33D]/75 to-transparent" aria-hidden="true" />
             <div className="relative p-5 sm:p-7 md:p-8">
                 <div className="flex items-center justify-center gap-2.5 mb-1">
-                    <span className="w-1.5 h-1.5 rotate-45 bg-[#C9A24B] inline-block" aria-hidden="true" />
+                    <span className="w-1.5 h-1.5 rotate-45 bg-[#F2B33D] inline-block" aria-hidden="true" />
                     <p className="text-[11px] md:text-xs font-black text-white/60 tracking-[0.32em] uppercase">{title}</p>
-                    <span className="w-1.5 h-1.5 rotate-45 bg-[#C9A24B] inline-block" aria-hidden="true" />
+                    <span className="w-1.5 h-1.5 rotate-45 bg-[#F2B33D] inline-block" aria-hidden="true" />
                 </div>
                 <p className="text-center text-[12px] text-white/40 font-medium mb-6">{isAr ? 'اضغط على أي مستوى لتشوف ميزته' : 'Tap any tier to preview its perk'}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3" role="list">
@@ -612,11 +727,11 @@ const AlertTiers: React.FC<{ title: string; note: string; lang: Language }> = ({
                         const pct = Math.max(8, Math.round((tr.amount / max) * 100));
                         return (
                             <button key={tr.label} role="listitem" onClick={() => setActive(i)}
-                                className={`group relative text-start rounded-3xl border p-4 sm:p-5 overflow-hidden transition-all duration-500 active:scale-[0.97] ${on ? 'border-white/25 bg-white/[0.07] -translate-y-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)]' : 'border-white/10 bg-white/[0.02] hover:border-white/25 hover:bg-white/[0.05] hover:-translate-y-1'}`}>
+                                className={`group relative text-start rounded-3xl border p-4 sm:p-5 overflow-hidden transition-all duration-500 active:scale-[0.97] ${on ? 'border-[#F2B33D]/45 bg-white/[0.07] -translate-y-1.5 shadow-[0_24px_60px_-16px_rgba(242,179,61,0.35)]' : 'border-white/10 bg-white/[0.02] hover:border-[#F2B33D]/35 hover:bg-white/[0.05] hover:-translate-y-1'}`}>
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                                     style={{ background: `radial-gradient(220px circle at 50% 0%, ${tr.glow}, transparent 70%)` }} aria-hidden="true" />
                                 {tr.popular && (
-                                    <span className="absolute top-3 end-3 text-[8px] font-black tracking-[0.18em] px-2 py-1 rounded-full bg-[#C9A24B] text-black shadow-[0_0_18px_rgba(201,162,75,0.7)]">HOT</span>
+                                    <span className="absolute top-3 end-3 text-[8px] font-black tracking-[0.18em] px-2 py-1 rounded-full bg-[#F2B33D] text-black shadow-[0_0_20px_rgba(242,179,61,0.8)]">HOT</span>
                                 )}
                                 <span className="relative w-10 h-10 rounded-2xl flex items-center justify-center text-lg font-black border border-white/15 bg-white/[0.06] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
                                     style={{ color: tr.c, boxShadow: on ? `0 0 24px ${tr.glow}` : 'none' }}>{tr.icon}</span>
@@ -653,13 +768,13 @@ const DonateGate: React.FC<{
         e.preventDefault(); if (busy) return; setBusy(true);
         window.setTimeout(() => { window.open(url, '_blank'); window.setTimeout(() => setBusy(false), 600); }, 350);
     };
-    const ctaBg = color2 ? `linear-gradient(135deg, ${color}, ${color2})` : `linear-gradient(135deg, #fff 0%, ${color} 60%, ${color})`;
-    const ctaColor = color2 ? '#fff' : '#06281f';
+    const ctaBg = color2 ? `linear-gradient(135deg, ${color}, ${color2})` : `linear-gradient(135deg, #FDEFC9 0%, ${color} 62%, ${color})`;
+    const ctaColor = color2 ? '#fff' : '#08060A';
     return (
         <a href={url} onClick={go} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-            className="group relative block rounded-[28px] transition-transform duration-500 hover:-translate-y-1.5 active:translate-y-0 active:scale-[0.99]" aria-label={`${title} donation`}>
-            <div className="absolute -inset-2 rounded-[32px] blur-3xl pointer-events-none transition-opacity duration-700" style={{ background: `linear-gradient(150deg, ${color}40, ${color2 ? color2 + '33' : 'transparent'} 60%, transparent)`, opacity: hover ? 1 : 0.5 }} aria-hidden="true" />
-            <div className="card-sheen relative rounded-[28px] border border-white/10 bg-white/[0.04] backdrop-blur-2xl overflow-hidden transition-all duration-500 group-hover:border-white/25 group-hover:bg-white/[0.06] group-hover:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]">
+            className="group relative block rounded-[28px] transition-transform duration-500 hover:-translate-y-1.5 active:translate-y-0 active:scale-[0.99]" aria-label={`${title} — ${cta}`}>
+            <div className="absolute -inset-2 rounded-[32px] blur-3xl pointer-events-none transition-opacity duration-700" style={{ background: `linear-gradient(150deg, ${color}55, ${color2 ? color2 + '33' : 'transparent'} 60%, transparent)`, opacity: hover ? 1 : 0.55 }} aria-hidden="true" />
+            <div className="card-sheen relative rounded-[28px] border border-white/10 bg-white/[0.04] backdrop-blur-2xl overflow-hidden transition-all duration-500 group-hover:border-[#F2B33D]/45 group-hover:bg-white/[0.06] group-hover:shadow-[0_30px_80px_-20px_rgba(242,179,61,0.28)]">
                 <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(420px circle at 85% -10%, ${color}26, transparent 65%), radial-gradient(320px circle at 0% 110%, ${color2 || color}1f, transparent 60%)` }} aria-hidden="true" />
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-white/40 to-transparent" aria-hidden="true" />
                 <span className="absolute top-4 end-4 inline-flex items-center gap-1.5 text-[9px] font-black tracking-[0.2em] px-2.5 py-1.5 rounded-full bg-black/50 border border-white/15 text-white/60 backdrop-blur">
@@ -713,24 +828,23 @@ const DonateGate: React.FC<{
 
 const SupportArena: React.FC<{ lang: Language; supporters: Supporter[] }> = ({ lang }) => {
     const t = TRANSLATIONS[lang];
+    const isAr = lang === 'ar';
     return (
         <div className="w-full">
-            {/* gates — modern glass duo */}
+            {/* the one and only support gate — Dokan Tip */}
             <div className="relative">
-                <div className="absolute -top-10 right-0 w-64 h-64 rounded-full bg-[#10B981]/15 blur-[90px] animate-aurora pointer-events-none" aria-hidden="true" />
-                <div className="absolute -bottom-10 left-0 w-72 h-72 rounded-full bg-[#C9A24B]/20 blur-[100px] animate-aurora pointer-events-none" style={{ animationDelay: '-7s' }} aria-hidden="true" />
-                <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-5" dir="rtl">
-                    <DonateGate lang={lang} title="STREAMLABS" url="https://streamlabs.com/xtroet" color="#10B981" markImg="/xtroet-logo.webp"
-                        label={lang === 'en' ? 'STREAMLABS' : 'ستريم لابس'} secure={lang === 'en' ? 'SECURE • INSTANT ALERT' : 'آمن • تنبيه فوري'} cta={lang === 'en' ? 'Donate via Streamlabs' : 'ادعم عبر ستريم لابس'}
-                        sub={lang === 'en' ? 'Global cards • instant on-screen alert' : 'بطاقات عالمية • تنبيه فوري على الشاشة'} />
-                    <DonateGate lang={lang} title="DOKAN" url="https://tip.dokan.sa/xtroet" color="#C9A24B" color2="#10B981" markImg="/xtroet-logo.webp"
-                        label={lang === 'en' ? 'DOKAN • SEND TIP' : 'دكان • تيب'}
-                        secure={lang === 'en' ? 'SECURE • MADA & APPLE PAY' : 'آمن • مدى وآبل باي'} cta={lang === 'en' ? 'Donate via Dokan' : 'ادعم عبر دكان'}
-                        sub={lang === 'en' ? 'Mada • Apple Pay • instant vibe' : 'مدى • آبل باي • تنبيه يهز الشات'} />
+                <div className="absolute -top-12 right-0 w-72 h-72 rounded-full bg-[#F2B33D]/20 blur-[100px] animate-aurora pointer-events-none" aria-hidden="true" />
+                <div className="absolute -bottom-12 left-0 w-80 h-80 rounded-full bg-[#E07B12]/18 blur-[110px] animate-aurora pointer-events-none" style={{ animationDelay: '-7s' }} aria-hidden="true" />
+                <div className="relative" dir="rtl">
+                    <DonateGate lang={lang} title={SUPPORT_TITLE} url={FAHAD_LINKS.support} color="#F2B33D" color2="#E07B12" markImg={SUPPORT_MARK}
+                        label={isAr ? 'الدعم الرسمي • دوكان تيب' : 'OFFICIAL SUPPORT • DOKAN TIP'}
+                        secure={isAr ? 'آمن • تنبيه فوري على الشاشة' : 'SECURE • INSTANT ON-SCREEN ALERT'}
+                        cta={isAr ? 'ادعم فهد عبر دوكان تيب' : 'Support FAHAD on Dokan Tip'}
+                        sub={isAr ? `الرابط الرسمي للدعم — كل مساهمة توصلك مباشرة (${SUPPORT_HOST}).` : `The official FAHAD support link — every contribution lands directly (${SUPPORT_HOST}).`} />
                 </div>
             </div>
 
-            <AlertTiers lang={lang} title={t.tiersTitle} note={lang === 'en' ? 'Donations are non-refundable • name appears live' : 'التبرعات غير قابلة للاسترداد • اسمك يظهر مباشرة على البث'} />
+            <AlertTiers lang={lang} title={t.tiersTitle} note={isAr ? 'الدعم غير قابل للاسترداد • اسمك يظهر مباشرة على البث' : 'Support is non-refundable • your name appears live'} />
         </div>
     );
 };
@@ -741,13 +855,11 @@ export default function App() {
     const [branding] = useState({ profileImage: DEFAULT_PROFILE_IMAGE, bannerImage: PC_BACKGROUND });
 
     const [socialStats, setSocialStats] = useState<Record<string, string>>({
-        'KICK': '—', 'TikTok': '—',
-        'X': '—', 'Instagram': '—', 'Snapchat': '—', 'YouTube': '—'
+        'KICK': '—', 'TikTok': '—', 'X': '19.0K+', 'Snapchat': '—'
     });
 
     const [socials, setSocials] = useState<SocialLink[]>(() => buildDefaultSocials({
-        'KICK': '—', 'TikTok': '—',
-        'X': '—', 'Instagram': '—', 'Snapchat': '—', 'YouTube': '—'
+        'KICK': '—', 'TikTok': '—', 'X': '19.0K+', 'Snapchat': '—'
     }));
     const [lastSession, setLastSession] = useState<any>(null);
     const [pastSessions, setPastSessions] = useState<any[]>([]);
@@ -755,13 +867,11 @@ export default function App() {
 
     // Live social counters — dedicated 5-minute loop + instant cache paint (API-style)
     useEffect(() => {
-        const apply = (stats: { instagram?: number; tiktok?: number; twitter?: number; youtube?: number; snapchat?: number }) => {
+        const apply = (stats: { tiktok?: number; twitter?: number; snapchat?: number }) => {
             setSocialStats(prev => ({
                 ...prev,
-                'Instagram': formatFollowerCount(stats.instagram || 0),
                 'TikTok': formatFollowerCount(stats.tiktok || 0),
                 'X': formatFollowerCount(stats.twitter || 0),
-                'YouTube': formatFollowerCount(stats.youtube || 0),
                 'Snapchat': formatFollowerCount(stats.snapchat || 0),
             }));
         };
@@ -825,7 +935,7 @@ export default function App() {
     }, [fetchKickStatus]);
 
     const handleShare = async () => {
-        const shareUrl = "https://kick.com/xtroet";
+        const shareUrl = FAHAD_LINKS.kick;
         if (navigator.share) { try { await navigator.share({ title: t.shareTitle, text: t.shareText, url: shareUrl }); } catch { /* dismissed */ } }
         else { try { await navigator.clipboard.writeText(shareUrl); } catch { /* clipboard blocked */ } alert(t.copied); }
     };
@@ -864,7 +974,7 @@ export default function App() {
 
     if (route === '#story') {
         return (
-            <div className={`relative min-h-screen w-full overflow-hidden bg-black ${lang === 'ar' ? 'font-arabic' : 'font-sans'}`}>
+            <div className={`relative min-h-screen w-full overflow-hidden bg-[#08060A] ${lang === 'ar' ? 'font-arabic' : 'font-sans'}`}>
                 <Suspense fallback={null}>
                     <StoryPage lang={lang} />
                 </Suspense>
@@ -890,82 +1000,100 @@ export default function App() {
                     </div>
                     <div className="relative z-10 w-full max-w-[1200px] mx-auto px-3 sm:px-4 md:px-8 pb-10 overflow-clip">
 
-                        {/* ===== HERO — ascension in the emerald void ===== */}
+                        {/* ===== HERO — the gold ascension ===== */}
                         <section id="top" className="relative pt-4 md:pt-20 pb-8 md:pb-12 overflow-clip">
+                            {/* radiant crown behind the emblem */}
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] md:h-[640px] overflow-hidden" aria-hidden="true">
+                                <div className="absolute left-1/2 top-6 -translate-x-1/2 w-[560px] h-[560px] max-w-[92vw] rounded-full bg-[#F2B33D]/[0.10] blur-[110px] animate-aurora" />
+                                <div className="absolute left-1/2 top-40 -translate-x-1/2 w-[380px] h-[380px] max-w-[76vw] rounded-full bg-[#E07B12]/[0.12] blur-[90px] animate-aurora" style={{ animationDelay: '-6s' }} />
+                            </div>
+
                             <div className="relative mx-auto w-full max-w-3xl text-center">
                                 {/* emblem seal */}
                                 <div className="animate-fade-in relative mx-auto w-fit" onMouseEnter={() => setIsHoveringProfile(true)} onMouseLeave={() => setIsHoveringProfile(false)}>
                                     <span className="halo-conic -inset-3" aria-hidden="true" />
                                     <span className="profile-3d-ring-inner" aria-hidden="true" />
-                                    <span className="relative block w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-2 border-[#E8D5A8]/70 shadow-[0_0_60px_rgba(16,185,129,0.5)] bg-black">
-                                        <img src={branding.profileImage} alt="XTROET official emblem" className={`w-full h-full object-cover transition-transform duration-700 ${isHoveringProfile ? 'scale-110' : ''}`} loading="eager" />
+                                    <span className="relative block w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden ring-radiant border-2 border-[#FDEFC9]/80 bg-[#08060A]">
+                                        <img src={branding.profileImage} alt="FAHAD official emblem" className={`w-full h-full object-cover transition-transform duration-700 ${isHoveringProfile ? 'scale-110' : ''}`} loading="eager" />
+                                        <span className="profile-scanner" aria-hidden="true" />
                                     </span>
-                                    <span className={`absolute -bottom-1 -end-1 flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black tracking-[0.18em] ${streamInfo.isLive ? 'border-[#53FC18]/60 bg-black/85 text-[#53FC18]' : 'border-[#10B981]/60 bg-black/85 text-[#6EE7B7]'}`}>
-                                        <span className={`w-1.5 h-1.5 rounded-full ${streamInfo.isLive ? 'bg-[#53FC18] animate-pulse' : 'bg-[#10B981] animate-pulse'}`} />
-                                        {streamInfo.isLive ? 'LIVE' : 'XTROET'}
+                                    <span className={`absolute -bottom-1 -end-1 flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black tracking-[0.18em] ${streamInfo.isLive ? 'border-[#53FC18]/60 bg-black/85 text-[#53FC18]' : 'border-[#F2B33D]/60 bg-black/85 text-[#F2CE7C]'}`}>
+                                        <span className={`w-1.5 h-1.5 rounded-full ${streamInfo.isLive ? 'bg-[#53FC18] animate-pulse' : 'bg-[#F2B33D] animate-pulse'}`} />
+                                        {streamInfo.isLive ? 'LIVE' : 'FAHAD'}
                                     </span>
                                 </div>
 
                                 <div className="animate-fade-in-up mt-6" style={{ animationDelay: '100ms' }}>
                                     <span className="eyebrow-chip">
-                                        <span className={`w-2 h-2 rounded-full shrink-0 ${streamInfo.isLive ? 'bg-[#53FC18] animate-pulse shadow-[0_0_10px_#53FC18]' : 'bg-[#10B981] animate-pulse shadow-[0_0_10px_#10B981]'}`} />
+                                        <span className={`w-2 h-2 rounded-full shrink-0 ${streamInfo.isLive ? 'bg-[#53FC18] animate-pulse shadow-[0_0_10px_#53FC18]' : 'bg-[#F2B33D] animate-pulse shadow-[0_0_10px_#F2B33D]'}`} />
                                         {t.eyebrow}
                                     </span>
                                 </div>
 
                                 {/* giant backdrop word */}
-                                <p className="font-gaming text-stroke-red pointer-events-none select-none absolute inset-x-0 top-[6%] md:top-2 text-[23vw] md:text-[190px] leading-none opacity-20 md:opacity-30" dir="ltr" aria-hidden="true">XTROET</p>
+                                <p className="font-gaming text-stroke-red pointer-events-none select-none absolute inset-x-0 top-[8%] md:top-4 text-[26vw] md:text-[210px] leading-none opacity-20 md:opacity-30" dir="ltr" aria-hidden="true">FAHAD</p>
 
-                                <h1 className="animate-fade-in-up relative font-heading font-black text-white leading-[1.05] tracking-tight text-[clamp(2.6rem,9vw,4.8rem)] mt-3" style={{ animationDelay: '180ms' }}>
+                                <h1 className="animate-fade-in-up relative font-heading font-black text-white leading-[1.05] tracking-tight text-[clamp(2.8rem,10vw,5.6rem)] mt-3" style={{ animationDelay: '180ms' }}>
                                     {lang === 'ar' ? (
                                         <>
                                             {t.nameAr}
                                             <span className="gold-text mx-2 inline-flex align-middle" aria-hidden="true">
                                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="translate-y-[-1px]"><path d="M12 2l4.5 7.5L12 22 7.5 9.5z" /></svg>
                                             </span>
-                                            <span dir="ltr" className="hero-xtroet">XTROET</span>
+                                            <span dir="ltr" className="hero-fahad">FAHAD</span>
                                         </>
                                     ) : (
-                                        <span dir="ltr" className="hero-xtroet">XTROET</span>
+                                        <span dir="ltr" className="hero-fahad">FAHAD</span>
                                     )}
                                 </h1>
+                                {/* beauty line */}
+                                <div className="xt-sub animate-fade-in-up" style={{ animationDelay: '240ms' }}>
+                                    <span className="xt-sub-text" dir="ltr">GOLDEN KINGDOM</span>
+                                    <span className="xt-line" aria-hidden="true"><span className="xt-line-dot" /></span>
+                                </div>
                                 <p className="animate-fade-in-up text-white/70 text-[15px] md:text-lg leading-relaxed max-w-2xl mt-6 md:mt-7 font-medium mx-auto" style={{ animationDelay: '300ms' }}>{t.bio}</p>
 
                                 <div className="animate-fade-in-up flex flex-wrap justify-center gap-2 sm:gap-2.5 mt-5" style={{ animationDelay: '360ms' }}>
                                     {t.tags.map((tag, i) => (
-                                        <span key={i} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-[#C9A24B]/35 bg-black/50 backdrop-blur text-[11px] sm:text-xs font-bold text-[#E8D5A8]">
-                                            <span className="w-1 h-1 rotate-45 bg-[#C9A24B]" aria-hidden="true" />#{tag}
+                                        <span key={i} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-[#B8862B]/40 bg-black/55 backdrop-blur text-[11px] sm:text-xs font-bold text-[#F7E3B0]">
+                                            <span className="w-1 h-1 rotate-45 bg-[#F2B33D]" aria-hidden="true" />#{tag}
                                         </span>
                                     ))}
                                 </div>
 
                                 <div className="animate-fade-in-up flex flex-col sm:flex-row justify-center gap-2.5 sm:gap-3 mt-7" style={{ animationDelay: '420ms' }}>
-                                    <a href="https://kick.com/xtroet" target="_blank" rel="noopener noreferrer"
+                                    <a href={FAHAD_LINKS.kick} target="_blank" rel="noopener noreferrer"
                                         className="btn-arena btn-watch inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-2xl font-black text-[15px] md:text-base active:scale-[0.98]">
                                         <span className="play-badge shrink-0">
                                             <svg className="w-4 h-4 fill-current translate-x-[1px]" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                                         </span>
                                         <span className="watch-label">{t.watchLive}</span>
-                                        {streamInfo.isLive && streamInfo.viewers > 0 && <span className="rounded-lg bg-[#C9A24B]/15 border border-[#C9A24B]/30 px-2 py-0.5 text-xs font-black text-[#E8D5A8]" dir="ltr">{streamInfo.viewers.toLocaleString()}</span>}
+                                        {streamInfo.isLive && streamInfo.viewers > 0 && <span className="rounded-lg bg-[#B8862B]/20 border border-[#B8862B]/40 px-2 py-0.5 text-xs font-black text-[#F7E3B0]" dir="ltr">{streamInfo.viewers.toLocaleString()}</span>}
                                     </a>
-                                    <a href="https://discord.gg/bYPKxMp4h" target="_blank" rel="noopener noreferrer"
+                                    <a href={FAHAD_LINKS.discord} target="_blank" rel="noopener noreferrer"
                                         className="btn-arena btn-discord inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl font-black text-[15px] md:text-base active:scale-[0.98]">
                                         <DiscordIcon className="w-5 h-5 shrink-0" />
                                         {t.joinDiscord}
+                                    </a>
+                                    <a href={FAHAD_LINKS.support} target="_blank" rel="noopener noreferrer"
+                                        className="btn-arena btn-gold inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl font-black text-[15px] md:text-base active:scale-[0.98]">
+                                        <svg className="w-5 h-5 shrink-0 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-10.3C4.5 6.6 6.7 5 8.8 5c1.4 0 2.6.7 3.2 1.8C12.6 5.7 13.8 5 15.2 5c2.1 0 4.3 1.6 4.3 4.7C19.5 15.4 12 20 12 20z" /></svg>
+                                        {lang === 'ar' ? 'ادعم فهد' : 'Support FAHAD'}
                                     </a>
                                 </div>
 
                                 {/* stat band */}
                                 <div className="animate-fade-in-up citadel-frame rounded-3xl mt-8 md:mt-10 overflow-hidden" style={{ animationDelay: '500ms' }}>
-                                    {streamInfo.isLive && <div className="h-[3px] bg-gradient-to-l from-[#10B981] via-[#53FC18]/40 to-transparent" />}
-                                    <div className="grid grid-cols-2 divide-x divide-x-reverse divide-[#C9A24B]/15">
+                                    {streamInfo.isLive && <div className="h-[3px] bg-gradient-to-l from-[#F2B33D] via-[#53FC18]/40 to-transparent" />}
+                                    <div className="grid grid-cols-3 divide-x divide-x-reverse divide-[#B8862B]/20">
                                         {[
                                             { v: socialStats['KICK'] || '—', l: t.statsKick },
-                                            { v: '5', l: t.statsPlatforms },
+                                            { v: '6', l: t.statsPlatforms },
+                                            { v: streamInfo.isLive ? t.status : t.statusOffline, l: t.statsStatus },
                                         ].map((s, i) => (
                                             <div key={i} className="px-2 sm:px-4 py-4 sm:py-5 text-center min-w-0">
-                                                <p className="font-heading text-xl sm:text-2xl md:text-3xl font-black text-white truncate" dir="ltr">{s.v}</p>
-                                                <p className="text-[9px] md:text-[10px] font-bold text-[#6EE7B7]/60 uppercase tracking-[0.2em] mt-1.5 truncate">{s.l}</p>
+                                                <p className="font-heading text-lg sm:text-2xl md:text-3xl font-black text-white truncate" dir="ltr">{s.v}</p>
+                                                <p className="text-[9px] md:text-[10px] font-bold text-[#F2CE7C]/65 uppercase tracking-[0.2em] mt-1.5 truncate">{s.l}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -996,11 +1124,11 @@ export default function App() {
                         {streamInfo.isLive && (
                             <section id="live" className="pt-12 md:pt-16 scroll-mt-28 animate-slide-down">
                                 <Reveal><SectionHeading no="02" title={t.theaterTitle} sub={`${streamInfo.viewers.toLocaleString()} ${t.viewers}`} en="LIVE THEATER" /></Reveal>
-                                <div className="relative rounded-[28px] p-[1px] bg-gradient-to-b from-[#C9A24B]/60 via-white/10 to-transparent shadow-[0_30px_90px_rgba(201,162,75,0.18)]">
-                                    <div className="rounded-[27px] bg-[#080808] overflow-hidden">
+                                <div className="relative rounded-[28px] p-[1px] bg-gradient-to-b from-[#B8862B]/60 via-white/10 to-transparent shadow-[0_30px_90px_rgba(184,134,43,0.18)]">
+                                    <div className="rounded-[27px] bg-[#08070A] overflow-hidden">
                                     <div className="flex items-center gap-2.5 px-4 md:px-6 py-3 border-b border-white/[0.07] bg-black/60">
                                         <span className="flex gap-1.5" aria-hidden="true">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-[#C9A24B]/80" />
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[#B8862B]/80" />
                                             <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
                                             <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
                                         </span>
@@ -1011,14 +1139,14 @@ export default function App() {
                                     </div>
                                     <div className="flex flex-col xl:flex-row gap-0">
                                         <div className="flex-1 min-w-0 min-h-0 p-3 md:p-4">
-                                            <div className="aspect-video rounded-2xl overflow-hidden bg-black border border-[#C9A24B]/20">
+                                            <div className="aspect-video rounded-2xl overflow-hidden bg-black border border-[#B8862B]/20">
                                                 <StreamPlayer lang={lang} isLive={streamInfo.isLive} viewers={streamInfo.viewers} channelSlug={CHANNEL_SLUG} poster={branding.bannerImage} />
                                             </div>
                                             <div className="p-4 md:p-5 flex flex-col gap-3">
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="min-w-0 flex-1">
                                                         <h3 className="text-lg md:text-2xl font-black text-white truncate" title={displayTitle}>{displayTitle}</h3>
-                                                        <p className="text-sm text-white/50 font-bold mt-1"><span className="gold-text font-black" dir="ltr">XTROET</span> <span className="text-white/25 mx-1">•</span> {displayCategory}</p>
+                                                        <p className="text-sm text-white/50 font-bold mt-1"><span className="gold-text font-black" dir="ltr">FAHAD</span> <span className="text-white/25 mx-1">•</span> {displayCategory}</p>
                                                     </div>
                                                     <button onClick={handleShare} aria-label="Share"
                                                         className="btn-arena w-11 h-11 rounded-xl bg-white/[0.06] border border-white/10 text-white/70 hover:text-white flex items-center justify-center shrink-0">
@@ -1059,7 +1187,7 @@ export default function App() {
                             <Reveal delay={80}><SupportArena lang={lang} supporters={[]} /></Reveal>
                         </section>
 
-                        {/* ===== SIRAH — Nasser's photo deck, above Honor ===== */}
+                        {/* ===== SIRAH — Fahad's photo deck, above Honor ===== */}
                         <section id="album" className="pt-12 md:pt-16 scroll-mt-28">
                             <Reveal><SectionHeading no="05" title={t.albumTitle} sub={t.albumSub} en="SIRAH" /></Reveal>
                             <Reveal delay={80}><Suspense fallback={<div className="w-full h-72 rounded-[26px] border border-white/10 bg-white/[0.02] animate-pulse" />}><AlbumSection lang={lang} /></Suspense></Reveal>
@@ -1078,24 +1206,49 @@ export default function App() {
                         </section>
 
                         {/* ===== FOOTER ===== */}
-                        <footer className="mt-16 md:mt-24 rounded-[28px] border border-white/10 bg-black/60 backdrop-blur-xl overflow-hidden relative">
-                            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#10B981]/70 to-transparent" />
+                        <footer className="mt-16 md:mt-24 rounded-[28px] border border-[#B8862B]/25 bg-black/70 backdrop-blur-xl overflow-hidden relative">
+                            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#F2B33D]/80 to-transparent" />
+                            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[280px] max-w-[90vw] rounded-full bg-[#F2B33D]/[0.09] blur-[90px] pointer-events-none" aria-hidden="true" />
                             <div className="p-8 md:p-12 text-center relative">
-                                <p className="font-gaming text-[18vw] md:text-[120px] leading-none text-stroke opacity-40 select-none" dir="ltr" aria-hidden="true">XTROET</p>
-                                <div className="flex flex-wrap justify-center gap-2.5 -mt-4 md:-mt-8 relative">
-                                    {socials.slice(0, 5).map(s => (
-                                        <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.name}
-                                            className="btn-arena w-11 h-11 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:border-[#C9A24B]/50">
-                                            <span className="scale-[0.8] block">{s.icon}</span>
+                                {/* emblem */}
+                                <div className="relative mx-auto w-fit mb-5">
+                                    <span className="halo-conic -inset-2.5" aria-hidden="true" />
+                                    <img src={branding.profileImage} alt="FAHAD" className="relative w-16 h-16 rounded-full object-cover border-2 border-[#FDEFC9]/70 shadow-[0_0_44px_rgba(242,179,61,0.5)]" loading="lazy" />
+                                </div>
+
+                                <p className="font-gaming text-[22vw] md:text-[150px] leading-none text-stroke opacity-40 select-none" dir="ltr" aria-hidden="true">FAHAD</p>
+                                <p className="fahad-text text-2xl md:text-3xl font-black tracking-[0.30em] -mt-3 md:-mt-6 relative" dir="ltr">FAHAD</p>
+
+                                {/* every social */}
+                                <div className="flex flex-wrap justify-center gap-2.5 mt-7 relative">
+                                    {socials.map(s => (
+                                        <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.name} title={s.name}
+                                            className="btn-arena w-12 h-12 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:border-[#F2B33D]/60 hover:bg-[#F2B33D]/10"
+                                            style={{ transition: 'transform .35s cubic-bezier(0.16,1,0.3,1), border-color .3s, background .3s, color .3s' }}>
+                                            <span className="scale-[0.82] block">{s.icon}</span>
                                         </a>
                                     ))}
+                                    <a href={FAHAD_LINKS.support} target="_blank" rel="noopener noreferrer" aria-label={SUPPORT_TITLE} title={lang === 'ar' ? 'دوكان تيب' : 'Dokan Tip'}
+                                        className="btn-arena w-12 h-12 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:border-[#E07B12]/70 hover:bg-[#E07B12]/15">
+                                        <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-7.5-10.3C4.5 6.6 6.7 5 8.8 5c1.4 0 2.6.7 3.2 1.8C12.6 5.7 13.8 5 15.2 5c2.1 0 4.3 1.6 4.3 4.7C19.5 15.4 12 20 12 20z" /></svg>
+                                    </a>
                                 </div>
-                                <p className="text-[11px] font-black tracking-[0.3em] text-white/50 mt-6 uppercase">{t.poweredBy}</p>
+
+                                {/* contact strip */}
+                                <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] font-bold text-white/40">
+                                    <a href={FAHAD_LINKS.support} target="_blank" rel="noopener noreferrer" className="hover:text-[#F2B33D] transition-colors" dir="ltr">{SUPPORT_HOST}</a>
+                                </div>
+
+                                <div className="rule-radiant my-7 opacity-50" />
+                                <p className="text-[11px] font-black tracking-[0.3em] text-white/50 uppercase">{t.poweredBy}</p>
                                 <p className="text-[11px] text-white/35 mt-1">{t.footer}</p>
                             </div>
                         </footer>
                     </div>
                 </>
+        {/* One player for the whole page: VODs, past sessions and clips all
+            open here instead of sending the visitor over to Kick. */}
+        <InSitePlayer />
         </div>
     );
 }

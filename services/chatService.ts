@@ -26,64 +26,98 @@ class ChatService {
     // XTROET lookup is fresh from API every time to ensure correct Chatroom ID.
   };
 
+  /**
+   * v3: older builds cached whatever `data.id` happened to be, which is the
+   * CHANNEL id — subscribing to it connects and then receives nothing,
+   * forever. The version bump drops every one of those entries at once.
+   */
+  private CHAT_CACHE_PREFIX = 'kick_chatroom_id_v3_';
+
+  /**
+   * Kick only hands out a chatroom id inside a real `chatroom` object.
+   *
+   * The v2 channel payload also has a top-level `id` — that is the CHANNEL
+   * id, not the room. Subscribing to `chatrooms.<channel id>` looks like it
+   * connects but never receives a single message, and the bad id then sits in
+   * localStorage poisoning every later load. So we refuse anything that did
+   * not come out of `chatroom`.
+   */
+  private extractChatroomId(payload: any): number | null {
+    const id = Number(payload?.chatroom?.id);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+
+  private cacheKey(slug: string) {
+    return `${this.CHAT_CACHE_PREFIX}${slug}`;
+  }
+
+  /** One lookup attempt: fetch, unwrap, and only accept a real chatroom id. */
+  private async tryResolve(url: string, unwrap: (raw: any) => any, slug: string): Promise<number> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 9000);
+    try {
+      const response = await fetch(url, { headers: { Accept: 'application/json' }, signal: controller.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const found = this.extractChatroomId(unwrap(await response.json()));
+      if (!found) throw new Error('no chatroom in payload');
+      localStorage.setItem(this.cacheKey(slug), String(found));
+      return found;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
   async getChatroomId(channelSlug: string): Promise<number | null> {
     const slug = channelSlug.toLowerCase().trim();
 
-    // 1. Check Memory Cache
+    // 1. Memory cache
     if (this.KNOWN_CHATROOM_IDS[slug]) {
       return this.KNOWN_CHATROOM_IDS[slug];
     }
 
-    // 2. Check Local Storage Cache (Fastest persistent)
-    const cachedId = localStorage.getItem(`kick_chatroom_id_${slug}`);
-    if (cachedId) {
+    // 2. Local storage cache
+    const cachedId = Number(localStorage.getItem(this.cacheKey(slug)));
+    if (Number.isFinite(cachedId) && cachedId > 0) {
+      this.KNOWN_CHATROOM_IDS[slug] = cachedId;
       console.log(`[ChatService] Using cached ID for ${slug}: ${cachedId}`);
-      return parseInt(cachedId);
+      return cachedId;
     }
 
-    // 3. Fetch from Proxies
-    const proxies = [
-      `https://kick.com/api/v1/channels/${slug}`, // Direct (if CORS allows or via extension)
-      `https://api.allorigins.win/get?url=${encodeURIComponent(`https://kick.com/api/v2/channels/${slug}`)}`,
-      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://kick.com/api/v2/channels/${slug}`)}`
+    const api = `https://kick.com/api/v2/channels/${slug}`;
+    const apiV1 = `https://kick.com/api/v1/channels/${slug}`;
+    const wrap = (target: string) => (raw: any) =>
+      typeof raw?.contents === 'string' ? JSON.parse(raw.contents) : raw;
+
+    // Our own edge proxy goes first: no CORS, and it works in dev too. The
+    // public proxies are the fallback for when that one is unavailable.
+    const attempts: { url: string; unwrap: (raw: any) => any }[] = [
+      { url: `/api/kick?endpoint=${encodeURIComponent(api)}`, unwrap: (r) => r },
+      { url: `/api/kick?endpoint=${encodeURIComponent(apiV1)}`, unwrap: (r) => r },
+      { url: `https://api.allorigins.win/get?url=${encodeURIComponent(api)}`, unwrap: wrap(api) },
+      { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(api)}`, unwrap: wrap(api) },
     ];
 
     try {
       const result = await Promise.any(
-        proxies.map(async (proxyUrl) => {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
-
-          const response = await fetch(proxyUrl, { signal: controller.signal });
-
-          if (!response.ok) {
-            clearTimeout(timeoutId);
-            throw new Error(`Failed with status ${response.status}`);
-          }
-
-          const rawData = await response.json();
-          clearTimeout(timeoutId);
-          const data = proxyUrl.includes('allorigins') ? JSON.parse(rawData.contents) : rawData;
-
-          let foundId = null;
-          if (data?.chatroom?.id) foundId = data.chatroom.id;
-          else if (data?.id) foundId = data.id;
-
-          if (foundId) {
-            console.log(`[ChatService] ✅ Found ID: ${foundId}`);
-            // Cache it for future sessions
-            localStorage.setItem(`kick_chatroom_id_${slug}`, foundId.toString());
-            return foundId;
-          }
-          throw new Error('No ID found in response');
-        })
+        attempts.map((a) => this.tryResolve(a.url, a.unwrap, slug))
       );
-      if (result) return result;
+      this.KNOWN_CHATROOM_IDS[slug] = result;
+      console.log(`[ChatService] ✅ Chatroom for ${slug}: ${result}`);
+      return result;
     } catch (e) {
-      console.warn(`[ChatService] All proxies failed for ${slug}.`);
+      console.warn(`[ChatService] All proxies failed for ${slug}.`, e);
+      // Drop the cache so the next attempt starts clean, including any
+      // entry left behind by an older build.
+      this.purgeCache(slug);
+      return null;
     }
+  }
 
-    return null;
+  private purgeCache(slug: string) {
+    localStorage.removeItem(this.cacheKey(slug));
+    for (const legacy of ['kick_chatroom_id_', 'kick_chatroom_id_v2_']) {
+      localStorage.removeItem(`${legacy}${slug}`);
+    }
   }
 
   private connectionId = 0;
@@ -177,6 +211,17 @@ class ChatService {
 
       this.pusher.connection.bind('state_change', (states: any) => {
         console.log("[ChatService] Connection State:", states.current);
+      });
+
+      // A bad chatroom id connects cleanly and then stays silent, so treat a
+      // failed subscription as "that id was wrong" and resolve it once more.
+      this.channel.bind('pusher:subscription_error', (err: any) => {
+        if (this.connectionId !== myConnectionId) return;
+        console.warn("[ChatService] Subscription error, re-resolving chatroom.", err);
+        delete this.KNOWN_CHATROOM_IDS[slug];
+        this.purgeCache(slug);
+        this.disconnect();
+        this.connect(slug);
       });
 
     } catch (error: any) {

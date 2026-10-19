@@ -1,34 +1,6 @@
-import fs from 'node:fs';
 import path from 'path';
-import crypto from 'node:crypto';
-import { pathToFileURL } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-
-/** يقرأ ملف .env بدون المكتبة — نفس قواعد dotenv (بدون export، يقبل ' و " ). */
-const parseEnvFile = (p: string): Record<string, string> => {
-  const out: Record<string, string> = {};
-  if (!fs.existsSync(p)) return out;
-  for (const line of fs.readFileSync(p, 'utf8').split(/\r?\n/)) {
-    const m = /^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/.exec(line);
-    if (!m) continue;
-    let v = m[2].trim();
-    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
-    out[m[1]] = v;
-  }
-  return out;
-};
-
-const KICK_DEFAULT_SCOPES = 'user:read channel:read chat:write events:subscribe moderation:ban';
-const b64url = (buf: Buffer) => buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-const parseCookies = (h?: string) => {
-  const out: Record<string, string> = {};
-  for (const p of String(h || '').split(';')) {
-    const i = p.indexOf('=');
-    if (i > 0) out[p.slice(0, i).trim()] = decodeURIComponent(p.slice(i + 1).trim());
-  }
-  return out;
-};
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
@@ -43,93 +15,6 @@ export default defineConfig(({ mode }) => {
         name: 'local-api-proxy',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
-            // ---- /api/kick-login + /api/kick-callback + /api/kick-status : ربط البوت محلياً (مرآة مجلد api/) ----
-            if (req.url && (req.url === '/api/kick-login' || req.url.startsWith('/api/kick-login?'))) {
-              const clientId = String(env.KICK_CLIENT_ID || '').trim();
-              if (!clientId) { res.statusCode = 500; res.end(JSON.stringify({ error: 'KICK_CLIENT_ID missing in local .env' })); return; }
-              const host = String(req.headers.host || 'localhost:3000');
-              const proto = host.startsWith('localhost') || host.startsWith('127.') ? 'http' : 'https';
-              const redirectUri = String(env.KICK_REDIRECT_URI || '').trim() || `${proto}://${host}/api/kick-callback`;
-              const scope = String(env.KICK_SCOPES || KICK_DEFAULT_SCOPES).trim() || KICK_DEFAULT_SCOPES;
-              const verifier = b64url(crypto.randomBytes(48));
-              const state = b64url(crypto.randomBytes(24));
-              const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
-              const auth = new URL('https://id.kick.com/oauth/authorize');
-              auth.searchParams.set('response_type', 'code');
-              auth.searchParams.set('client_id', clientId);
-              auth.searchParams.set('redirect_uri', redirectUri);
-              auth.searchParams.set('scope', scope);
-              auth.searchParams.set('code_challenge', challenge);
-              auth.searchParams.set('code_challenge_method', 'S256');
-              auth.searchParams.set('state', state);
-              res.setHeader('Set-Cookie', [`kick_verifier=${verifier}; Path=/; Max-Age=600; HttpOnly; SameSite=Lax`, `kick_state=${state}; Path=/; Max-Age=600; HttpOnly; SameSite=Lax`]);
-              res.statusCode = 302;
-              res.setHeader('Location', auth.toString());
-              res.end();
-              return;
-            }
-            if (req.url && req.url.startsWith('/api/kick-callback')) {
-              try {
-                const host = String(req.headers.host || 'localhost:3000');
-                const proto = host.startsWith('localhost') || host.startsWith('127.') ? 'http' : 'https';
-                const full = new URL(req.url, `${proto}://${host}`);
-                const code = full.searchParams.get('code') || '';
-                const state = full.searchParams.get('state') || '';
-                if (!code) { res.statusCode = 400; res.end('Missing code — ابدأ من زر الربط'); return; }
-                const ck = parseCookies(req.headers.cookie);
-                const verifier = ck['kick_verifier'] || '';
-                if (!verifier) { res.statusCode = 400; res.end('انتهت الجلسة — اضغط زر الربط من جديد'); return; }
-                if (ck['kick_state'] && state && ck['kick_state'] !== state) { res.statusCode = 400; res.end('state غير مطابق'); return; }
-                const clientId = String(env.KICK_CLIENT_ID || '').trim();
-                const clientSecret = String(env.KICK_CLIENT_SECRET || '').trim();
-                const redirectUri = String(env.KICK_REDIRECT_URI || '').trim() || `${proto}://${host}/api/kick-callback`;
-                const body = new URLSearchParams({ grant_type: 'authorization_code', client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, code, code_verifier: verifier });
-                const tokRes = await fetch('https://id.kick.com/oauth/token', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
-                const tokText = await tokRes.text();
-                if (!tokRes.ok) { res.statusCode = 400; res.end(`فشل التبادل: ${tokText.slice(0, 200)}`); return; }
-                const token = JSON.parse(tokText);
-                const chRes = await fetch('https://api.kick.com/public/v1/channels', { headers: { authorization: `Bearer ${token.access_token}`, accept: 'application/json' } });
-                const chText = await chRes.text();
-                if (!chRes.ok) { res.statusCode = 400; res.end(`فشل قراءة القناة: ${chText.slice(0, 200)}`); return; }
-                const chData = JSON.parse(chText);
-                const list = Array.isArray(chData?.data) ? chData.data : Array.isArray(chData) ? chData : [];
-                const pick = list[0];
-                if (!pick) { res.statusCode = 400; res.end('لا توجد قناة — سجل بحساب المالك'); return; }
-                const channelId = Number(pick.broadcaster_user_id ?? pick.id ?? 0);
-                const slug = String(pick.slug || '');
-                const sbUrl = String(env.SUPABASE_URL || env.VITE_SUPABASE_URL || '').trim().replace(/\/$/, '');
-                const sbKey = String(env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_KEY || '').trim();
-                if (sbUrl && sbKey) {
-                  const h = { apikey: sbKey, Authorization: `Bearer ${sbKey}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' } as Record<string, string>;
-                  await fetch(`${sbUrl}/rest/v1/channels?on_conflict=id`, { method: 'POST', headers: h, body: JSON.stringify({ id: channelId, slug }) });
-                  await fetch(`${sbUrl}/rest/v1/kick_tokens?on_conflict=channel_id`, { method: 'POST', headers: h, body: JSON.stringify({ channel_id: channelId, broadcaster_user_id: channelId, access_token: token.access_token, refresh_token: token.refresh_token ?? '', expires_at: new Date(Date.now() + Number(token.expires_in ?? 3600) * 1000).toISOString(), scope: token.scope ?? null, updated_at: new Date().toISOString() }) });
-                }
-                res.statusCode = 302;
-                res.setHeader('Location', `/?kick=connected&channel=${encodeURIComponent(slug || String(channelId))}`);
-                res.end();
-              } catch (e: any) { res.statusCode = 500; res.end(`callback error: ${e?.message || e}`); }
-              return;
-            }
-            if (req.url && req.url.startsWith('/api/kick-status')) {
-              try {
-                const sbUrl = String(env.SUPABASE_URL || env.VITE_SUPABASE_URL || '').trim().replace(/\/$/, '');
-                const sbKey = String(env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_KEY || '').trim();
-                if (!sbUrl || !sbKey) { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ connected: false })); return; }
-                const h = { apikey: sbKey, Authorization: `Bearer ${sbKey}`, Accept: 'application/json' } as Record<string, string>;
-                const r = await fetch(`${sbUrl}/rest/v1/kick_tokens?select=channel_id,updated_at&order=updated_at.desc&limit=1`, { headers: h });
-                const rows: any = await r.json();
-                if (!rows?.length) { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ connected: false })); return; }
-                let slug: string | null = null;
-                try {
-                  const c = await fetch(`${sbUrl}/rest/v1/channels?select=slug&id=eq.${rows[0].channel_id}`, { headers: h });
-                  const cj: any = await c.json();
-                  slug = cj?.[0]?.slug ?? null;
-                } catch {}
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ connected: true, channelId: rows[0].channel_id, slug, updatedAt: rows[0].updated_at }));
-              } catch { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ connected: false })); }
-              return;
-            }
             // ---- /api/groq : نفس سلوك سيرفر Vercel لكن محلياً (npm run dev) ----
             if (req.url && (req.url === '/api/groq' || req.url.startsWith('/api/groq?'))) {
               if (req.method === 'OPTIONS') {
@@ -409,71 +294,6 @@ export default defineConfig(({ mode }) => {
               } catch (err: any) {
                 res.statusCode = 502;
                 res.end(JSON.stringify({ platform, count: null, error: err.message || 'failed' }));
-              }
-              return;
-            }
-            if (req.url && req.url.startsWith('/api/admin')) {
-              // ---- /api/admin : نفس معالج api/admin.ts الحقيقي محلياً ----
-              const botEnv = parseEnvFile(path.resolve(__dirname, 'BOT/.env'));
-              const injected: Record<string, string | undefined> = {};
-              for (const [k, v] of Object.entries({ ...env, ...botEnv })) {
-                injected[k] = process.env[k];
-                process.env[k] = String(v);
-              }
-              try {
-                const mod: any = await import(pathToFileURL(path.resolve(__dirname, 'api/admin.ts')).href);
-                const chunks: Buffer[] = [];
-                for await (const c of req) chunks.push(c as Buffer);
-                const body = Buffer.concat(chunks).toString('utf8');
-                const request = new Request(`http://${req.headers.host || 'localhost:3000'}${req.url}`, {
-                  method: req.method,
-                  headers: { 'content-type': 'application/json', ...(req.headers as Record<string, string>) },
-                  body: req.method === 'GET' || req.method === 'HEAD' ? undefined : body,
-                });
-                const response: Response = await mod.default(request);
-                res.statusCode = response.status;
-                response.headers.forEach((v, k) => res.setHeader(k, v));
-                res.end(Buffer.from(await response.arrayBuffer()));
-              } catch (e: any) {
-                res.setHeader('Content-Type', 'application/json');
-                res.statusCode = 500;
-                res.end(JSON.stringify({ error: `local admin failed: ${e?.message || e}` }));
-              } finally {
-                for (const [k, v] of Object.entries(injected)) {
-                  if (v === undefined) delete process.env[k];
-                  else process.env[k] = v;
-                }
-              }
-              return;
-            }
-            if (req.url && req.url.startsWith('/api/leaderboard')) {
-              // ---- /api/leaderboard : نفس ملف api/leaderboard.ts الحقيقي (بدون نسخة من الكود) ----
-              // المتغيرات: جذر .env ثم BOT/.env (فوقه) عشان *__BOT توصل للـ handler.
-              const botEnv = parseEnvFile(path.resolve(__dirname, 'BOT/.env'));
-              const injected: Record<string, string | undefined> = {};
-              for (const [k, v] of Object.entries({ ...env, ...botEnv })) {
-                injected[k] = process.env[k];
-                process.env[k] = String(v);
-              }
-              try {
-                const mod: any = await import(pathToFileURL(path.resolve(__dirname, 'api/leaderboard.ts')).href);
-                const request = new Request(`http://${req.headers.host || 'localhost:3000'}${req.url}`, {
-                  method: req.method,
-                  headers: { accept: 'application/json' },
-                });
-                const response: Response = await mod.default(request);
-                res.statusCode = response.status;
-                response.headers.forEach((v, k) => res.setHeader(k, v));
-                res.end(Buffer.from(await response.arrayBuffer()));
-              } catch (e: any) {
-                res.setHeader('Content-Type', 'application/json');
-                res.statusCode = 500;
-                res.end(JSON.stringify({ entries: [], error: `local leaderboard failed: ${e?.message || e}` }));
-              } finally {
-                for (const [k, v] of Object.entries(injected)) {
-                  if (v === undefined) delete process.env[k];
-                  else process.env[k] = v;
-                }
               }
               return;
             }

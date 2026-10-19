@@ -53,10 +53,10 @@ const NAV_DEFS = [
 ] as const;
 
 /**
- * XTROET top bar — "Aurora Dock" edition (emerald empire rebuild).
+ * FAHAD top bar — "Sovereign Dock" edition (obsidian gold rebuild).
  * - No search: every page section is one tap away.
- * - Segmented-control nav with sliding emerald-bronze active pill.
- * - Slim floating dock, gradient hairline, aurora glow, live-first brand.
+ * - Segmented-control nav with a sliding radiant-gold active pill.
+ * - Slim floating dock, radiant hairline, aurora glow, live-first brand.
  */
 export const SiteHeader: React.FC<SiteHeaderProps> = ({
     lang, onToggleLang, profileImage, headerTitle, isLive, viewers, statusText, onRefresh,
@@ -118,59 +118,61 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
     return (
         <>
             <style>{`
-            .dock{--emerald:#10B981;--emerald-lt:#A7F3D0;--emerald-dk:#047857;--bronze:#C9A24B;--bronze-lt:#F4D98A}
+            .dock{--radiant:#F2B33D;--radiant-lt:#F7E3B0;--radiant-dk:#8A6320;--antique:#B8862B;--antique-lt:#F2CE7C;--pale:#FDEFC9}
             .dock-shell{position:sticky;top:12px;z-index:60;width:min(1240px,calc(100% - 16px));margin:12px auto 0;
                 animation:dock-in .9s cubic-bezier(.16,1,.3,1) both}
             @keyframes dock-in{from{opacity:0;transform:translateY(-16px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
-            /* emerald-bronze hairline wrapper */
+            /* radiant-gold hairline wrapper */
             .dock-frame{border-radius:24px;padding:1px;
-                background:linear-gradient(135deg,rgba(16,185,129,.55),rgba(201,162,75,.35) 30%,rgba(255,255,255,.08) 50%,rgba(201,162,75,.35) 70%,rgba(16,185,129,.55));
-                box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 40px -14px rgba(16,185,129,.35)}
+                background:linear-gradient(135deg,rgba(247,227,176,.75),rgba(242,179,61,.5) 22%,rgba(184,134,43,.3) 42%,rgba(255,255,255,.08) 52%,rgba(184,134,43,.3) 62%,rgba(242,179,61,.5) 80%,rgba(247,227,176,.75));
+                box-shadow:0 24px 60px rgba(0,0,0,.65),0 0 48px -12px rgba(242,179,61,.42)}
             .dock-bar{position:relative;border-radius:23px;overflow:hidden;
-                background:linear-gradient(180deg,rgba(8,32,25,.92),rgba(3,12,9,.94));
-                backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2)}
+                background:linear-gradient(180deg,rgba(24,19,12,.93),rgba(6,5,8,.95));
+                backdrop-filter:blur(24px) saturate(1.25);-webkit-backdrop-filter:blur(24px) saturate(1.25)}
             /* aurora wash + top light line */
             .dock-aurora{position:absolute;inset:0;pointer-events:none;
-                background:radial-gradient(440px 130px at 12% -20%,rgba(16,185,129,.16),transparent 65%),
-                           radial-gradient(440px 130px at 88% -25%,rgba(201,162,75,.12),transparent 65%);
+                background:radial-gradient(440px 130px at 12% -20%,rgba(242,179,61,.2),transparent 65%),
+                           radial-gradient(440px 130px at 88% -25%,rgba(224,123,18,.14),transparent 65%);
                 animation:dock-aurora 18s ease-in-out infinite alternate}
             @keyframes dock-aurora{from{opacity:.7;transform:translateX(-2%)}to{opacity:1;transform:translateX(2%)}}
             .dock-bar::before{content:"";position:absolute;top:0;left:8%;right:8%;height:1px;border-radius:99px;
-                background:linear-gradient(90deg,transparent,rgba(244,217,138,.7),rgba(16,185,129,.7),transparent);pointer-events:none}
+                background:linear-gradient(90deg,transparent,rgba(253,239,201,.85),rgba(242,179,61,.8),transparent);pointer-events:none}
             .dock-row{display:flex;align-items:center;gap:10px;min-height:68px;padding:8px 12px;transition:min-height .35s ease}
             .dock-shell.is-compact .dock-row{min-height:58px}
             @media(min-width:768px){.dock-row{padding:8px 14px;gap:12px}}
             /* brand */
             .dock-brand{display:flex;align-items:center;gap:11px;text-decoration:none;min-width:0;flex:none}
             .dock-emblem{position:relative;width:48px;height:48px;flex:none;border-radius:16px;overflow:visible;
-                border:1px solid rgba(16,185,129,.5);background:#04120D;
-                box-shadow:0 10px 26px -10px rgba(16,185,129,.6),inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px rgba(201,162,75,.25);
+                border:1px solid rgba(242,179,61,.5);background:#08060A;
+                box-shadow:0 10px 26px -10px rgba(242,179,61,.6),inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px rgba(184,134,43,.25);
                 transition:transform .3s ease,box-shadow .3s ease}
             .dock-shell.is-compact .dock-emblem{width:42px;height:42px}
-            .dock-brand:hover .dock-emblem{transform:translateY(-1px);box-shadow:0 14px 30px -10px rgba(16,185,129,.7),inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px rgba(201,162,75,.4)}
+            .dock-brand:hover .dock-emblem{transform:translateY(-1px);box-shadow:0 14px 30px -10px rgba(242,179,61,.7),inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px rgba(184,134,43,.4)}
             .dock-emblem img{width:100%;height:100%;object-fit:cover;border-radius:15px;display:block}
             .dock-emblem::before{content:"";position:absolute;inset:-5px;border-radius:20px;padding:1.5px;
-                background:conic-gradient(from 0deg,transparent 0 68%,rgba(16,185,129,.85) 80%,rgba(244,217,138,.95) 88%,transparent 96%);
+                background:conic-gradient(from 0deg,transparent 0 68%,rgba(242,179,61,.85) 80%,rgba(242,206,124,.95) 88%,transparent 96%);
                 -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
                 animation:dock-spin 12s linear infinite;pointer-events:none;opacity:.9}
             @keyframes dock-spin{to{transform:rotate(360deg)}}
             .dock-dot{position:absolute;bottom:-4px;inset-inline-end:-4px;width:15px;height:15px;border-radius:99px;
-                border:3px solid #04120D;background:#3a4a44;z-index:2}
-            .dock-dot.on{background:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.18),0 0 12px #10B981;animation:dock-pulse 3s ease-in-out infinite}
+                border:3px solid #08060A;background:#4A4238;z-index:2}
+            .dock-dot.on{background:#F2B33D;box-shadow:0 0 0 3px rgba(242,179,61,.2),0 0 14px #F2B33D;animation:dock-pulse 3s ease-in-out infinite}
             @keyframes dock-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.85}}
             .dock-word{display:flex;flex-direction:column;line-height:1.1;min-width:0}
-            .dock-word b{font-size:20px;font-weight:900;letter-spacing:.14em;color:#F2F7F3;
-                text-shadow:0 2px 12px rgba(16,185,129,.4)}
+            .dock-word b{font-size:20px;font-weight:900;letter-spacing:.14em;
+                background:linear-gradient(135deg,#FFFDF7 0%,#FDEFC9 40%,#F2B33D 70%,#B8862B 100%);
+                -webkit-background-clip:text;background-clip:text;color:transparent;
+                filter:drop-shadow(0 2px 12px rgba(242,179,61,.5))}
             .dock-shell.is-compact .dock-word b{font-size:17px}
             .dock-live{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:10px;font-weight:800;white-space:nowrap}
-            .dock-live i{width:6px;height:6px;border-radius:99px;background:#5a6a63;flex:none}
-            .dock-live.on{color:#34D399}.dock-live.on i{background:#10B981;box-shadow:0 0 8px #10B981;animation:dock-pulse 3s ease-in-out infinite}
-            .dock-live.off{color:rgba(232,213,168,.85)}
-            /* segmented nav — emerald core */
+            .dock-live i{width:6px;height:6px;border-radius:99px;background:#6B6255;flex:none}
+            .dock-live.on{color:#F5D98C}.dock-live.on i{background:#F2B33D;box-shadow:0 0 8px #F2B33D;animation:dock-pulse 3s ease-in-out infinite}
+            .dock-live.off{color:rgba(247,227,176,.85)}
+            /* segmented nav — radiant gold core */
             .dock-nav{flex:1;min-width:0;display:none;align-items:center;justify-content:center}
             @media(min-width:1024px){.dock-nav{display:flex}}
             .dock-seg{display:flex;align-items:center;gap:2px;padding:4px;border-radius:99px;max-width:100%;
-                background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.16);
+                background:rgba(242,179,61,.06);border:1px solid rgba(242,179,61,.16);
                 box-shadow:inset 0 2px 10px rgba(0,0,0,.5);
                 overflow-x:auto;scrollbar-width:none;
                 mask-image:linear-gradient(to right,#000 92%,transparent);
@@ -180,39 +182,46 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
             .dock-link{display:inline-flex;flex:none;align-items:center;gap:6px;padding:9px 13px;border-radius:99px;
                 font-size:12.5px;font-weight:800;color:rgba(255,255,255,.62);text-decoration:none;white-space:nowrap;
                 transition:color .3s ease,background .3s ease,transform .3s ease,box-shadow .3s ease}
-            .dock-link svg{color:rgba(216,190,130,.55);transition:color .3s ease,transform .3s ease}
-            .dock-link:hover{color:#E8F5EE;background:rgba(16,185,129,.1)}
-            .dock-link:hover svg{color:#6EE7B7;transform:scale(1.12)}
+            .dock-link svg{color:rgba(247,227,176,.6);transition:color .3s ease,transform .3s ease}
+            .dock-link:hover{color:#FFFDF7;background:rgba(242,179,61,.12)}
+            .dock-link:hover svg{color:#FDEFC9;transform:scale(1.12)}
             .dock-link:active{transform:scale(.97)}
-            .dock-link.is-active{color:#04120D;background:linear-gradient(180deg,#A7F3D0,#10B981 55%,#047857);
-                box-shadow:0 6px 18px -6px rgba(16,185,129,.7),inset 0 1px 0 rgba(255,255,255,.5),0 0 0 1px rgba(201,162,75,.3)}
-            .dock-link.is-active svg{color:#04120D}
+            .dock-link.is-active{color:#08060A;background:linear-gradient(180deg,#FDEFC9,#F2B33D 52%,#B8862B);
+                box-shadow:0 6px 18px -6px rgba(242,179,61,.8),inset 0 1px 0 rgba(255,255,255,.6),0 0 0 1px rgba(247,227,176,.35)}
+            .dock-link.is-active svg{color:#08060A}
             @media(min-width:1024px) and (max-width:1279px){.dock-link{padding:9px 12px;font-size:12px;gap:5px}}
             /* actions */
             .dock-actions{flex:none;display:flex;align-items:center;gap:8px;margin-inline-start:auto}
             .dock-iconbtn{width:44px;height:44px;flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:14px;
-                background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.18);color:rgba(255,255,255,.75);
+                background:rgba(242,179,61,.07);border:1px solid rgba(242,179,61,.2);color:rgba(255,255,255,.78);
                 cursor:pointer;transition:all .3s ease}
-            .dock-iconbtn:hover{color:#A7F3D0;border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.12);transform:translateY(-1px)}
+            .dock-iconbtn:hover{color:#FDEFC9;border-color:rgba(242,179,61,.55);background:rgba(242,179,61,.14);transform:translateY(-1px)}
             .dock-iconbtn:active{transform:scale(.95)}
+            .dock-discord{border-color:rgba(88,101,242,.35);background:rgba(88,101,242,.09);color:#A5ABF5}
+            .dock-discord:hover{border-color:rgba(88,101,242,.75);background:rgba(88,101,242,.2);color:#C7CBFB;
+                box-shadow:0 0 22px -6px rgba(88,101,242,.7)}
+            .dock-support{border-color:rgba(242,179,61,.42);background:rgba(242,179,61,.12);color:#FDEFC9}
+            .dock-support:hover{border-color:rgba(247,227,176,.85);background:rgba(242,179,61,.22);color:#FFFDF7;
+                box-shadow:0 0 22px -6px rgba(242,179,61,.8)}
+            @media(max-width:639px){.dock-discord,.dock-support{display:none}}
             .dock-lang{height:44px;padding:0 14px;border-radius:14px;display:none;align-items:center;gap:7px;
-                background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.18);color:#A7F3D0;
+                background:rgba(242,179,61,.07);border:1px solid rgba(242,179,61,.2);color:#FDEFC9;
                 font-size:12.5px;font-weight:800;cursor:pointer;transition:all .3s ease;white-space:nowrap;font-family:inherit}
             @media(min-width:1024px){.dock-lang{display:inline-flex}}
-            .dock-lang:hover{border-color:rgba(16,185,129,.55);background:rgba(16,185,129,.12);transform:translateY(-1px)}
+            .dock-lang:hover{border-color:rgba(242,179,61,.6);background:rgba(242,179,61,.14);transform:translateY(-1px)}
             .dock-cta{display:none;position:relative;overflow:hidden;align-items:center;gap:9px;height:46px;padding:0 20px 0 12px;border-radius:15px;text-decoration:none;
-                background:linear-gradient(180deg,#A7F3D0 0%,#10B981 55%,#047857 100%);color:#04120D;font-size:13px;font-weight:900;
-                box-shadow:0 12px 28px -8px rgba(16,185,129,.65),inset 0 1px 0 rgba(255,255,255,.5),0 0 0 1px rgba(201,162,75,.3);
+                background:linear-gradient(180deg,#FDEFC9 0%,#F2B33D 52%,#B8862B 100%);color:#08060A;font-size:13px;font-weight:900;
+                box-shadow:0 12px 28px -8px rgba(242,179,61,.72),inset 0 1px 0 rgba(255,255,255,.6),0 0 0 1px rgba(247,227,176,.35);
                 transition:filter .3s ease,transform .3s ease,box-shadow .3s ease;white-space:nowrap}
             @media(min-width:768px){.dock-cta{display:inline-flex}}
-            .dock-cta:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 16px 34px -8px rgba(16,185,129,.75),inset 0 1px 0 rgba(255,255,255,.5),0 0 24px -6px rgba(16,185,129,.6)}
+            .dock-cta:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 16px 34px -8px rgba(242,179,61,.82),inset 0 1px 0 rgba(255,255,255,.6),0 0 30px -6px rgba(242,179,61,.65)}
             .dock-cta:active{transform:scale(.97)}
             .dock-cta::after{content:"";position:absolute;top:-20%;bottom:-20%;width:38%;left:-60%;z-index:1;pointer-events:none;
-                background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);
+                background:linear-gradient(105deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-18deg);
                 animation:dock-shine 5s ease-in-out infinite}
             @keyframes dock-shine{0%{left:-60%;opacity:0}12%{opacity:1}32%,100%{left:135%;opacity:0}}
-            .dock-cta .play{width:26px;height:26px;border-radius:99px;background:#04120D;color:#6EE7B7;
-                display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.15)}
+            .dock-cta .play{width:26px;height:26px;border-radius:99px;background:#08060A;color:#FDEFC9;
+                display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
             .dock-burger{display:inline-flex}
             @media(min-width:1024px){.dock-burger{display:none}}
             /* scrollable section strip (tablet + mobile): all sections, no menu needed */
@@ -223,30 +232,30 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
             @media(min-width:1024px){.dock-strip{display:none}}
             .dock-chip{flex:none;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:99px;
                 font-size:12.5px;font-weight:800;color:rgba(255,255,255,.62);text-decoration:none;white-space:nowrap;
-                background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.14);transition:all .3s ease}
-            .dock-chip svg{color:rgba(216,190,130,.55);transition:color .3s ease}
-            .dock-chip.is-active{color:#04120D;background:linear-gradient(180deg,#A7F3D0,#10B981 55%,#047857);border-color:transparent;
-                box-shadow:0 6px 16px -6px rgba(16,185,129,.7)}
-            .dock-chip.is-active svg{color:#04120D}
+                background:rgba(242,179,61,.06);border:1px solid rgba(242,179,61,.16);transition:all .3s ease}
+            .dock-chip svg{color:rgba(247,227,176,.6);transition:color .3s ease}
+            .dock-chip.is-active{color:#08060A;background:linear-gradient(180deg,#FDEFC9,#F2B33D 52%,#B8862B);border-color:transparent;
+                box-shadow:0 6px 16px -6px rgba(242,179,61,.8)}
+            .dock-chip.is-active svg{color:#08060A}
             /* mobile menu panel */
             .dock-menu{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .4s cubic-bezier(.16,1,.3,1),opacity .3s,margin .35s}
             .dock-menu.open{grid-template-rows:1fr;opacity:1;margin-top:8px}
             .dock-menu-in{overflow:hidden}
-            .dock-panel{border-radius:18px;padding:1px;background:linear-gradient(140deg,rgba(16,185,129,.45),rgba(201,162,75,.2) 45%,rgba(16,185,129,.45))}
+            .dock-panel{border-radius:18px;padding:1px;background:linear-gradient(140deg,rgba(242,179,61,.45),rgba(184,134,43,.2) 45%,rgba(242,179,61,.45))}
             .dock-panel-in{border-radius:17px;padding:12px;display:flex;flex-direction:column;gap:8px;
-                background:linear-gradient(180deg,rgba(8,32,25,.98),rgba(3,10,8,.98))}
-            .dock-mhead{display:flex;align-items:center;gap:12px;padding:4px 6px 10px;border-bottom:1px solid rgba(16,185,129,.12)}
-            .dock-mhead img{width:44px;height:44px;border-radius:13px;object-fit:cover;border:1px solid rgba(16,185,129,.45)}
+                background:linear-gradient(180deg,rgba(16,13,9,.98),rgba(6,5,8,.98))}
+            .dock-mhead{display:flex;align-items:center;gap:12px;padding:4px 6px 10px;border-bottom:1px solid rgba(242,179,61,.12)}
+            .dock-mhead img{width:44px;height:44px;border-radius:13px;object-fit:cover;border:1px solid rgba(242,179,61,.45)}
             .dock-mhead b{display:block;font-size:14px;letter-spacing:.14em;color:#fff}
             .dock-mhead small{display:block;font-size:11px;color:rgba(255,255,255,.45);margin-top:3px}
             .dock-mrow{display:flex;align-items:center;gap:12px;width:100%;min-height:50px;padding:12px 15px;font-size:14px;font-weight:800;
-                color:rgba(255,255,255,.78);border:1px solid rgba(16,185,129,.12);border-radius:14px;background:rgba(16,185,129,.04);
+                color:rgba(255,255,255,.78);border:1px solid rgba(242,179,61,.12);border-radius:14px;background:rgba(242,179,61,.04);
                 text-align:start;text-decoration:none;cursor:pointer;font-family:inherit;transition:all .3s ease}
-            .dock-mrow svg{color:rgba(216,190,130,.6);transition:color .3s ease}
-            .dock-mrow:hover,.dock-mrow.is-active{color:#A7F3D0;border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.09)}
-            .dock-mrow:hover svg,.dock-mrow.is-active svg{color:#6EE7B7}
-            .dock-mrow.gold{color:#04120D;background:linear-gradient(180deg,#A7F3D0,#10B981 55%,#047857);border-color:transparent;font-weight:900}
-            .dock-mrow.gold svg{color:#04120D}
+            .dock-mrow svg{color:rgba(247,227,176,.62);transition:color .3s ease}
+            .dock-mrow:hover,.dock-mrow.is-active{color:#FDEFC9;border-color:rgba(242,179,61,.5);background:rgba(242,179,61,.11)}
+            .dock-mrow:hover svg,.dock-mrow.is-active svg{color:#FDEFC9}
+            .dock-mrow.gold{color:#08060A;background:linear-gradient(180deg,#FDEFC9,#F2B33D 52%,#B8862B);border-color:transparent;font-weight:900}
+            .dock-mrow.gold svg{color:#08060A}
             /* ===== PHONE EDITION: slim top strip — only the sections button ===== */
             @media(max-width:767px){.dock-desk{display:none}}
             .dock-mob{position:sticky;top:0;z-index:60;display:block}
@@ -258,16 +267,16 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
             /* soft aurora puddle so the pill never floats on dead black */
             .dock-mob-row::before{content:"";position:absolute;inset-inline-start:-14px;top:50%;width:230px;height:86px;
                 transform:translateY(-50%);pointer-events:none;
-                background:radial-gradient(closest-side,rgba(16,185,129,.26),transparent 72%);
+                background:radial-gradient(closest-side,rgba(242,179,61,.26),transparent 72%);
                 -webkit-mask-image:radial-gradient(closest-side,#000,transparent 72%);
                 mask-image:radial-gradient(closest-side,#000,transparent 72%)}
             /* the one and only phone control */
             .dock-mob-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:10px;
                 height:48px;padding:0 15px 0 9px;border-radius:99px;cursor:pointer;font-family:inherit;
-                color:#04120D;background:linear-gradient(180deg,#A7F3D0 0%,#10B981 52%,#047857 100%);
-                border:1px solid rgba(201,162,75,.34);
-                box-shadow:0 20px 40px -14px rgba(16,185,129,.8),0 12px 28px -16px rgba(0,0,0,.95),
-                    inset 0 1px 0 rgba(255,255,255,.55),0 0 32px -12px rgba(16,185,129,.55);
+                color:#08060A;background:linear-gradient(180deg,#FDEFC9 0%,#F2B33D 52%,#B8862B 100%);
+                border:1px solid rgba(247,227,176,.38);
+                box-shadow:0 20px 40px -14px rgba(242,179,61,.85),0 12px 28px -16px rgba(0,0,0,.95),
+                    inset 0 1px 0 rgba(255,255,255,.6),0 0 34px -10px rgba(242,179,61,.6);
                 transition:transform .3s ease,box-shadow .3s ease}
             .dock-mob-btn:active{transform:scale(.97)}
             .dock-mob-btn::after{content:"";position:absolute;top:-40%;bottom:-40%;width:34%;left:-75%;z-index:0;pointer-events:none;
@@ -276,11 +285,11 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
             @keyframes mob-shine{0%{left:-75%;opacity:0}14%{opacity:1}36%,100%{left:150%;opacity:0}}
             .dock-mob-btn>*{position:relative;z-index:1}
             .dock-mob-btn-ic{position:relative;width:32px;height:32px;border-radius:11px;flex:none;display:inline-flex;align-items:center;justify-content:center;
-                background:#04120D;color:#6EE7B7;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 1px rgba(201,162,75,.22)}
+                background:#08060A;color:#FDEFC9;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 0 1px rgba(247,227,176,.25)}
             .dock-mob-btn-ic::before{content:"";position:absolute;inset:-4px;border-radius:14px;padding:1.5px;
-                background:conic-gradient(from 0deg,transparent 0 62%,rgba(16,185,129,.9) 78%,rgba(244,217,138,.95) 88%,transparent 96%);
+                background:conic-gradient(from 0deg,transparent 0 62%,rgba(242,179,61,.95) 78%,rgba(253,239,201,1) 88%,transparent 96%);
                 -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
-                animation:dock-spin 12s linear infinite;opacity:.85}
+                animation:dock-spin 12s linear infinite;opacity:.9}
             .dock-mob-btn-tx{display:flex;flex-direction:column;align-items:start;line-height:1.1;gap:1px}
             .dock-mob-btn-tx b{font-size:13.5px;font-weight:900;white-space:nowrap}
             .dock-mob-btn-tx small{font-size:9.5px;font-weight:800;letter-spacing:.06em;opacity:.75;white-space:nowrap;
@@ -293,43 +302,44 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
             .dock-mob.is-open .dock-mob-menu{grid-template-rows:1fr;opacity:1}
             .dock-mob-menu-in{overflow:hidden}
             .dock-mob-panel{margin:8px 12px 12px;border-radius:22px;padding:1px;
-                background:linear-gradient(150deg,rgba(16,185,129,.55),rgba(201,162,75,.28) 45%,rgba(16,185,129,.55));
-                box-shadow:0 26px 60px -22px rgba(0,0,0,.95)}
+                background:linear-gradient(150deg,rgba(247,227,176,.7),rgba(242,179,61,.4) 35%,rgba(184,134,43,.25) 50%,rgba(242,179,61,.4) 68%,rgba(247,227,176,.7));
+                box-shadow:0 26px 60px -22px rgba(0,0,0,.95),0 0 40px -18px rgba(242,179,61,.5)}
             .dock-mob-panel-in{border-radius:21px;padding:12px;max-height:min(74vh,560px);overflow-y:auto;overscroll-behavior:contain;
                 -webkit-overflow-scrolling:touch;
-                background:linear-gradient(180deg,rgba(8,32,25,.99),rgba(3,10,8,.99))}
-            .dock-mob-head{display:flex;align-items:center;gap:12px;padding:2px 4px 11px;margin-bottom:11px;border-bottom:1px solid rgba(16,185,129,.13)}
-            .dock-mob-head img{width:44px;height:44px;border-radius:14px;object-fit:cover;flex:none;border:1px solid rgba(16,185,129,.45)}
-            .dock-mob-head b{display:block;font-size:14px;letter-spacing:.15em;color:#fff}
+                background:linear-gradient(180deg,rgba(24,19,12,.99),rgba(6,5,8,.99))}
+            .dock-mob-head{display:flex;align-items:center;gap:12px;padding:2px 4px 11px;margin-bottom:11px;border-bottom:1px solid rgba(242,179,61,.15)}
+            .dock-mob-head img{width:44px;height:44px;border-radius:14px;object-fit:cover;flex:none;border:1px solid rgba(242,179,61,.5)}
+            .dock-mob-head b{display:block;font-size:14px;letter-spacing:.15em;
+                background:linear-gradient(135deg,#FFFDF7,#F2B33D);-webkit-background-clip:text;background-clip:text;color:transparent}
             .dock-mob-head small{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.45);margin-top:4px}
-            .dock-mob-head small i{width:6px;height:6px;border-radius:99px;background:#5a6a63;flex:none}
-            .dock-mob-head small.on{color:#34D399}
-            .dock-mob-head small.on i{background:#10B981;box-shadow:0 0 8px #10B981;animation:dock-pulse 3s ease-in-out infinite}
+            .dock-mob-head small i{width:6px;height:6px;border-radius:99px;background:#6B6255;flex:none}
+            .dock-mob-head small.on{color:#F5D98C}
+            .dock-mob-head small.on i{background:#F2B33D;box-shadow:0 0 8px #F2B33D;animation:dock-pulse 3s ease-in-out infinite}
             .dock-mob-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
             .dock-tile{position:relative;display:flex;align-items:center;gap:10px;width:100%;padding:13px 12px;border-radius:18px;
-                border:1px solid rgba(16,185,129,.14);background:rgba(16,185,129,.05);color:rgba(255,255,255,.8);
+                border:1px solid rgba(242,179,61,.16);background:rgba(242,179,61,.06);color:rgba(255,255,255,.82);
                 font-family:inherit;font-size:13.5px;font-weight:800;text-align:start;cursor:pointer;
                 transition:transform .3s ease,background .3s ease,border-color .3s ease,color .3s ease,box-shadow .3s ease}
-            .dock-tile svg{color:rgba(216,190,130,.6);flex:none;transition:color .3s ease}
+            .dock-tile svg{color:rgba(247,227,176,.65);flex:none;transition:color .3s ease}
             .dock-tile:active{transform:scale(.97)}
-            .dock-tile.is-active{color:#04120D;background:linear-gradient(180deg,#A7F3D0,#10B981 55%,#047857);
-                border-color:transparent;box-shadow:0 12px 28px -12px rgba(16,185,129,.85)}
-            .dock-tile.is-active svg{color:#04120D}
+            .dock-tile.is-active{color:#08060A;background:linear-gradient(180deg,#FDEFC9,#F2B33D 52%,#B8862B);
+                border-color:transparent;box-shadow:0 12px 28px -12px rgba(242,179,61,.9)}
+            .dock-tile.is-active svg{color:#08060A}
             .dock-tile-n{position:absolute;top:6px;inset-inline-end:9px;font-size:9px;font-weight:900;letter-spacing:.14em;
-                color:rgba(255,255,255,.22)}
-            .dock-tile.is-active .dock-tile-n{color:rgba(4,18,13,.45)}
+                color:rgba(255,255,255,.24)}
+            .dock-tile.is-active .dock-tile-n{color:rgba(8,6,10,.45)}
             .dock-mob-cta{position:relative;overflow:hidden;margin-top:11px;display:flex;align-items:center;justify-content:center;gap:9px;
-                width:100%;height:52px;border-radius:18px;text-decoration:none;color:#04120D;font-size:14px;font-weight:900;
-                background:linear-gradient(180deg,#A7F3D0 0%,#10B981 55%,#047857 100%);
-                box-shadow:0 16px 34px -12px rgba(16,185,129,.8),inset 0 1px 0 rgba(255,255,255,.5)}
+                width:100%;height:52px;border-radius:18px;text-decoration:none;color:#08060A;font-size:14px;font-weight:900;
+                background:linear-gradient(180deg,#FDEFC9 0%,#F2B33D 52%,#B8862B 100%);
+                box-shadow:0 16px 34px -12px rgba(242,179,61,.85),inset 0 1px 0 rgba(255,255,255,.6)}
             .dock-mob-cta:active{transform:scale(.985)}
             .dock-mob-acts{display:flex;gap:9px;margin-top:9px}
             .dock-mob-act{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:46px;border-radius:15px;
                 font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;color:rgba(255,255,255,.72);
                 background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);transition:all .3s ease}
-            .dock-mob-act:active{transform:scale(.97);border-color:rgba(16,185,129,.5);color:#A7F3D0}
+            .dock-mob-act:active{transform:scale(.97);border-color:rgba(242,179,61,.55);color:#FDEFC9}
             @media(prefers-reduced-motion:reduce){.dock-mob-shell{animation:none}.dock-mob-btn::after{animation:none}}
-            a:focus-visible,button:focus-visible{outline:2px solid #10B981;outline-offset:2px;border-radius:10px}
+            a:focus-visible,button:focus-visible{outline:2px solid #F2B33D;outline-offset:2px;border-radius:10px}
             @media(prefers-reduced-motion:reduce){.dock-shell,.dock-menu,.dock-aurora{animation:none;transition:none}.dock-dot.on,.dock-live.on i{animation:none}}
             `}</style>
 
@@ -339,13 +349,13 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
                         <span className="dock-aurora" aria-hidden="true" />
                         <div className="dock-row">
                             {/* Brand + live */}
-                            <a href="#top" className="dock-brand" aria-label="XTROET — home">
+                            <a href="#top" className="dock-brand" aria-label="FAHAD — home">
                                 <span className="dock-emblem">
-                                    <img src={profileImage} alt="XTROET emblem" loading="eager" />
+                                    <img src={profileImage} alt="FAHAD emblem" loading="eager" />
                                     <span className={`dock-dot${isLive ? ' on' : ''}`} aria-hidden="true" />
                                 </span>
                                 <span className="dock-word" dir="ltr">
-                                    <b>XTROET</b>
+                                    <b>FAHAD</b>
                                     <span className={`dock-live${isLive ? ' on' : ' off'}`} role="status" aria-live="polite">
                                         <i aria-hidden="true" />
                                         <span>{isLive ? `${statusText}${viewersLabel ? ` • ${viewersLabel}` : ''}` : statusText}</span>
@@ -381,7 +391,17 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
                                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                                 </button>
 
-                                <a href="https://kick.com/xtroet" target="_blank" rel="noopener noreferrer" className="dock-cta">
+                                <a href="https://discord.com/invite/HYByGx8mQA" target="_blank" rel="noopener noreferrer" className="dock-iconbtn dock-discord"
+                                    title={isAr ? 'ديسكورد فهد' : 'FAHAD Discord'} aria-label={isAr ? 'ديسكورد فهد' : 'FAHAD Discord'}>
+                                    <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419z" /></svg>
+                                </a>
+
+                                <a href="https://tip.dokan.sa/fahad89" target="_blank" rel="noopener noreferrer" className="dock-iconbtn dock-support"
+                                    title={isAr ? 'ادعم فهد' : 'Support FAHAD'} aria-label={isAr ? 'ادعم فهد' : 'Support FAHAD'}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-10.3C4.5 6.6 6.7 5 8.8 5c1.4 0 2.6.7 3.2 1.8C12.6 5.7 13.8 5 15.2 5c2.1 0 4.3 1.6 4.3 4.7C19.5 15.4 12 20 12 20z" /></svg>
+                                </a>
+
+                                <a href="https://kick.com/fahad" target="_blank" rel="noopener noreferrer" className="dock-cta">
                                     <span className="play" aria-hidden="true">
                                         <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
                                     </span>
@@ -423,7 +443,7 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
                                 <div className="dock-mhead" dir={isAr ? 'rtl' : 'ltr'}>
                                     <img src={profileImage} alt="" loading="lazy" />
                                     <span>
-                                        <b dir="ltr">XTROET</b>
+                                        <b dir="ltr">FAHAD</b>
                                         <small dir="auto">{headerTitle}</small>
                                     </span>
                                 </div>
@@ -439,10 +459,20 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
                                         <span>{isAr ? n.ar : n.en}</span>
                                     </a>
                                 ))}
-                                <a href="https://kick.com/xtroet" target="_blank" rel="noopener noreferrer" className="dock-mrow gold" onClick={() => setOpen(false)}>
+                                <a href="https://kick.com/fahad" target="_blank" rel="noopener noreferrer" className="dock-mrow gold" onClick={() => setOpen(false)}>
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
                                     <span>{isAr ? 'شاهد البث المباشر' : 'Watch Live'}</span>
                                 </a>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <a href="https://discord.com/invite/HYByGx8mQA" target="_blank" rel="noopener noreferrer" className="dock-mrow" onClick={() => setOpen(false)} style={{ flex: 1 }}>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419z" /></svg>
+                                        <span>Discord</span>
+                                    </a>
+                                    <a href="https://tip.dokan.sa/fahad89" target="_blank" rel="noopener noreferrer" className="dock-mrow" onClick={() => setOpen(false)} style={{ flex: 1 }}>
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-10.3C4.5 6.6 6.7 5 8.8 5c1.4 0 2.6.7 3.2 1.8C12.6 5.7 13.8 5 15.2 5c2.1 0 4.3 1.6 4.3 4.7C19.5 15.4 12 20 12 20z" /></svg>
+                                        <span>{isAr ? 'الدعم' : 'Support'}</span>
+                                    </a>
+                                </div>
                                 <div style={{ display: 'flex', gap: 8 }}>
                                     <button type="button" onClick={() => { onToggleLang(); setOpen(false); }} className="dock-mrow" style={{ flex: 1 }}>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z" /></svg>
@@ -496,7 +526,7 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
                                         <div className="dock-mob-head" dir={isAr ? 'rtl' : 'ltr'}>
                                             <img src={profileImage} alt="" loading="lazy" />
                                             <span className="min-w-0">
-                                                <b dir="ltr">XTROET</b>
+                                                <b dir="ltr">FAHAD</b>
                                                 <small className={isLive ? 'on' : ''}>
                                                     <i aria-hidden="true" />
                                                     <span className="truncate">{isLive ? `${statusText}${viewersLabel ? ` • ${viewersLabel}` : ''}` : statusText}</span>
@@ -520,10 +550,21 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
                                             ))}
                                         </nav>
 
-                                        <a href="https://kick.com/xtroet" target="_blank" rel="noopener noreferrer" className="dock-mob-cta">
+                                        <a href="https://kick.com/fahad" target="_blank" rel="noopener noreferrer" className="dock-mob-cta">
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
                                             {isAr ? 'شاهد البث المباشر' : 'Watch Live'}
                                         </a>
+
+                                        <div className="dock-mob-acts">
+                                            <a href="https://discord.com/invite/HYByGx8mQA" target="_blank" rel="noopener noreferrer" className="dock-mob-act">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.419 0 1.333-.946 2.419-2.157 2.419z" /></svg>
+                                                Discord
+                                            </a>
+                                            <a href="https://tip.dokan.sa/fahad89" target="_blank" rel="noopener noreferrer" className="dock-mob-act">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7.5-4.6-7.5-10.3C4.5 6.6 6.7 5 8.8 5c1.4 0 2.6.7 3.2 1.8C12.6 5.7 13.8 5 15.2 5c2.1 0 4.3 1.6 4.3 4.7C19.5 15.4 12 20 12 20z" /></svg>
+                                                {isAr ? 'الدعم' : 'Support'}
+                                            </a>
+                                        </div>
 
                                         <div className="dock-mob-acts">
                                             <button type="button" className="dock-mob-act" onClick={() => onToggleLang()}>

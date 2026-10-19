@@ -1,33 +1,33 @@
-// Live social counters — 3-layer architecture per platform:
+// Live social counters — layered architecture per platform:
 //   1) /api/social (server-side: Vercel Edge in prod, vite middleware in dev)
 //   2) Direct client fetch (CORS-open sources only)
-//   3) Static fallback (neutral until live numbers land)
+//   3) Neutral fallback until a live number lands
 //
-// XTROET handles:
-//   TikTok @ixtroet | X @xtroet | Instagram @xtroet | YouTube @XTROET
+// FAHAD handles:
+//   TikTok @ifhd89 | X @iiFHD89 | Snapchat @fahad898 | YouTube @fhd-gm
 
 export interface SocialMediaStats {
-  instagram?: number;
   tiktok?: number;
   twitter?: number;
-  youtube?: number;
   snapchat?: number;
 }
 
-export const FALLBACK = {
-  instagram: 10500, // owner-verified (@xtroet) — live API used when it returns a sane number
-  tiktok: 27200, // owner-verified (@ixtroet) — live API used when it returns a sane number
-  twitter: 0,
-  youtube: 0,
+/**
+ * WhatsApp channels publish no follower count to any public API, and X
+ * blocks every endpoint we can reach from a serverless region. Both cards
+ * must never render an empty "—", so they fall back to the known figures.
+ */
+export const WHATSAPP_FOLLOWERS = 10000;
+const TWITTER_KNOWN = 19000;
+
+/** Shown only while every live source is still warming up. */
+export const FALLBACK: SocialMediaStats = {
+  tiktok: 0,
+  twitter: TWITTER_KNOWN,
+  snapchat: 0,
 };
 
-/** Owner-verified Instagram count — shown when the live API reads stale/wrong data. */
-export const VERIFIED_INSTAGRAM = 10500;
-
-/** Owner-verified TikTok count — shown when the live API reads stale/wrong data. */
-export const VERIFIED_TIKTOK = 27200;
-
-const CACHE_KEY = 'xtroet_social_cache_v1';
+const CACHE_KEY = 'fahad_social_cache_v1';
 export const SOCIAL_TTL_MS = 5 * 60 * 1000;
 
 async function fetchJson(url: string, timeoutMs = 9000): Promise<any> {
@@ -43,7 +43,7 @@ async function fetchJson(url: string, timeoutMs = 9000): Promise<any> {
 }
 
 /** Layer 1 — our server API (works in dev + prod, no CORS issues). */
-async function viaServerApi(platform: 'tiktok' | 'instagram' | 'twitter' | 'youtube' | 'snapchat'): Promise<number | null> {
+async function viaServerApi(platform: 'tiktok' | 'twitter' | 'snapchat'): Promise<number | null> {
   try {
     const j = await fetchJson(`/api/social?platform=${platform}`);
     return typeof j?.count === 'number' && j.count > 0 ? j.count : null;
@@ -82,29 +82,9 @@ function num(v: unknown): number | null {
   return null;
 }
 
-export async function getInstagramFollowers(username = 'xtroet'): Promise<number> {
-  const via = await viaServerApi('instagram');
-  // Live only when sane — the endpoint sometimes reads a stale/empty profile
-  if (via && via >= 1000) return via;
-  // Layer 2 — Mixerno Instagram counter (usually CORS-open)
-  try {
-    const d = await fetchJson(`https://mixerno.space/api/instagram-user-counter/user/${username}`);
-    const entry = Array.isArray(d?.counts) ? d.counts.find((c: any) => /follow/i.test(c?.value || '')) : null;
-    const n = num(entry?.count);
-    if (n && n >= 1000) return n;
-  } catch {}
-  return FALLBACK.instagram;
-}
-
-export async function getSnapchatFollowers(): Promise<number> {
-  // Snapchat has no client-side API (CORS) — server only, 0 when unavailable
-  return (await viaServerApi('snapchat')) ?? 0;
-}
-
-export async function getTikTokFollowers(username = 'ixtroet'): Promise<number> {
+export async function getTikTokFollowers(username = 'ifhd89'): Promise<number> {
   const via = await viaServerApi('tiktok');
-  // Live only when sane — otherwise fall back to the owner-verified number
-  if (via && via >= 1000) return via;
+  if (via && via >= 100) return via;
   // Layer 2 — TikWM (free, no key, CORS-open)
   try {
     const d = await fetchJson(`https://www.tikwm.com/api/user/info?unique_id=${username}`);
@@ -146,10 +126,10 @@ export async function getTikTokFollowers(username = 'ixtroet'): Promise<number> 
       }
     }
   } catch {}
-  return FALLBACK.tiktok;
+  return FALLBACK.tiktok ?? 0;
 }
 
-export async function getTwitterFollowers(username = 'xtroet'): Promise<number> {
+export async function getTwitterFollowers(username = 'iiFHD89'): Promise<number> {
   const via = await viaServerApi('twitter');
   if (via) return via;
   // Layer 2 — FixTweet API (usually CORS-open)
@@ -158,31 +138,23 @@ export async function getTwitterFollowers(username = 'xtroet'): Promise<number> 
     const n = num(d?.user?.followers);
     if (n) return n;
   } catch {}
-  return FALLBACK.twitter;
+  // X has no reachable public counter from here — show the real figure
+  // rather than an empty dash on the card.
+  return FALLBACK.twitter ?? TWITTER_KNOWN;
 }
 
-export async function getYouTubeSubscribers(channelId = 'UCzTrJVRcJjcpUMKojPsgbDw'): Promise<number> {
-  const via = await viaServerApi('youtube');
-  if (via) return via;
-  // Layer 2 — Mixerno (usually CORS-open)
-  try {
-    const d = await fetchJson(`https://mixerno.space/api/youtube-channel-counter/user/${channelId}`);
-    const entry = Array.isArray(d?.counts) ? d.counts.find((c: any) => c?.value === 'subscribers') : null;
-    const n = num(entry?.count);
-    if (n) return n;
-  } catch {}
-  return FALLBACK.youtube;
+export async function getSnapchatFollowers(): Promise<number> {
+  // Snapchat has no client-side API (CORS) — server only, 0 when unavailable
+  return (await viaServerApi('snapchat')) ?? 0;
 }
 
 export async function getAllSocialMediaStats(): Promise<SocialMediaStats> {
-  const [instagram, tiktok, twitter, youtube, snapchat] = await Promise.all([
-    getInstagramFollowers('xtroet'),
-    getTikTokFollowers('ixtroet'),
-    getTwitterFollowers('xtroet'),
-    getYouTubeSubscribers('UCzTrJVRcJjcpUMKojPsgbDw'),
+  const [tiktok, twitter, snapchat] = await Promise.all([
+    getTikTokFollowers(),
+    getTwitterFollowers(),
     getSnapchatFollowers(),
   ]);
-  const stats = { instagram, tiktok, twitter, youtube, snapchat };
+  const stats: SocialMediaStats = { tiktok, twitter, snapchat };
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), stats }));
   } catch {}
@@ -208,6 +180,9 @@ export function formatFollowerCount(count: number): string {
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K+`;
   return count.toString();
 }
+
+/** The WhatsApp channel has no counter — format its known figure the same way. */
+export const whatsappFollowerLabel = (): string => formatFollowerCount(WHATSAPP_FOLLOWERS);
 
 export async function getCachedSocialMediaStats(): Promise<SocialMediaStats> {
   return getAllSocialMediaStats();

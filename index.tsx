@@ -2,9 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-/** /admin is a standalone command room — never rendered inside the main page. */
-const AdminPage = React.lazy(() => import('./components/AdminDashboard'));
-
 /**
  * Catches a render crash and shows something instead of a black page.
  *
@@ -24,7 +21,7 @@ class RootBoundary extends React.Component<{ children: React.ReactNode }, { erro
     }
 
     componentDidCatch(error: Error, info: unknown) {
-        console.error('[xtroet] render failed', error, info);
+        console.error('[fahad] render failed', error, info);
         // بلّغ السيرفر حتى يُقرأ الخطأ من لوحة التشخيص بدون ما ينسخه المستخدم.
         // fire-and-forget: التبليغ نفسه لا يكسر شيئاً أبداً.
         try {
@@ -51,10 +48,11 @@ class RootBoundary extends React.Component<{ children: React.ReactNode }, { erro
             <div dir="rtl" style={{
                 minHeight: '100vh', display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center', gap: '1rem',
-                padding: '2rem', textAlign: 'center', background: '#04120D', color: '#fff',
+                padding: '2rem', textAlign: 'center', background: '#08060A', color: '#fff',
                 fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
             }}>
-                <div style={{ fontSize: '2.5rem' }}>⚠️</div>
+                <img src="/fahad-logo.png" alt="" width={72} height={72}
+                    style={{ borderRadius: '50%', boxShadow: '0 0 50px rgba(242,179,61,0.6)' }} />
                 <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>الموقع ما قدر يشتغل</h1>
                 <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', maxWidth: '32rem', margin: 0, lineHeight: 1.9 }}>
                     صار خطأ أثناء تحميل الصفحة. جرّب تحديث الصفحة، وإذا تكرر — افتح الموقع من متصفح ثاني.
@@ -70,7 +68,7 @@ class RootBoundary extends React.Component<{ children: React.ReactNode }, { erro
                     style={{
                         marginTop: '0.5rem', padding: '0.75rem 1.75rem', borderRadius: '14px',
                         border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '0.9rem',
-                        background: 'linear-gradient(180deg,#8CFF5C,#53FC18 55%,#2b9e1c)', color: '#04120D',
+                        background: 'linear-gradient(180deg,#FDEFC9,#F2B33D 55%,#B8862B)', color: '#08060A',
                     }}
                 >
                     أعد تحميل الصفحة
@@ -81,17 +79,18 @@ class RootBoundary extends React.Component<{ children: React.ReactNode }, { erro
 }
 
 /** Shown until React mounts. The body is black, so a plain dark loader. */
-function Boot({ admin = false }: { admin?: boolean }) {
+function Boot() {
     return (
         <div style={{
             minHeight: '100vh', display: 'flex', flexDirection: 'column', gap: '0.9rem',
             alignItems: 'center', justifyContent: 'center',
-            background: admin ? '#050403' : '#04120D',
-            color: admin ? 'rgba(201,162,75,0.7)' : 'rgba(255,255,255,0.5)',
+            background: '#08060A',
+            color: 'rgba(255,255,255,0.5)',
             fontFamily: 'system-ui, sans-serif', fontSize: '0.85rem', letterSpacing: '0.2em',
         }}>
-            {admin && <div style={{ fontSize: '2rem' }}>👑</div>}
-            <div>{admin ? 'COMMAND ROOM' : 'XTROET…'}</div>
+            <img src="/fahad-logo.png" alt="" width={64} height={64}
+                style={{ borderRadius: '50%', boxShadow: '0 0 44px rgba(242,179,61,0.55)' }} />
+            <div>FAHAD…</div>
         </div>
     );
 }
@@ -103,25 +102,19 @@ if (!rootElement) {
 
 rootElement.innerHTML = '';
 const boot = document.createElement('div');
-boot.id = 'xtroet-boot';
+boot.id = 'fahad-boot';
 rootElement.appendChild(boot);
-
-const isAdmin = /^\/admin(\/|$)/.test(window.location.pathname);
 
 const root = ReactDOM.createRoot(rootElement);
 root.render(
     <React.StrictMode>
         <RootBoundary>
-            {isAdmin ? (
-                <React.Suspense fallback={<Boot admin />}>
-                    <AdminPage />
-                </React.Suspense>
-            ) : (
+            <React.Suspense fallback={<Boot />}>
                 <App />
-            )}
+            </React.Suspense>
         </RootBoundary>
     </React.StrictMode>,
 );
 
 // Remove the placeholder once React has painted, whatever it painted.
-requestAnimationFrame(() => document.getElementById('xtroet-boot')?.remove());
+requestAnimationFrame(() => document.getElementById('fahad-boot')?.remove());

@@ -11,7 +11,7 @@ interface BotrixLeaderboardProps {
   lang: 'en' | 'ar';
 }
 
-const API_URL = '/api/kick?endpoint=' + encodeURIComponent('https://botrix.live/api/public/leaderboard?platform=kick&user=xtroet');
+const API_URL = '/api/kick?endpoint=' + encodeURIComponent('https://botrix.live/api/public/leaderboard?platform=kick&user=fahad');
 
 /**
  * Botrix sends `watchtime` in MINUTES (1 point is earned per minute watched,
@@ -156,9 +156,9 @@ const BotrixLeaderboard: React.FC<BotrixLeaderboardProps> = ({ lang }) => {
   const picOf = (name: string): string => avatars[name.toLowerCase()] || '';
 
   const ringOf = (rank: number) =>
-    rank === 1 ? 'conic-gradient(from 200deg,#a7f3d0,#047857,#ecfdf5,#047857,#a7f3d0)'
+    rank === 1 ? 'conic-gradient(from 200deg,#F7E3B0,#8A6320,#FFF8E8,#8A6320,#F7E3B0)'
     : rank === 2 ? 'conic-gradient(from 200deg,#e8e8e8,#6f7b8a,#ffffff,#6f7b8a,#e8e8e8)'
-    : rank === 3 ? 'conic-gradient(from 200deg,#f0a35e,#6e3c10,#ffd9ae,#6e3c10,#f0a35e)'
+    : rank === 3 ? 'conic-gradient(from 200deg,#F5A03F,#6B3A08,#FFE0A8,#6B3A08,#F5A03F)'
     : 'rgba(255,255,255,0.12)';
 
   const WatchIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -177,28 +177,28 @@ const BotrixLeaderboard: React.FC<BotrixLeaderboardProps> = ({ lang }) => {
   return (
     <div className="w-full animate-fade-in-up">
       <div className="group relative rounded-[28px] overflow-hidden bg-white/[0.03] border border-white/10 backdrop-blur-2xl transition-colors duration-500 hover:border-white/20">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#10B981]/60 to-transparent" aria-hidden="true" />
-        <div className="absolute -top-24 start-1/4 w-96 h-96 bg-[#10B981]/[0.08] blur-[110px] pointer-events-none" aria-hidden="true" />
-        <div className="absolute -bottom-32 end-0 w-96 h-96 bg-[#10B981]/[0.08] blur-[110px] pointer-events-none" aria-hidden="true" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#F2B33D]/60 to-transparent" aria-hidden="true" />
+        <div className="absolute -top-24 start-1/4 w-96 h-96 bg-[#F2B33D]/[0.08] blur-[110px] pointer-events-none" aria-hidden="true" />
+        <div className="absolute -bottom-32 end-0 w-96 h-96 bg-[#F2B33D]/[0.08] blur-[110px] pointer-events-none" aria-hidden="true" />
 
         {/* header */}
         <div className="relative p-5 md:p-7 pb-4 flex items-center gap-4">
           <div className="relative shrink-0">
-            <div className="absolute -inset-2 bg-[#10B981]/40 blur-2xl opacity-40 group-hover:opacity-80 transition-opacity duration-500 rounded-full" aria-hidden="true" />
-            <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-[20px] bg-[#04120D] border border-[#10B981]/50 shadow-[0_16px_40px_-12px_rgba(16,185,129,0.6)] flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 ring-1 ring-[#C9A24B]/30">
-              <svg className="w-7 h-7 md:w-8 md:h-8 text-[#10B981] drop-shadow-[0_0_12px_rgba(16,185,129,0.7)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+            <div className="absolute -inset-2 bg-[#F2B33D]/40 blur-2xl opacity-40 group-hover:opacity-80 transition-opacity duration-500 rounded-full" aria-hidden="true" />
+            <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-[20px] bg-[#08060A] border border-[#F2B33D]/50 shadow-[0_16px_40px_-12px_rgba(242,179,61,0.6)] flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6 ring-1 ring-[#B8862B]/30">
+              <svg className="w-7 h-7 md:w-8 md:h-8 text-[#F2B33D] drop-shadow-[0_0_12px_rgba(242,179,61,0.7)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
             </div>
             <span className="absolute -bottom-1.5 -end-1.5 w-6 h-6 rounded-full bg-[#53FC18] border-4 border-[#0B0906] animate-pulse shadow-[0_0_14px_#53FC18]" aria-hidden="true" />
           </div>
           <div className={`min-w-0 flex-1 ${ar ? 'text-right' : 'text-left'}`}>
             <h3 className="text-xl md:text-2xl font-black text-white tracking-tight leading-none">{t.title}</h3>
-            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.24em] bg-gradient-to-r from-[#A7F3D0] to-[#059669] bg-clip-text text-transparent mt-2">{t.subtitle}</p>
+            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.24em] bg-gradient-to-r from-[#F7E3B0] to-[#A97C2A] bg-clip-text text-transparent mt-2">{t.subtitle}</p>
           </div>
           <div className="hidden sm:flex items-center gap-2 shrink-0">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3.5 py-2 rounded-2xl bg-white/[0.05] border border-white/10 text-white/60">
               {sorted.length} {t.legends}
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3.5 py-2 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/30 text-[#6EE7B7]" dir="ltr">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black px-3.5 py-2 rounded-2xl bg-[#F2B33D]/10 border border-[#F2B33D]/30 text-[#F2CE7C]" dir="ltr">
               <WatchIcon className="w-3 h-3" /> {formatDurationShort(totalWatch)}
             </span>
           </div>
@@ -233,7 +233,7 @@ const BotrixLeaderboard: React.FC<BotrixLeaderboardProps> = ({ lang }) => {
                       <div key={e.name} className="flex flex-col items-center w-[30%] max-w-[200px] animate-fade-in-up transition-transform duration-500 hover:-translate-y-1.5" style={{ animationDelay: `${i * 100}ms` }}>
                         <span
                           className={`relative rounded-full p-[2.5px] block transition-transform duration-500 hover:scale-110 ${rank === 1 ? 'w-16 h-16 sm:w-20 sm:h-20' : 'w-12 h-12 sm:w-16 sm:h-16'}`}
-                          style={{ background: ringOf(rank), boxShadow: rank === 1 ? '0 0 36px rgba(255,215,106,0.55)' : '0 8px 24px rgba(0,0,0,0.5)' }}
+                          style={{ background: ringOf(rank), boxShadow: rank === 1 ? '0 0 36px rgba(245,197,92,0.55)' : '0 8px 24px rgba(0,0,0,0.5)' }}
                         >
                           <span className="w-full h-full rounded-full bg-white/[0.06] backdrop-blur flex items-center justify-center font-black text-lg md:text-xl text-white/85 overflow-hidden">
                             {picOf(e.name) ? (
@@ -242,17 +242,17 @@ const BotrixLeaderboard: React.FC<BotrixLeaderboardProps> = ({ lang }) => {
                               e.name.charAt(0).toUpperCase()
                             )}
                           </span>
-                          <span className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] font-black px-2 py-0.5 rounded-lg border ${rank === 1 ? 'bg-[#10B981] text-[#04120D] border-white/50' : 'bg-black/80 text-white/80 border-white/20'}`} dir="ltr">#{rank}</span>
+                          <span className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] font-black px-2 py-0.5 rounded-lg border ${rank === 1 ? 'bg-[#F2B33D] text-[#08060A] border-white/50' : 'bg-black/80 text-white/80 border-white/20'}`} dir="ltr">#{rank}</span>
                           {rank === 1 && (
-                            <svg className="absolute -top-4 left-1/2 -translate-x-1/2 w-6 h-6 sm:w-7 sm:h-7 drop-shadow-[0_0_10px_rgba(16,185,129,0.9)] animate-float-soft" viewBox="0 0 24 24" fill="none">
-                              <path fill="#6EE7B7" d="M2.5 8.5 6.5 12l5.5-7 5.5 7 4-3.5L20 18H4L2.5 8.5z" />
-                              <rect x="4" y="18.6" width="16" height="2.2" rx="1.1" fill="#047857" />
+                            <svg className="absolute -top-4 left-1/2 -translate-x-1/2 w-6 h-6 sm:w-7 sm:h-7 drop-shadow-[0_0_10px_rgba(242,179,61,0.9)] animate-float-soft" viewBox="0 0 24 24" fill="none">
+                              <path fill="#F2CE7C" d="M2.5 8.5 6.5 12l5.5-7 5.5 7 4-3.5L20 18H4L2.5 8.5z" />
+                              <rect x="4" y="18.6" width="16" height="2.2" rx="1.1" fill="#8A6320" />
                             </svg>
                           )}
                         </span>
                         <p className="mt-3 text-xs sm:text-sm font-black text-white truncate max-w-full" dir="auto">{e.name}</p>
                         {/* watchtime is the headline number */}
-                        <span className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-[#6EE7B7] bg-[#10B981]/10 border border-[#10B981]/30 rounded-lg px-2 py-0.5" dir="ltr">
+                        <span className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-[#F2CE7C] bg-[#F2B33D]/10 border border-[#F2B33D]/30 rounded-lg px-2 py-0.5" dir="ltr">
                           <WatchIcon className="w-3 h-3" /> {formatDurationShort(e.watchtime)}
                         </span>
                         <span className="mt-1 text-[10px] font-bold text-white/45" dir="ltr">{formatNum(e.points)} {t.points}</span>
@@ -268,7 +268,7 @@ const BotrixLeaderboard: React.FC<BotrixLeaderboardProps> = ({ lang }) => {
                   const rank = idx + 4;
                   const pct = Math.max(4, Math.round(((e.watchtime || 0) / maxWatch) * 100));
                   return (
-                    <div key={e.name} className="relative rounded-2xl p-2.5 sm:p-3 border border-transparent hover:border-[#10B981]/20 hover:bg-white/[0.04] hover:-translate-y-0.5 hover:shadow-[0_16px_38px_-14px_rgba(16,185,129,0.35)] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${Math.min(idx * 60, 480)}ms` }}>
+                    <div key={e.name} className="relative rounded-2xl p-2.5 sm:p-3 border border-transparent hover:border-[#F2B33D]/20 hover:bg-white/[0.04] hover:-translate-y-0.5 hover:shadow-[0_16px_38px_-14px_rgba(242,179,61,0.35)] transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${Math.min(idx * 60, 480)}ms` }}>
                       <div className="flex items-center gap-2 sm:gap-3 min-w-0" dir={ar ? 'rtl' : 'ltr'}>
                         <span className="w-8 h-8 shrink-0 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[11px] font-black text-white/40" dir="ltr">{rank < 10 ? `0${rank}` : rank}</span>
                         <span className="w-10 h-10 sm:w-11 sm:h-11 rounded-full p-[2px] shrink-0 block bg-white/[0.14] overflow-hidden">
@@ -281,20 +281,20 @@ const BotrixLeaderboard: React.FC<BotrixLeaderboardProps> = ({ lang }) => {
                         <div className="flex-1 min-w-0">
                           <p className={`text-[13px] sm:text-sm font-black text-white/90 truncate ${ar ? 'text-right' : 'text-left'}`} dir="auto" title={e.name}>{e.name}</p>
                           {/* watchtime — the ranking metric */}
-                          <p className="mt-1 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-[#6EE7B7] bg-[#10B981]/10 border border-[#10B981]/25 rounded-lg px-2 py-0.5" dir="ltr">
+                          <p className="mt-1 inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-[#F2CE7C] bg-[#F2B33D]/10 border border-[#F2B33D]/25 rounded-lg px-2 py-0.5" dir="ltr">
                             <WatchIcon className="w-3 h-3" /> {formatDuration(e.watchtime)}
                           </p>
                         </div>
                         {/* points — the second number */}
                         <span className="shrink-0 text-right">
                           <span className="flex items-center justify-end gap-1 text-[12px] sm:text-sm font-black text-white/85" dir="ltr">
-                            <PointsIcon className="w-3.5 h-3.5 text-[#C9A24B]/80" /> {formatNum(e.points)}
+                            <PointsIcon className="w-3.5 h-3.5 text-[#B8862B]/80" /> {formatNum(e.points)}
                           </span>
                           <span className="mt-0.5 block text-[9px] font-black uppercase tracking-wider text-white/30">{t.points}</span>
                         </span>
                       </div>
                       <div className="mt-2 ms-[76px] h-1 rounded-full bg-white/[0.06] overflow-hidden" dir="ltr">
-                        <div className="bar-grow h-full rounded-full bg-gradient-to-r from-[#A7F3D0] via-[#10B981] to-[#047857]" style={{ width: `${pct}%`, animationDelay: `${Math.min(idx * 60, 480)}ms` }} />
+                        <div className="bar-grow h-full rounded-full bg-gradient-to-r from-[#F7E3B0] via-[#F2B33D] to-[#8A6320]" style={{ width: `${pct}%`, animationDelay: `${Math.min(idx * 60, 480)}ms` }} />
                       </div>
                     </div>
                   );

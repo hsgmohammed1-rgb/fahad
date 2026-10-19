@@ -60,7 +60,7 @@ const tiltStyle = (tilt: { rx: number; ry: number; on: boolean }): React.CSSProp
 });
 
 const CardSkeleton: React.FC<{ glow: string }> = ({ glow }) => (
-   <div className="w-full rounded-[26px] border border-white/10 bg-[#0a0a0a]/80 backdrop-blur-xl p-5 animate-pulse" aria-hidden="true">
+   <div className="w-full rounded-[26px] border border-white/10 bg-[#0A090C]/80 backdrop-blur-xl p-5 animate-pulse" aria-hidden="true">
       <div className="h-20 rounded-2xl bg-white/[0.06]" />
       <div className="flex items-center gap-3 mt-4">
          <div className="w-14 h-14 rounded-2xl" style={{ background: glow }} />
@@ -73,13 +73,18 @@ const CardSkeleton: React.FC<{ glow: string }> = ({ glow }) => (
    </div>
 );
 
-/* ============================ DISCORD — XTROET EMPIRE (Nasser official) ============================
+/* ============================ DISCORD — FAHAD EMPIRE (Nasser official) ============================
    Live guild data, refreshed every 60s:
      1) Server widget API (rich: online members, games, channels, invite)
      2) Invite API fallback (online + total members, always public) */
 const DISCORD_GUILD_ID = '1254910012392738817';
-const DISCORD_INVITE_CODE = 'bYPKxMp4h';
-const DISCORD_JOIN_URL = 'https://discord.gg/bYPKxMp4h';
+const DISCORD_INVITE_CODE = 'HYByGx8mQA';
+const DISCORD_JOIN_URL = 'https://discord.com/invite/HYByGx8mQA';
+
+/* FAHAD brand art for the Discord card — the guild icon from the API is
+   only used if the local crest ever fails to load. */
+const DISCORD_CREST = '/discord-logo.jpg';
+const DISCORD_BANNER = '/discord-banner.png';
 
 interface DiscordLive {
    name: string;
@@ -106,7 +111,7 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                const json: DiscordData = await res.json();
                 if (!dead && json && typeof json.presence_count === 'number') {
                    setData({
-                      name: json.name || 'XTROET EMPIRE',
+                      name: json.name || 'FAHAD KINGDOM',
                       invite: json.instant_invite || DISCORD_JOIN_URL,
                       online: json.presence_count,
                       total: null,
@@ -127,7 +132,7 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                 if (dead) return;
                 const iconHash = inv?.guild?.icon as string | undefined;
                 setData({
-                   name: inv?.guild?.name || 'XTROET EMPIRE',
+                   name: inv?.guild?.name || 'FAHAD KINGDOM',
                    invite: DISCORD_JOIN_URL,
                    online: Number(inv?.approximate_presence_count) || 0,
                    total: Number(inv?.approximate_member_count) || null,
@@ -153,7 +158,7 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
     const activeMembers = data.members.filter((m: any) => m.game);
     const squad = data.members.slice(0, 6);
     const extra = Math.max(0, data.online - squad.length);
-    const crest = data.icon || '/xtroet-logo.webp';
+    const crest = DISCORD_CREST;
 
    return (
       <div className="perspective-1000 h-full">
@@ -164,7 +169,7 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
             style={tiltStyle(tilt)}
             className="group relative h-full rounded-[26px] p-[1.5px] bg-gradient-to-b from-[#5865F2]/70 via-[#5865F2]/15 to-white/[0.06] shadow-[0_24px_70px_-20px_rgba(88,101,242,0.45)]"
          >
-            <div className="relative h-full rounded-[24.5px] bg-[#0a0b16]/95 backdrop-blur-xl overflow-hidden flex flex-col">
+            <div className="relative h-full rounded-[24.5px] bg-[#0A0912]/95 backdrop-blur-xl overflow-hidden flex flex-col">
                {/* pointer glare */}
                <div
                   className="absolute inset-0 pointer-events-none transition-opacity duration-300 z-10"
@@ -173,32 +178,32 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                      background: `radial-gradient(420px circle at ${tilt.gx}% ${tilt.gy}%, rgba(88,101,242,0.22), transparent 65%)`,
                   }}
                />
-                {/* color bleed — banner tones wash down the whole card, no boundary */}
-                <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                   <img
-                      src="/xtroet-discord.jpg"
-                      alt=""
-                      className="absolute top-0 inset-x-0 h-[48%] w-full object-cover blur-3xl opacity-30"
+                 {/* color bleed — banner tones wash down the whole card, no boundary */}
+                 <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                    <img
+                       src={DISCORD_BANNER}
+                       alt=""
+                       className="absolute top-0 inset-x-0 h-[48%] w-full object-cover blur-3xl opacity-30"
                       style={{ maskImage: 'linear-gradient(to bottom, black 25%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 25%, transparent 100%)' }}
-                   />
-                </div>
-               {/* orbiting halo */}
-               <div className="absolute -top-24 start-1/4 w-72 h-72 rounded-full bg-[#5865F2]/25 blur-[90px] animate-aurora pointer-events-none" />
+                    />
+                 </div>
+                {/* orbiting halo */}
+                <div className="absolute -top-24 start-1/4 w-72 h-72 rounded-full bg-[#5865F2]/25 blur-[90px] animate-aurora pointer-events-none" />
                  {/* banner — single seamless melt, no edge lines */}
                  <div className="relative h-32 sm:h-40 overflow-hidden shrink-0">
                     <img
-                       src="/xtroet-discord.jpg"
-                       alt="XTROET community banner"
-                       className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-[2.5s] ease-out"
+                       src={DISCORD_BANNER}
+                       alt="FAHAD community banner"
+                       className="absolute inset-0 w-full h-full object-cover object-[50%_38%] scale-105 group-hover:scale-110 transition-transform duration-[2.5s] ease-out"
                     />
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#0a0b16]/50 via-transparent to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#0a0b16] via-[#0a0b16]/55 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#0A0912]/50 via-transparent to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#0A0912] via-[#0A0912]/55 to-transparent" />
                   <span className="absolute top-3 start-3 inline-flex items-center gap-2 px-3 py-1.5 bg-black/55 backdrop-blur border border-white/15 text-white/85">
-                     <span className="led bg-green-400 animate-pulse shadow-[0_0_8px_#4ade80]" />
+                     <span className="led bg-green-400 animate-pulse shadow-[0_0_8px_#F2CE7C]" />
                      <span className="kicker" dir="ltr">Discord // Live</span>
                   </span>
                    <span className="cut-tag absolute top-3 end-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#5865F2]/25 backdrop-blur border border-[#5865F2]/50 text-[10px] font-black tracking-[0.2em] text-white" dir="ltr">
-                      XTROET
+                      FAHAD
                    </span>
                </div>
                 {/* crest + title — straddles the melt */}
@@ -206,15 +211,15 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                    <div aria-hidden="true" className="absolute -top-8 inset-x-8 h-14 bg-[#5865F2]/15 blur-2xl pointer-events-none" />
                    <div className="relative shrink-0" style={{ transform: 'translateZ(45px)' }}>
                       <div className="absolute -inset-3 bg-[#5865F2]/50 blur-2xl opacity-40 group-hover:opacity-80 transition-opacity duration-500 rounded-full" />
-                       <div className="relative w-[72px] h-[72px] rounded-[22px] overflow-hidden border-2 border-[#5865F2]/60 ring-4 ring-[#0a0b16]/90 bg-[#0a0b16] shadow-[0_16px_36px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:rotate-6 group-hover:scale-105">
-                         <img src={crest} alt="XTROET Discord server" className="w-full h-full object-cover" />
+                       <div className="relative w-[72px] h-[72px] rounded-[22px] overflow-hidden border-2 border-[#5865F2]/60 ring-4 ring-[#0A0912]/90 bg-[#0A0912] shadow-[0_16px_36px_rgba(0,0,0,0.65)] transition-transform duration-500 group-hover:rotate-6 group-hover:scale-105">
+                         <img src={crest} alt="FAHAD Discord server" className="w-full h-full object-cover" />
                       </div>
-                     <span className="absolute -bottom-1 -end-1 w-5 h-5 rounded-full bg-green-400 border-4 border-[#0a0b16] animate-pulse" />
+                     <span className="absolute -bottom-1 -end-1 w-5 h-5 rounded-full bg-green-400 border-4 border-[#0A0912] animate-pulse" />
                   </div>
                    <div className="min-w-0 pb-1">
                       <h3 className="text-lg sm:text-xl font-black text-white tracking-tight leading-none" dir="ltr">{data.name}</h3>
                       <p className="text-[11px] text-white/45 font-bold mt-1">
-                         {lang === 'en' ? 'XTROET official community' : 'مجتمع ناصر العنزي الرسمي'}
+                         {lang === 'en' ? 'FAHAD official community' : 'مجتمع فهد الرسمي'}
                         {data.total ? <span className="text-white/30" dir="ltr"> • {data.total.toLocaleString('en-US')}</span> : null}
                      </p>
                   </div>
@@ -236,12 +241,12 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                                     src={m.avatar_url}
                                     alt={m.username}
                                     loading="lazy"
-                                    className="w-9 h-9 rounded-full border-2 border-[#0a0b16] bg-white/10 object-cover transition-transform duration-300 hover:scale-125 hover:-translate-y-1 hover:z-10 relative"
+                                    className="w-9 h-9 rounded-full border-2 border-[#0A0912] bg-white/10 object-cover transition-transform duration-300 hover:scale-125 hover:-translate-y-1 hover:z-10 relative"
                                     style={{ zIndex: squad.length - i }}
                                  />
                               ))}
                               {extra > 0 && (
-                                 <span className="w-9 h-9 rounded-full border-2 border-[#0a0b16] bg-[#5865F2] flex items-center justify-center text-[10px] font-black text-white" dir="ltr">+{extra}</span>
+                                 <span className="w-9 h-9 rounded-full border-2 border-[#0A0912] bg-[#5865F2] flex items-center justify-center text-[10px] font-black text-white" dir="ltr">+{extra}</span>
                               )}
                            </div>
                            <div className="min-w-0 flex-1">
@@ -317,20 +322,20 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
    );
 };
 
-/* ============================ YOUTUBE — XTROET (Nasser official) ============================
+/* ============================ YOUTUBE — FAHAD (Nasser official) ============================
    Live channel data, refreshed every 5 minutes:
      • Latest video  → YouTube RSS feed (public, no key)
      • Subscribers   → Mixerno counter, Piped fallback */
 const CLAN_CHANNEL_ID = 'UCzTrJVRcJjcpUMKojPsgbDw';
-const CLAN_CHANNEL_URL = 'https://www.youtube.com/@XTROET';
-// XTROET emerald-bronze identity — official banner + logo mark.
-const CLAN_BANNER = '/xtroet-banner.jpg';
-const CLAN_BANNER_FALLBACK = '/xtroet-banner.jpg';
-const CLAN_MARK = '/xtroet-logo.webp';
+const CLAN_CHANNEL_URL = 'https://www.youtube.com/@fhd-gm';
+// FAHAD obsidian-gold identity — the channel banner + the site logo mark.
+const CLAN_BANNER = '/youtube-banner.jpg';
+const CLAN_BANNER_FALLBACK = '/youtube-banner.jpg';
+const CLAN_MARK = '/fahad-logo.png';
 const CLAN_AVATAR =
    'https://yt3.googleusercontent.com/vwmrfjJlizWf7lYCyrBdpz8wD3pVqYkEGn1v2svg0LcxX0N4LNBnGcswFAlVH5BAvoxTyD2Ww-E=s900-c-k-c0x00ffffff-no-rj';
-const CLAN_ORANGE = '#10B981';
-const CLAN_ORANGE_DEEP = '#065F46';
+const CLAN_ORANGE = '#F2B33D';
+const CLAN_ORANGE_DEEP = '#5C4310';
 
 export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
     const [video, setVideo] = useState<YoutubeData | null>(null);
@@ -347,7 +352,7 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
           count >= 1000000 ? `${(count / 1000000).toFixed(1)}M+` : count >= 1000 ? `${(count / 1000).toFixed(1)}K+` : `${count}`;
        const fetchVideo = async () => {
           try {
-             // XTROET channel uses handle @XTROET — try handle-based RSS via third-party, fallback to banner
+             // FAHAD channel uses handle @fhd-gm — try handle-based RSS via third-party, fallback to banner
              const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
              const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
              const response = await fetch(apiUrl);
@@ -369,9 +374,9 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
           } catch (err) {
              if (!dead) {
                  setVideo({
-                    title: lang === 'en' ? 'XTROET — OFFICIAL VIDEOS' : 'ناصر العنزي — الفيديوهات الرسمية',
+                    title: lang === 'en' ? 'FAHAD — OFFICIAL VIDEOS' : 'فهد — الفيديوهات الرسمية',
                     link: channelUrl,
-                    date: 'XTROET',
+                    date: 'FAHAD',
                     thumbnail: CLAN_BANNER_FALLBACK
                  });
              }
@@ -410,7 +415,7 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [lang]);
 
-     if (loading && !video) return <CardSkeleton glow="rgba(16,185,129,0.35)" />;
+     if (loading && !video) return <CardSkeleton glow="rgba(242,179,61,0.35)" />;
 
      return (
         <div className="perspective-1000 h-full">
@@ -419,14 +424,14 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
               onPointerMove={move}
               onPointerLeave={leave}
               style={tiltStyle(tilt)}
-              className="group relative h-full rounded-[26px] p-[1.5px] bg-gradient-to-b from-[#10B981]/80 via-[#C9A24B]/30 to-white/[0.06] shadow-[0_24px_70px_-20px_rgba(16,185,129,0.5)]"
+              className="group relative h-full rounded-[26px] p-[1.5px] bg-gradient-to-b from-[#F2B33D]/80 via-[#B8862B]/30 to-white/[0.06] shadow-[0_24px_70px_-20px_rgba(242,179,61,0.5)]"
            >
-              <div className="relative h-full rounded-[24.5px] bg-[#04120D]/95 backdrop-blur-xl overflow-hidden flex flex-col">
+              <div className="relative h-full rounded-[24.5px] bg-[#08060A]/95 backdrop-blur-xl overflow-hidden flex flex-col">
                  <div
                     className="absolute inset-0 pointer-events-none transition-opacity duration-300 z-10"
                     style={{
                        opacity: tilt.on ? 1 : 0,
-                       background: `radial-gradient(420px circle at ${tilt.gx}% ${tilt.gy}%, rgba(16,185,129,0.24), transparent 65%)`,
+                       background: `radial-gradient(420px circle at ${tilt.gx}% ${tilt.gy}%, rgba(242,179,61,0.24), transparent 65%)`,
                     }}
                  />
                  {/* color bleed — emerald-bronze tones wash down the whole card, no boundary */}
@@ -438,59 +443,59 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                        style={{ maskImage: 'linear-gradient(to bottom, black 25%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 25%, transparent 100%)' }}
                     />
                  </div>
-                 <div className="absolute -top-24 end-1/4 w-72 h-72 rounded-full bg-[#10B981]/25 blur-[90px] animate-aurora pointer-events-none" />
-                 <div className="absolute -bottom-28 start-1/4 w-72 h-72 rounded-full bg-[#C9A24B]/15 blur-[100px] animate-aurora pointer-events-none" style={{ animationDelay: '-8s' }} />
-                 {/* banner — XTROET official, seamless melt, no edge lines */}
+                 <div className="absolute -top-24 end-1/4 w-72 h-72 rounded-full bg-[#F2B33D]/25 blur-[90px] animate-aurora pointer-events-none" />
+                 <div className="absolute -bottom-28 start-1/4 w-72 h-72 rounded-full bg-[#B8862B]/15 blur-[100px] animate-aurora pointer-events-none" style={{ animationDelay: '-8s' }} />
+                 {/* banner — FAHAD official, seamless melt, no edge lines */}
                  <div className="relative h-32 sm:h-40 overflow-hidden shrink-0">
-                    <img
-                       src={CLAN_BANNER}
-                       alt="XTROET official banner — emerald and bronze"
-                       className="absolute inset-0 w-full h-full object-cover object-[center_30%] scale-105 group-hover:scale-110 transition-transform duration-[2.5s] ease-out"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#04120D]/60 via-transparent to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#10B981]/25 via-transparent to-transparent mix-blend-overlay" />
-                    <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#04120D] via-[#04120D]/60 to-transparent" />
+                     <img
+                        src={CLAN_BANNER}
+                        alt="FAHAD official YouTube banner"
+                        className="absolute inset-0 w-full h-full object-cover object-[50%_46%] scale-105 group-hover:scale-110 transition-transform duration-[2.5s] ease-out"
+                     />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#08060A]/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#F2B33D]/25 via-transparent to-transparent mix-blend-overlay" />
+                    <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-[#08060A] via-[#08060A]/60 to-transparent" />
                     <span className="absolute top-3 start-3 inline-flex items-center gap-2 px-3 py-1.5 bg-black/55 backdrop-blur border border-white/15 text-white/85">
-                       <span className="led bg-[#10B981] animate-pulse shadow-[0_0_8px_#10B981]" />
+                       <span className="led bg-[#F2B33D] animate-pulse shadow-[0_0_8px_#F2B33D]" />
                        <span className="kicker" dir="ltr">YouTube // Official</span>
                     </span>
-                    <span className="absolute top-3 end-3 inline-flex items-center gap-1.5 text-[9px] font-black tracking-[0.2em] px-2.5 py-1 rounded-full bg-[#10B981] text-black shadow-[0_0_18px_rgba(16,185,129,0.7)]" dir="ltr">
+                    <span className="absolute top-3 end-3 inline-flex items-center gap-1.5 text-[9px] font-black tracking-[0.2em] px-2.5 py-1 rounded-full bg-[#F2B33D] text-black shadow-[0_0_18px_rgba(242,179,61,0.7)]" dir="ltr">
                        <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                       XTROET
+                       FAHAD
                     </span>
                  </div>
                  {/* crest + title — straddles the melt */}
                  <div className="relative px-5 -mt-10 flex items-end gap-3.5">
-                    <div aria-hidden="true" className="absolute -top-8 inset-x-8 h-14 bg-[#10B981]/20 blur-2xl pointer-events-none" />
+                    <div aria-hidden="true" className="absolute -top-8 inset-x-8 h-14 bg-[#F2B33D]/20 blur-2xl pointer-events-none" />
                     <div className="relative shrink-0" style={{ transform: 'translateZ(45px)' }}>
-                       <div className="absolute -inset-3 bg-[#10B981]/60 blur-2xl opacity-40 group-hover:opacity-80 transition-opacity duration-500 rounded-full" />
-                       <div className="relative w-[72px] h-[72px] rounded-[22px] overflow-hidden border-2 border-[#10B981]/70 ring-4 ring-[#04120D]/90 bg-[#04120D] shadow-[0_16px_36px_rgba(0,0,0,0.65),0_0_28px_rgba(16,185,129,0.45)] transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105">
-                         <img src={CLAN_MARK} alt="XTROET logo" className="w-full h-full object-cover" />
+                       <div className="absolute -inset-3 bg-[#F2B33D]/60 blur-2xl opacity-40 group-hover:opacity-80 transition-opacity duration-500 rounded-full" />
+                       <div className="relative w-[72px] h-[72px] rounded-[22px] overflow-hidden border-2 border-[#F2B33D]/70 ring-4 ring-[#08060A]/90 bg-[#08060A] shadow-[0_16px_36px_rgba(0,0,0,0.65),0_0_28px_rgba(242,179,61,0.45)] transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-105">
+                         <img src={CLAN_MARK} alt="FAHAD logo" className="w-full h-full object-cover" />
                       </div>
-                       <span className="absolute -bottom-1 -end-1 w-7 h-7 rounded-full bg-[#FF0000] border-4 border-[#04120D] flex items-center justify-center shadow-[0_0_14px_rgba(255,0,0,0.8)]">
+                       <span className="absolute -bottom-1 -end-1 w-7 h-7 rounded-full bg-[#FF0000] border-4 border-[#08060A] flex items-center justify-center shadow-[0_0_14px_rgba(255,0,0,0.8)]">
                           <svg className="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                        </span>
                     </div>
                     <div className="min-w-0 pb-1">
-                       <h3 className="text-lg sm:text-xl font-black text-white tracking-tight leading-none" dir="ltr">XTROET</h3>
-                       <p className="text-[11px] text-white/45 font-bold mt-1">{lang === 'en' ? 'Nasser official channel' : 'قناة ناصر العنزي — الرسمية'}</p>
+                       <h3 className="text-lg sm:text-xl font-black text-white tracking-tight leading-none" dir="ltr">FAHAD</h3>
+                       <p className="text-[11px] text-white/45 font-bold mt-1">{lang === 'en' ? 'FAHAD official channel' : 'قناة فهد — الرسمية'}</p>
                     </div>
                    <p className="ms-auto text-end shrink-0 pb-1">
                       <span className="jersey block text-3xl sm:text-4xl text-white leading-none" dir="ltr">{subs}</span>
                       <span className="kicker block mt-1" style={{ color: CLAN_ORANGE }}>{lang === 'en' ? 'subs' : 'مشترك'}</span>
                    </p>
                 </div>
-                 {/* empire ribbon — XTROET official */}
+                 {/* empire ribbon — FAHAD official */}
                  <div className="px-5 mt-3.5 relative">
-                    <div className="rounded-2xl border border-[#10B981]/35 bg-gradient-to-l from-[#10B981]/15 via-[#C9A24B]/[0.07] to-transparent backdrop-blur-md px-3.5 py-2.5 flex items-center gap-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                       <span className="w-12 h-12 rounded-xl overflow-hidden border border-[#C9A24B]/40 flex items-center justify-center shrink-0 bg-black shadow-[0_0_20px_rgba(16,185,129,0.45)]">
-                          <img src="/xtroet-logo.webp" alt="XTROET emblem" loading="lazy" className="w-full h-full object-cover" />
+                    <div className="rounded-2xl border border-[#F2B33D]/35 bg-gradient-to-l from-[#F2B33D]/15 via-[#B8862B]/[0.07] to-transparent backdrop-blur-md px-3.5 py-2.5 flex items-center gap-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                       <span className="w-12 h-12 rounded-xl overflow-hidden border border-[#B8862B]/40 flex items-center justify-center shrink-0 bg-black shadow-[0_0_20px_rgba(242,179,61,0.45)]">
+                          <img src="/fahad-logo.png" alt="FAHAD emblem" loading="lazy" className="w-full h-full object-cover" />
                        </span>
                        <div className="min-w-0 flex-1">
-                          <p className="text-[12px] font-black text-white truncate">{lang === 'en' ? 'XTROET ERA — Emerald Empire' : 'عصر XTROET — إمبراطورية الزمرد'}</p>
-                          <p className="text-[10px] font-bold text-[#6EE7B7] mt-0.5" dir="ltr">XTROET • OFFICIAL</p>
+                          <p className="text-[12px] font-black text-white truncate">{lang === 'en' ? 'FAHAD ERA — Emerald Empire' : 'عصر FAHAD — مملكة الذهب'}</p>
+                          <p className="text-[10px] font-bold text-[#F2CE7C] mt-0.5" dir="ltr">FAHAD • OFFICIAL</p>
                        </div>
-                       <span className="shrink-0 text-[9px] font-black tracking-[0.2em] px-2.5 py-1.5 rounded-lg bg-[#10B981] text-black" dir="ltr">LIVE</span>
+                       <span className="shrink-0 text-[9px] font-black tracking-[0.2em] px-2.5 py-1.5 rounded-lg bg-[#F2B33D] text-black" dir="ltr">LIVE</span>
                     </div>
                  </div>
                 {/* latest video — compact row, same weight as Discord squad box */}
@@ -501,7 +506,7 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={video?.title || 'Latest video'}
-                       className="group/vid relative flex items-center gap-3 rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] p-2.5 min-h-[88px] transition-all duration-500 hover:border-[#10B981]/60 hover:-translate-y-0.5 hover:shadow-[0_18px_44px_-14px_rgba(16,185,129,0.5)]"
+                       className="group/vid relative flex items-center gap-3 rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] p-2.5 min-h-[88px] transition-all duration-500 hover:border-[#F2B33D]/60 hover:-translate-y-0.5 hover:shadow-[0_18px_44px_-14px_rgba(242,179,61,0.5)]"
                    >
                       <span className="relative w-28 aspect-video rounded-xl overflow-hidden shrink-0 bg-black border border-white/10">
                          <img
@@ -515,17 +520,17 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
                                else target.src = CLAN_BANNER_FALLBACK;
                             }}
                          />
-                          <span className="absolute inset-0 m-auto w-7 h-7 rounded-full bg-black/50 backdrop-blur border border-[#10B981]/60 flex items-center justify-center transition-transform duration-300 group-hover/vid:scale-125 shadow-[0_0_16px_rgba(16,185,129,0.6)]">
+                          <span className="absolute inset-0 m-auto w-7 h-7 rounded-full bg-black/50 backdrop-blur border border-[#F2B33D]/60 flex items-center justify-center transition-transform duration-300 group-hover/vid:scale-125 shadow-[0_0_16px_rgba(242,179,61,0.6)]">
                             <svg className="w-3 h-3 text-white fill-current translate-x-[1px] rtl:-translate-x-[1px]" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                          </span>
                       </span>
                       <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-1.5 text-[8px] font-black tracking-[0.2em] text-[#34D399]" dir="ltr">
-                             <span className="w-1 h-1 rounded-full bg-[#10B981] animate-pulse" />LATEST
+                          <span className="flex items-center gap-1.5 text-[8px] font-black tracking-[0.2em] text-[#F5D98C]" dir="ltr">
+                             <span className="w-1 h-1 rounded-full bg-[#F2B33D] animate-pulse" />LATEST
                          </span>
                          <span className="block text-[12px] sm:text-[13px] font-black text-white leading-snug line-clamp-2 mt-1">{video?.title}</span>
                       </span>
-                       <span className="shrink-0 w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 hidden sm:flex items-center justify-center text-white/40 group-hover/vid:text-black group-hover/vid:bg-[#10B981] group-hover/vid:border-[#10B981] transition-all duration-300">
+                       <span className="shrink-0 w-9 h-9 rounded-xl bg-white/[0.05] border border-white/10 hidden sm:flex items-center justify-center text-white/40 group-hover/vid:text-black group-hover/vid:bg-[#F2B33D] group-hover/vid:border-[#F2B33D] transition-all duration-300">
                          <svg className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                       </span>
                    </a>
