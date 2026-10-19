@@ -69,7 +69,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'The commander\'s pride and disciplining the slacker',
         textAr: 'بنظرة ثاقبة وحزم عسكري، رفض فهد تهاون عبدالصمد، وأمر بإحالته لإعادة التأهيل لعدم كفاءته. كانت إهانة عسكرية في محلها لضبط القطاع، لكنها في قلب عبدالصمد تحولت إلى حقد أسود وبداية لعداوة لا ترحم.',
         textEn: 'With a piercing look and military firmness, Fahad refused Abdulsamad\'s negligence and ordered his referral to rehabilitation for incompetence. It was a deserved military insult to discipline the sector, but in Abdulsamad\'s heart it turned into black hatred and the beginning of a merciless enmity.',
-        pos: 'center 0%',
+        pos: 'center 5%',
         zoom: 1.1,
     },
     {
@@ -80,7 +80,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'Alliance of the strong',
         textAr: 'بدأ عبدالصمد بتكوين فرقة كاملة هدفها إسقاط فهد. لكن القائد المحنك لم يكن فريسة سهلة؛ أخذ احتياطاته ووحّد الصفوف مع كبار المدينة.',
         textEn: 'Abdulsamad began forming a full squad aiming to topple Fahad. But the seasoned commander was no easy prey; he took precautions and united ranks with the city\'s elders.',
-        pos: 'center 0%',
+        pos: 'center 5%',
         zoom: 1.1,
     },
     {
@@ -91,7 +91,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'Backstage daggers',
         textAr: 'كثرت الشكاوى الكيدية وتصيد الأخطاء. لم تكن الحرب في الميدان بل في الغرف المغلقة.',
         textEn: 'Malicious complaints and fault-finding multiplied. The war was no longer on the field but behind closed doors.',
-        pos: 'center 30%',
+        pos: 'center 5%',
         zoom: 1.12,
     },
     {
