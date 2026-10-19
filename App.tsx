@@ -93,6 +93,8 @@ const TRANSLATIONS = {
         defaultCategory: 'Offline',
         footer: '© 2026 FAHAD. All Rights Reserved.',
         poweredBy: 'POWERED BY FAHAD ERA',
+        licenseLabel: 'Trusted license no.',
+        licenseNo: '530179',
         watchLive: 'Watch Live', joinDiscord: 'Join Discord',
         subOnly: 'SUB ONLY', dropsEnabled: 'DROPS ENABLED', noTags: 'No tags',
         shareTitle: 'FAHAD Hub', shareText: 'Check out FAHAD live on Kick!',         copied: 'Link copied!',
@@ -120,6 +122,8 @@ const TRANSLATIONS = {
         defaultCategory: 'غير متصل',
         footer: '© 2026 FAHAD — فهد. جميع الحقوق محفوظة.',
         poweredBy: 'بدعم من FAHAD ERA',
+        licenseLabel: 'رقم رخصة موثوق',
+        licenseNo: '530179',
         watchLive: 'شاهد البث', joinDiscord: 'انضم للديسكورد',
         subOnly: 'للمشتركين فقط', dropsEnabled: 'الجوائز مفعلة', noTags: 'لا يوجد وسوم',
         shareTitle: 'مركز بث فهد', shareText: 'تابع بث فهد المباشر على كيك!',         copied: 'تم نسخ الرابط!',
@@ -1209,7 +1213,7 @@ export default function App() {
                         <footer className="mt-16 md:mt-24 rounded-[28px] border border-[#B8862B]/25 bg-black/70 backdrop-blur-xl overflow-hidden relative">
                             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#F2B33D]/80 to-transparent" />
                             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[280px] max-w-[90vw] rounded-full bg-[#F2B33D]/[0.09] blur-[90px] pointer-events-none" aria-hidden="true" />
-                            <div className="p-8 md:p-12 text-center relative">
+                            <div className="px-8 pt-8 pb-16 md:px-12 md:pt-12 md:pb-24 text-center relative">
                                 {/* emblem */}
                                 <div className="relative mx-auto w-fit mb-5">
                                     <span className="halo-conic -inset-2.5" aria-hidden="true" />
@@ -1239,9 +1243,26 @@ export default function App() {
                                     <a href={FAHAD_LINKS.support} target="_blank" rel="noopener noreferrer" className="hover:text-[#F2B33D] transition-colors" dir="ltr">{SUPPORT_HOST}</a>
                                 </div>
 
-                                <div className="rule-radiant my-7 opacity-50" />
+                                <div className="rule-radiant my-9 opacity-50" />
                                 <p className="text-[11px] font-black tracking-[0.3em] text-white/50 uppercase">{t.poweredBy}</p>
-                                <p className="text-[11px] text-white/35 mt-1">{t.footer}</p>
+                                <p className="text-[11px] text-white/35 mt-1.5">{t.footer}</p>
+
+                                {/* trusted license — sits well below the copyright line */}
+                                <div className="mt-10 md:mt-14 flex flex-col items-center gap-3">
+                                    <div className="inline-flex items-center gap-3 rounded-2xl border border-[#B8862B]/30 bg-[#B8862B]/[0.07] px-5 py-3 shadow-[0_18px_44px_-22px_rgba(242,179,61,0.55)]">
+                                        <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#B8862B]/15 border border-[#B8862B]/40 shrink-0" aria-hidden="true">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F2CE7C" strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M12 2.5 4.5 5.5v6c0 4.6 3.1 8.6 7.5 10 4.4-1.4 7.5-5.4 7.5-10v-6L12 2.5Z" />
+                                                <path d="m9 12 2.2 2.2L15.4 10" />
+                                            </svg>
+                                        </span>
+                                        <span className="flex flex-col items-start leading-tight">
+                                            <span className="text-[9.5px] font-black tracking-[0.22em] uppercase text-white/40">{t.licenseLabel}</span>
+                                            <span className="text-[15px] font-black text-[#F2CE7C] tabular-nums" dir="ltr">{t.licenseNo}</span>
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-white/25" dir="ltr">VERIFIED &amp; LICENSED</p>
+                                </div>
                             </div>
                         </footer>
                     </div>
