@@ -470,8 +470,14 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             .st-begin:hover{transform:translateY(-2px) scale(1.02)}.st-begin:active{transform:scale(.97)}
             /* end screen — bold quote over the final image */
             .st-end{position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem 1.5rem;animation:st-in .8s ease both;background-size:cover;background-position:center}
-            .st-end-scrim{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(120% 80% at 50% 92%, rgba(0,0,0,.18), rgba(0,0,0,.45) 62%, rgba(0,0,0,.62) 100%)}
-            .st-end-quote{position:relative;z-index:2;font-size:clamp(1.5rem,5vw,2.6rem);line-height:1.8;font-weight:900;max-width:34ch;color:#fff;text-shadow:0 14px 56px rgba(0,0,0,1);margin-top:4rem}
+            .st-end-scrim{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(130% 90% at 50% 96%, rgba(0,0,0,.04), rgba(0,0,0,.2) 55%, rgba(0,0,0,.32) 100%)}
+            /* soft local shade right behind the words — keeps them readable
+               without dimming the whole frame */
+            .st-end-halo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+                width:min(1100px,92vw);height:min(60vh,560px);pointer-events:none;z-index:1;
+                background:radial-gradient(closest-side,rgba(0,0,0,.45),rgba(0,0,0,.22) 55%,transparent 100%);
+                filter:blur(14px)}
+            .st-end-quote{position:relative;z-index:2;font-size:clamp(1.5rem,5vw,2.6rem);line-height:1.8;font-weight:900;max-width:34ch;color:#fff;text-shadow:0 3px 16px rgba(0,0,0,.7),0 0 44px rgba(0,0,0,.45);margin-top:4rem}
             [dir="rtl"] .st-end-quote{letter-spacing:0!important}
             .st-end-meta{position:relative;z-index:2;margin-top:1.4rem;display:flex;align-items:center;justify-content:center;gap:.8rem;font-size:10.5px;font-weight:900;letter-spacing:.24em;color:rgba(255,255,255,.45);text-transform:uppercase}
             .st-end-meta i{width:5px;height:5px;transform:rotate(45deg);background:rgba(184,134,43,.9);flex:none}
@@ -587,6 +593,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             {started && ended && (
                 <div className="st-end" style={{ backgroundImage: `url(${END_IMG})` }}>
                     <span className="st-end-scrim" aria-hidden="true" />
+                    <span className="st-end-halo" aria-hidden="true" />
                     <div>
                         <span className="st-eyebrow"><span className="w-1.5 h-1.5 rotate-45 bg-[#F2B33D]" aria-hidden="true" /><span dir="ltr">{isAr ? 'النهاية' : 'THE END'}</span></span>
                         <p className={`st-end-quote mt-6 ${isAr ? 'font-arabic' : ''}`}>
