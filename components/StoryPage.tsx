@@ -29,6 +29,8 @@ interface Chapter {
     headAr: string; headEn: string;
     textAr: string; textEn: string;
     pos?: string;
+    /** where the Ken Burns zoom pivots — keeps the focal corner pinned */
+    origin?: string;
     /** Ken Burns end-zoom */
     zoom?: number;
     /** render with blurred edges for vertical art */
@@ -168,6 +170,7 @@ const CHAPTERS: Chapter[] = [
         textAr: 'رحل القائد وترك إرثاً لا يُمحى. ظنوا أن رصاصهم سينهي قصته، لكن دماءه كتبت تاريخاً جديداً، ليصبح اسمه أسطورة تطارد قاتليه إلى الأبد.',
         textEn: 'The commander departed leaving a legacy no one can erase. They thought their bullets would end his story, but his blood wrote a new history — and his name became a legend that will hunt his killers forever.',
         pos: 'left top',
+        origin: 'left top',
         zoom: 1.04,
     },
 ];
@@ -508,6 +511,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
                 <div key={ended ? 'end' : `photo-${ch}`} className="st-photo" style={{
                     backgroundImage: ended ? `url(${END_IMG})` : `url(${started ? c.img : '/album3/' + pad(1) + '.jpg'})`,
                     backgroundPosition: started ? (c.pos || 'center') : 'center',
+                    transformOrigin: c.origin || 'center',
                     ['--kb' as string]: started ? (c.zoom || 1.14) : 1.06,
                     ['--chapms' as string]: `${sceneMs}ms`,
                     zIndex: 1,
