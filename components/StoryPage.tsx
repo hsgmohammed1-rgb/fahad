@@ -7,7 +7,7 @@ import type { Language } from '../types';
    الذي طلبه فهد. تُصل إليها عبر #story وتعود للموقع عند الخروج.
    ============================================================ */
 
-const CHAPTER_MS = 9000;
+const CHAPTER_MS = 15000;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const ext = (n: number) => (n >= 8 && n <= 13 ? 'png' : 'jpg');
@@ -19,42 +19,45 @@ interface Chapter {
     headAr: string; headEn: string;
     textAr: string; textEn: string;
     pos?: string;
+    /** Ken Burns end-zoom */
     zoom?: number;
+    /** render with blurred edges for vertical art */
+    vertical?: boolean;
 }
 
-const END_IMG = `/album3/${pad(1)}.jpg`;
+const END_IMG = `/album3/${pad(20)}.png`;
 
 const CHAPTERS: Chapter[] = [
     {
-        photo: 5,
-        img: '/album3/05.jpg',
+        photo: 8,
+        img: '/album3/08.png',
         kickerAr: 'الفصل 1', kickerEn: 'Chapter 1',
         headAr: 'شرارة الطموح',
         headEn: 'The spark of ambition',
-        textAr: 'لم تكن النجوم على كتفه مجرد صدفة.. بدأ فهد المطيري مسيرته باجتهادات شخصية في أروقة المركز، عسكريٌ صاعد يربط ليله بنهاره، يباشر الحالات بشغف، ويبني سلم ترقيته بعرق الجبين وحب النظام.',
-        textEn: 'The stars on his shoulder were no coincidence. Fahad Al-Mutairi began his career with personal efforts within the center\'s halls — a rising officer linking his nights to his days, handling cases with passion, building his promotion ladder with sweat and love of order.',
+        textAr: 'لم تكن النجوم على كتفه مجرد صدفة.. بدأ فهد المطيري مسيرته باجتهادات شخصية في أروقة المركز، عسكريٌ صاعد يربط ليله بنهاره.',
+        textEn: 'The stars on his shoulder were no coincidence. Fahad Al-Mutairi began his career with personal efforts within the center\'s halls.',
         pos: 'center 25%',
         zoom: 1.12,
     },
     {
-        photo: 17,
-        img: '/album3/17.jpg',
+        photo: 11,
+        img: '/album3/11.png',
         kickerAr: 'الفصل 2', kickerEn: 'Chapter 2',
         headAr: 'حارس ليالي المدينة',
         headEn: 'Guardian of the city nights',
-        textAr: 'في الوقت الذي نام فيه الكثيرون، كان فهد يجوب شوارع المدينة المظلمة. لم تغيره الرتب، بل زادته إصراراً. صعد السلم خطوة بخطوة حتى تربع على عرش قيادة قطاع الشيرف، وأقسم أن يطهره من كل متخاذل.',
-        textEn: 'While many slept, Fahad patrolled the dark streets of the city. Ranks did not change him — they only increased his resolve. He climbed the ladder step by step until he sat on the throne of the sheriff sector command, swearing to cleanse it of every slacker.',
+        textAr: 'في الوقت الذي نام فيه الكثيرون، كان فهد يجوب شوارع المدينة المظلمة. صعد السلم خطوة بخطوة حتى تربع على عرش قيادة قطاع الشيرف.',
+        textEn: 'While many slept, Fahad patrolled the dark streets of the city. He climbed the ladder step by step until he sat on the throne of the sheriff sector command.',
         pos: 'center 35%',
         zoom: 1.12,
     },
     {
-        photo: 3,
-        img: '/album3/03.jpg',
+        photo: 12,
+        img: '/album3/12.png',
         kickerAr: 'الفصل 3', kickerEn: 'Chapter 3',
         headAr: 'شرارة ساندي شواطئ',
         headEn: 'The Sandy Beaches spark',
-        textAr: 'دوى الإنذار معلناً سرقة بنك ساندي، وهناك بدأت القصة التي ستغير كل شيء. في ساحة المعركة، اصطدمت صرامة القائد فهد المطيري ببرود العسكري العائد من إجازته الطويلة "عبدالصمد".. وكان لا بد للقائد أن يفرض هيبته.',
-        textEn: 'The alarm sounded, announcing the Sandy Bank robbery — and there began the story that would change everything. On the battlefield, Commander Fahad Al-Mutairi\'s sternness clashed with the coldness of the soldier returning from a long vacation, "Abdulsamad".. and the commander had to impose his authority.',
+        textAr: 'دوى الإنذار معلناً سرقة بنك ساندي، وهناك بدأت القصة التي ستغير كل شيء. اصطدمت صرامة القائد فهد المطيري ببرود العسكري العائد من إجازته الطويلة "عبدالصمد".. وكان لا بد للقائد أن يفرض هيبته.',
+        textEn: 'The alarm sounded, announcing the Sandy Bank robbery — and there began the story that would change everything. Commander Fahad Al-Mutairi\'s sternness clashed with the coldness of "Abdulsamad".. and the commander had to impose his authority.',
         pos: 'center 30%',
         zoom: 1.14,
     },
@@ -71,56 +74,68 @@ const CHAPTERS: Chapter[] = [
     },
     {
         photo: 18,
-        img: '/album3/18.jpg',
+        img: '/album3/17.jpg',
         kickerAr: 'الفصل 5', kickerEn: 'Chapter 5',
         headAr: 'تحالف الأقوياء',
         headEn: 'Alliance of the strong',
-        textAr: 'بدأ عبدالصمد بتكوين فرقة كاملة هدفها إسقاط فهد. لكن القائد المحنك لم يكن فريسة سهلة؛ أخذ احتياطاته ووحّد الصفوف مع كبار المدينة، مستنداً إلى قوة الشريف "بكر باكور" والقائد "كيلر تشاندلر" لردع المؤامرة.',
-        textEn: 'Abdulsamad began forming a full squad aiming to topple Fahad. But the seasoned commander was no easy prey; he took precautions and united ranks with the city\'s elders, relying on the strength of Sheriff "Bakr Bakur" and Commander "Killer Chandler" to thwart the conspiracy.',
+        textAr: 'بدأ عبدالصمد بتكوين فرقة كاملة هدفها إسقاط فهد. لكن القائد المحنك لم يكن فريسة سهلة؛ أخذ احتياطاته ووحّد الصفوف مع كبار المدينة.',
+        textEn: 'Abdulsamad began forming a full squad aiming to topple Fahad. But the seasoned commander was no easy prey; he took precautions and united ranks with the city\'s elders.',
         pos: 'center 45%',
         zoom: 1.1,
     },
     {
-        photo: 14,
-        img: '/album3/14.jpg',
+        photo: 5,
+        img: '/album3/05.jpg',
+        vertical: true,
         kickerAr: 'الفصل 6', kickerEn: 'Chapter 6',
         headAr: 'خناجر الكواليس',
         headEn: 'Backstage daggers',
-        textAr: 'كثرت الشكاوى الكيدية وتصيد الأخطاء. لم تكن الحرب في الميدان بل في الغرف المغلقة. أدرك فهد أن الخطر لم يعد من المجرمين، بل من أولئك الذين يقفون في نفس الخندق ويحملون نفس الشعار.',
-        textEn: 'Malicious complaints and fault-finding multiplied. The war was no longer on the field but behind closed doors. Fahad realized the danger was no longer from criminals, but from those standing in the same trench and carrying the same insignia.',
-        pos: 'center 50%',
-        zoom: 1.13,
+        textAr: 'كثرت الشكاوى الكيدية وتصيد الأخطاء. لم تكن الحرب في الميدان بل في الغرف المغلقة.',
+        textEn: 'Malicious complaints and fault-finding multiplied. The war was no longer on the field but behind closed doors.',
+        pos: 'center 30%',
+        zoom: 1.06,
     },
     {
-        photo: 9,
-        img: '/album3/09.png',
+        photo: 13,
+        img: '/album3/13.png',
         kickerAr: 'الفصل 7', kickerEn: 'Chapter 7',
         headAr: 'عزلة الجبل',
         headEn: 'The mountain\'s isolation',
-        textAr: 'مهما كان الجبل قوياً، فإن رياح الغدر تنحت فيه. حين تحول النظام الذي أفنى عمره في حمايته إلى سلاح ضده، تُرك القائد وحيداً يواجه مصيراً نسجته خيوط الحقد والانتقام.',
-        textEn: 'However strong the mountain, the winds of betrayal carve into it. When the system he spent his life protecting turned into a weapon against him, the commander was left alone to face a fate woven by threads of spite and revenge.',
+        textAr: 'مهما كان الجبل قوياً، فإن رياح الغدر تنحت فيه. ترك القائد وحيداً يواجه مصيراً نسجته خيوط الحقد.',
+        textEn: 'However strong the mountain, the winds of betrayal carve into it. The commander was left alone to face a fate woven by spite.',
         pos: 'center 55%',
         zoom: 1.11,
     },
     {
-        photo: 6,
-        img: '/album3/06.jpg',
+        photo: 10,
+        img: '/album3/10.png',
         kickerAr: 'الفصل 8', kickerEn: 'Chapter 8',
         headAr: 'ميزان الظلم',
         headEn: 'The scale of injustice',
-        textAr: 'سقطت العدالة في قاعة المحكمة قبل أن يسقط القائد. تم القبض على فهد بظلم قاهر وبتهم ملفقة من فرقة عبدالصمد. غابت الحقيقة، وحضرت تصفية الحسابات الشخصية تحت غطاء القانون.',
-        textEn: 'Justice fell in the courtroom before the commander fell. Fahad was arrested with oppressive injustice and fabricated charges from Abdulsamad\'s squad. Truth vanished, and personal score-settling attended under the cover of law.',
+        textAr: 'سقطت العدالة في قاعة المحكمة قبل أن يسقط القائد. تم القبض على فهد بظلم قاهر وتهم ملفقة.',
+        textEn: 'Justice fell in the courtroom before the commander fell. Fahad was arrested with oppressive injustice and fabricated charges.',
         pos: 'center 50%',
-        zoom: 1.12,
+        zoom: 1.08,
     },
     {
-        photo: 1,
-        img: '/album3/01.jpg',
+        photo: 21,
+        img: '/album3/21.png',
         kickerAr: 'الفصل 9', kickerEn: 'Chapter 9',
+        headAr: 'فصل الغدر',
+        headEn: 'The betrayal chapter',
+        textAr: 'قبل النهاية جاء الحساب — ما تبقى من قائد وثق بالرجال الخطأ.',
+        textEn: 'Before the end came the reckoning — what remained of a commander who trusted the wrong men.',
+        pos: 'center 50%',
+        zoom: 1.1,
+    },
+    {
+        photo: 15,
+        img: '/album3/15.jpg',
+        kickerAr: 'الفصل 10', kickerEn: 'Chapter 10',
         headAr: 'خلود الأساطير (النهاية)',
         headEn: 'The immortality of legends (The end)',
-        textAr: 'في مشهد تقشعر له الأبدان، وأمام أعين "شبيب" و"عبدالله المهنا"، نُفذ حكم الإعدام الجائر بحق القائد فهد المطيري ليروي بدمائه قصة غدر لن تنساها المدينة.',
-        textEn: 'In a chilling scene, before the eyes of "Shuaib" and "Abdullah Al-Muhanna", the unjust execution sentence was carried out against Commander Fahad Al-Mutairi, narrating with his blood a story of betrayal the city will never forget.',
+        textAr: 'في مشهد تقشعر له الأبدان، نُفذ حكم الإعدام الجائر بحق القائد فهد المطيري ليروي بدمائه قصة غدر لن تنساها المدينة.',
+        textEn: 'In a chilling scene, the unjust execution sentence was carried out against Commander Fahad Al-Mutairi, narrating with his blood a story of betrayal the city will never forget.',
         pos: 'center 50%',
         zoom: 1.15,
     },
@@ -370,18 +385,32 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             .st-end-meta i{width:5px;height:5px;transform:rotate(45deg);background:rgba(184,134,43,.9);flex:none}
             .st-end-btns{position:relative;z-index:2;margin-top:2.6rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.8rem}
             a:focus-visible,button:focus-visible{outline:2px solid ${GOLD};outline-offset:3px;border-radius:14px}
+            /* vertical photo — full art with blurred edges */
+            .st-photo-vert{position:absolute;inset:0;overflow:hidden;background:#000;animation:st-kb 9.5s ease-out forwards;will-change:transform}
+            .st-photo-vert-blur{position:absolute;inset:-20%;width:140%;height:140%;background-size:cover;background-position:center;filter:blur(46px) brightness(.55);opacity:.9;transform:scale(var(--kbv,1.1))}
+            .st-photo-vert-img{position:absolute;inset:50% 50% 0 0;width:100%;height:100%;object-fit:contain;object-position:center;transform:translate(0,-50%);will-change:transform}
             @media(prefers-reduced-motion:reduce){
-                .st-photo,.st-grain,.st-bolt,.st-pol,.st-seg.cur .st-seg-fill{animation:none!important}
+                .st-photo,.st-grain,.st-bolt,.st-pol,.st-seg.cur .st-seg-fill,.st-photo-vert,.st-photo-vert-blur,.st-photo-vert-img{animation:none!important}
                 .st-rise{opacity:1!important;transform:none!important}.st-rain{display:none}
             }
             `}</style>
 
-            <div className="st-photo" style={{
-                backgroundImage: ended ? `url(${END_IMG})` : `url(${started ? c.img : '/album3/' + pad(1) + '.jpg'})`,
-                backgroundPosition: started ? (c.pos || 'center') : 'center',
-                ['--kb' as string]: started ? (c.zoom || 1.14) : 1.06,
-                zIndex: 1,
-            }} aria-hidden="true" />
+            {started && !ended && c.vertical ? (
+                <div className="st-photo-vert" style={{
+                    ['--kbv' as string]: c.zoom || 1.06,
+                    zIndex: 1,
+                }} aria-hidden="true">
+                    <div className="st-photo-vert-blur" style={{ backgroundImage: `url(${c.img})`, backgroundPosition: c.pos || 'center' }} />
+                    <img className="st-photo-vert-img" src={c.img} alt="" decoding="async" loading="lazy" />
+                </div>
+            ) : (
+                <div className="st-photo" style={{
+                    backgroundImage: ended ? `url(${END_IMG})` : `url(${started ? c.img : '/album3/' + pad(1) + '.jpg'})`,
+                    backgroundPosition: started ? (c.pos || 'center') : 'center',
+                    ['--kb' as string]: started ? (c.zoom || 1.14) : 1.06,
+                    zIndex: 1,
+                }} aria-hidden="true" />
+            )}
             <span className="st-scrim" style={{ zIndex: 2 }} aria-hidden="true" />
             <span className="st-grain" style={{ zIndex: 3 }} aria-hidden="true" />
             <span className="st-scan" style={{ zIndex: 4 }} aria-hidden="true" />
@@ -400,7 +429,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
                     <div className="relative" style={{ zIndex: 2 }}>
                         <span className="st-eyebrow"><span className="w-1.5 h-1.5 rounded-full bg-[#F2B33D] animate-pulse" aria-hidden="true" /><span dir="ltr">فيلم قصير</span></span>
                         <h1 className={`st-title ${isAr ? 'font-arabic' : ''}`}>{isAr ? 'سيرة فهد المطيري' : 'The saga of Fahad Al-Mutairi'}</h1>
-                        <div className="st-meta"><span>{isAr ? 'فهد' : 'FAHAD'}</span><i aria-hidden="true" /><span dir="ltr">FAHAD ERA</span><i aria-hidden="true" /><span>{isAr ? '٩ فصول' : '9 chapters'}</span></div>
+                        <div className="st-meta"><span>{isAr ? 'فهد' : 'FAHAD'}</span><i aria-hidden="true" /><span dir="ltr">FAHAD ERA</span><i aria-hidden="true" />                            <span>{isAr ? '١٠ فصول' : '10 chapters'}</span></div>
                         <div><button type="button" className="st-begin" onClick={() => setStarted(true)} autoFocus>
                             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#08060A] text-[#F2CE7C]" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
                             {isAr ? 'ابدأ السيرة' : 'Begin the story'}
