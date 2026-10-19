@@ -1214,17 +1214,14 @@ export default function App() {
                             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#F2B33D]/80 to-transparent" />
                             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[280px] max-w-[90vw] rounded-full bg-[#F2B33D]/[0.09] blur-[90px] pointer-events-none" aria-hidden="true" />
                             <div className="px-8 pt-8 pb-16 md:px-12 md:pt-12 md:pb-24 text-center relative">
-                                {/* giant outlined wordmark — sits at the very top of the footer */}
-                                <p className="font-gaming text-[22vw] md:text-[150px] leading-none text-stroke opacity-40 select-none -mb-2 md:-mb-4" dir="ltr" aria-hidden="true">FAHAD</p>
-
-                                {/* emblem — right under the wordmark */}
-                                <div className="relative mx-auto w-fit mt-4 md:mt-6">
+                                {/* emblem */}
+                                <div className="relative mx-auto w-fit mb-5">
                                     <span className="halo-conic -inset-2.5" aria-hidden="true" />
                                     <img src={branding.profileImage} alt="FAHAD" className="relative w-16 h-16 rounded-full object-cover border-2 border-[#FDEFC9]/70 shadow-[0_0_44px_rgba(242,179,61,0.5)]" loading="lazy" />
                                 </div>
 
-                                {/* solid name */}
-                                <p className="fahad-text text-2xl md:text-3xl font-black tracking-[0.30em] mt-4 relative" dir="ltr">FAHAD</p>
+                                <p className="font-gaming text-[22vw] md:text-[150px] leading-none text-stroke opacity-40 select-none" dir="ltr" aria-hidden="true">FAHAD</p>
+                                <p className="fahad-text text-2xl md:text-3xl font-black tracking-[0.30em] -mt-3 md:-mt-6 relative" dir="ltr">FAHAD</p>
 
                                 {/* every social */}
                                 <div className="flex flex-wrap justify-center gap-2.5 mt-7 relative">
