@@ -94,7 +94,7 @@ const CHAPTERS: Chapter[] = [
     },
     {
         photo: 5,
-        img: '/album3/05.jpg',
+        img: '/album3/23.jpg',
         kickerAr: 'الفصل 6', kickerEn: 'Chapter 6',
         headAr: 'خناجر الكواليس',
         headEn: 'Backstage daggers',
