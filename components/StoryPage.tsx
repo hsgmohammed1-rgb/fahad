@@ -167,7 +167,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'The immortality of legends',
         textAr: 'رحل القائد وترك إرثاً لا يُمحى. ظنوا أن رصاصهم سينهي قصته، لكن دماءه كتبت تاريخاً جديداً، ليصبح اسمه أسطورة تطارد قاتليه إلى الأبد.',
         textEn: 'The commander departed leaving a legacy no one can erase. They thought their bullets would end his story, but his blood wrote a new history — and his name became a legend that will hunt his killers forever.',
-        pos: 'center 25%',
+        pos: 'left top',
         zoom: 1.04,
     },
 ];
