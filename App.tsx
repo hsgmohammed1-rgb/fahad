@@ -858,6 +858,53 @@ export default function App() {
     const [lang, setLang] = useState<Language>('ar');
     const [branding] = useState({ profileImage: DEFAULT_PROFILE_IMAGE, bannerImage: PC_BACKGROUND });
 
+    /* ---------- live social / search preview tags ----------
+       Keeps the WhatsApp / X / Facebook / Discord card in sync with
+       the current language and live state, so a shared link always
+       shows the right title, description and the gold banner.        */
+    useEffect(() => {
+        const SITE = 'https://fahad89.vercel.app/';
+        const BANNER = `${SITE}og-banner.png`;
+        const isAr = lang === 'ar';
+        const title = isAr
+            ? 'فهد المطيري | FAHAD Official — مملكة الذهب 💛'
+            : 'Fahad Al-Mutairi | FAHAD Official — The Golden Kingdom 💛';
+        const desc = isAr
+            ? 'بث مباشر على كيك، سيرة فهد المصوّرة، وتحديات أسطورية في مملكة الذهب. فهد كيك • فهد المطيري • فahad89 • FAHAD ERA.'
+            : 'Live on Kick, the visual sirah of Fahad, and legendary challenges in the Golden Kingdom. fahad • fahad89 • FAHAD ERA.';
+
+        const set = (attr: 'name' | 'property', key: string, value: string) => {
+            let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+            if (!el) {
+                el = document.createElement('meta');
+                el.setAttribute(attr, key);
+                document.head.appendChild(el);
+            }
+            el.setAttribute('content', value);
+        };
+
+        set('name', 'title', title);
+        set('name', 'description', desc);
+        set('property', 'og:title', title);
+        set('property', 'og:description', desc);
+        set('property', 'og:url', SITE);
+        set('property', 'og:image', BANNER);
+        set('property', 'og:image:secure_url', BANNER);
+        set('name', 'twitter:title', title);
+        set('name', 'twitter:description', desc);
+        set('name', 'twitter:url', SITE);
+        set('name', 'twitter:image', BANNER);
+
+        document.title = title;
+        let canon = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+        if (!canon) {
+            canon = document.createElement('link');
+            canon.rel = 'canonical';
+            document.head.appendChild(canon);
+        }
+        canon.href = SITE;
+    }, [lang]);
+
     const [socialStats, setSocialStats] = useState<Record<string, string>>({
         'KICK': '—', 'TikTok': '—', 'X': '19.0K+', 'Snapchat': '—'
     });
@@ -939,8 +986,13 @@ export default function App() {
     }, [fetchKickStatus]);
 
     const handleShare = async () => {
-        const shareUrl = FAHAD_LINKS.kick;
-        if (navigator.share) { try { await navigator.share({ title: t.shareTitle, text: t.shareText, url: shareUrl }); } catch { /* dismissed */ } }
+        // share the site itself — the OG/Twitter card renders the gold banner
+        const shareUrl = 'https://fahad89.vercel.app/';
+        const title = lang === 'ar' ? 'فهد المطيري | FAHAD Official — مملكة الذهب 💛' : 'Fahad Al-Mutairi | FAHAD Official 💛';
+        const text = lang === 'ar'
+            ? 'فهد كيك • بث مباشر وتحديات أسطورية وسيرة مصوّرة — فهد المطيري، FAHAD ERA.'
+            : 'fahad89 • Live on Kick, legendary challenges and the visual sirah of Fahad — FAHAD ERA.';
+        if (navigator.share) { try { await navigator.share({ title, text, url: shareUrl }); } catch { /* dismissed */ } }
         else { try { await navigator.clipboard.writeText(shareUrl); } catch { /* clipboard blocked */ } alert(t.copied); }
     };
 

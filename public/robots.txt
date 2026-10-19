@@ -1,4 +1,45 @@
+# robots.txt — FAHAD | فهد المطيري
+# https://fahad89.vercel.app/
+
 User-agent: *
 Allow: /
 
-Sitemap: https://fahad.vercel.app/sitemap.xml
+# crawl everything, just keep the noise out of the index
+Disallow: /api/
+Disallow: /iABS_AR-main%20-%20Copy/
+
+# search engines that read the og:/twitter: card for link previews
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+
+User-agent: Pinterestbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://fahad89.vercel.app/sitemap.xml
