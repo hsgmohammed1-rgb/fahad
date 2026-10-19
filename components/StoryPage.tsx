@@ -226,7 +226,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
     const musicOnRef = useRef(true);
     useEffect(() => { musicOnRef.current = musicOn; }, [musicOn]);
     useEffect(() => {
-        const a = new Audio('/1005.MP3');
+        const a = new Audio('/album3/9e77a4d5096f2bc167d5f9a93115903f_1.mp3');
         a.loop = true; a.volume = 0.75; a.preload = 'auto';
         audioRef.current = a;
         const kick = () => { if (musicOnRef.current && a.paused) a.play().catch(() => { }); };
