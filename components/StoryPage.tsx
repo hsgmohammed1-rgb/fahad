@@ -149,8 +149,8 @@ const CHAPTERS: Chapter[] = [
         zoom: 1.08,
     },
     {
-        photo: 25,
-        img: '/album3/25.png',
+        photo: 27,
+        img: '/album3/27.png',
         kickerAr: 'الفصل 11', kickerEn: 'Chapter 11',
         headAr: 'اغتِيَالُ العَدالَة',
         headEn: 'The murder of justice',
@@ -177,7 +177,7 @@ const POLAROIDS = [
     { src: '/album3/08.png', rot: -9, x: '6%', y: '12%', s: 1 },
     { src: '/album3/26.png', rot: 7, x: '82%', y: '10%', s: 0.92 },
     { src: '/album3/12.png', rot: -6, x: '12%', y: '66%', s: 0.95 },
-    { src: '/album3/25.png', rot: 8, x: '76%', y: '64%', s: 1.05 },
+    { src: '/album3/27.png', rot: 8, x: '76%', y: '64%', s: 1.05 },
     { src: '/album3/24.png', rot: -4, x: '46%', y: '78%', s: 0.8 },
 ];
 

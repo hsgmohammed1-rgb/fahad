@@ -11,7 +11,7 @@ export const ALBUM3_FILES: string[] = [
     '01.jpg', '02.jpg', '03.jpg', '04.jpg', '05.jpg', '06.jpg', '07.jpg',
     '08.png', '09.png', '10.png', '11.png', '12.png', '13.png',
     '14.jpg', '15.jpg', '16.jpg', '17.jpg', '18.jpg', '19.jpg',
-    '20.png', '21.png', '22.jpg', '23.jpg', '24.png', '25.png', '26.png',
+    '20.png', '21.png', '22.jpg', '23.jpg', '24.png', '25.png', '26.png', '27.png',
 ];
 
 export const ALBUM3_COUNT = ALBUM3_FILES.length;
