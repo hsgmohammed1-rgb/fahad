@@ -420,7 +420,8 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             <span className="st-bar top" aria-hidden="true" /><span className="st-bar bot" aria-hidden="true" /><span className="st-vig" aria-hidden="true" />
 
             {!started && (
-                <div className="st-intro">
+                <div className="st-intro" style={{ backgroundImage: `url(/album3/09.png)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                    <span className="absolute inset-0 bg-black/55" aria-hidden="true" />
                     {POLAROIDS.map((p, i) => (
                         <span key={p.src} className="st-pol" style={{ left: p.x, top: p.y, ['--r' as string]: `${p.rot}deg`, transform: `scale(${p.s})`, animationDelay: `${i * -1.7}s`, zIndex: 1 }} aria-hidden="true">
                             <img src={p.src} alt="" loading="lazy" />
