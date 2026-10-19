@@ -92,7 +92,7 @@ const TRANSLATIONS = {
         defaultStreamTitle: 'CHECK OUT THE VODS | FOLLOW NOW',
         defaultCategory: 'Offline',
         footer: '© 2026 FAHAD. All Rights Reserved.',
-        poweredBy: 'POWERED BY FAHAD ERA',
+        poweredBy: 'POWERED BY HSG',
         licenseLabel: 'Trusted license no.',
         licenseNo: '530179',
         watchLive: 'Watch Live', joinDiscord: 'Join Discord',
@@ -121,7 +121,7 @@ const TRANSLATIONS = {
         defaultStreamTitle: 'تابع البثوث السابقة | تابعني الآن',
         defaultCategory: 'غير متصل',
         footer: '© 2026 FAHAD — فهد. جميع الحقوق محفوظة.',
-        poweredBy: 'بدعم من FAHAD ERA',
+        poweredBy: 'POWERED BY HSG',
         licenseLabel: 'رقم رخصة موثوق',
         licenseNo: '530179',
         watchLive: 'شاهد البث', joinDiscord: 'انضم للديسكورد',
@@ -1244,8 +1244,7 @@ export default function App() {
                                 </div>
 
                                 <div className="rule-radiant my-9 opacity-50" />
-                                <p className="text-[11px] font-black tracking-[0.3em] text-white/50 uppercase">{t.poweredBy}</p>
-                                <p className="text-[11px] text-white/35 mt-1.5">{t.footer}</p>
+                                <p className="text-[11px] text-white/35">{t.footer}</p>
 
                                 {/* trusted license — sits well below the copyright line */}
                                 <div className="mt-10 md:mt-14 flex flex-col items-center gap-3">
@@ -1263,6 +1262,9 @@ export default function App() {
                                     </div>
                                     <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-white/25" dir="ltr">VERIFIED &amp; LICENSED</p>
                                 </div>
+
+                                {/* powered by — the last line in the footer */}
+                                <p className="mt-10 md:mt-14 text-[11px] font-black tracking-[0.3em] text-white/50 uppercase" dir="ltr">{t.poweredBy}</p>
                             </div>
                         </footer>
                     </div>
