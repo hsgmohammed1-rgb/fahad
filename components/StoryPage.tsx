@@ -7,7 +7,7 @@ import type { Language } from '../types';
    الذي طلبه فهد. تُصل إليها عبر #story وتعود للموقع عند الخروج.
    ============================================================ */
 
-const CHAPTER_MS = 15000;
+const CHAPTER_MS = 35000;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const ext = (n: number) => (n >= 8 && n <= 13 ? 'png' : 'jpg');
@@ -47,7 +47,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'Guardian of the city nights',
         textAr: 'في الوقت الذي نام فيه الكثيرون، كان فهد يجوب شوارع المدينة المظلمة. صعد السلم خطوة بخطوة حتى تربع على عرش قيادة قطاع الشيرف.',
         textEn: 'While many slept, Fahad patrolled the dark streets of the city. He climbed the ladder step by step until he sat on the throne of the sheriff sector command.',
-        pos: 'center 35%',
+        pos: 'center 75%',
         zoom: 1.12,
     },
     {
@@ -58,18 +58,18 @@ const CHAPTERS: Chapter[] = [
         headEn: 'The Sandy Beaches spark',
         textAr: 'دوى الإنذار معلناً سرقة بنك ساندي، وهناك بدأت القصة التي ستغير كل شيء. اصطدمت صرامة القائد فهد المطيري ببرود العسكري العائد من إجازته الطويلة "عبدالصمد".. وكان لا بد للقائد أن يفرض هيبته.',
         textEn: 'The alarm sounded, announcing the Sandy Bank robbery — and there began the story that would change everything. Commander Fahad Al-Mutairi\'s sternness clashed with the coldness of "Abdulsamad".. and the commander had to impose his authority.',
-        pos: 'center 30%',
+        pos: 'center 0%',
         zoom: 1.14,
     },
     {
         photo: 11,
-        img: '/album3/11.png',
+        img: '/album3/19.jpg',
         kickerAr: 'الفصل 4', kickerEn: 'Chapter 4',
         headAr: 'كبرياء القائد وتأديب المتخاذل',
         headEn: 'The commander\'s pride and disciplining the slacker',
         textAr: 'بنظرة ثاقبة وحزم عسكري، رفض فهد تهاون عبدالصمد، وأمر بإحالته لإعادة التأهيل لعدم كفاءته. كانت إهانة عسكرية في محلها لضبط القطاع، لكنها في قلب عبدالصمد تحولت إلى حقد أسود وبداية لعداوة لا ترحم.',
         textEn: 'With a piercing look and military firmness, Fahad refused Abdulsamad\'s negligence and ordered his referral to rehabilitation for incompetence. It was a deserved military insult to discipline the sector, but in Abdulsamad\'s heart it turned into black hatred and the beginning of a merciless enmity.',
-        pos: 'center 40%',
+        pos: 'center 0%',
         zoom: 1.1,
     },
     {
@@ -80,20 +80,19 @@ const CHAPTERS: Chapter[] = [
         headEn: 'Alliance of the strong',
         textAr: 'بدأ عبدالصمد بتكوين فرقة كاملة هدفها إسقاط فهد. لكن القائد المحنك لم يكن فريسة سهلة؛ أخذ احتياطاته ووحّد الصفوف مع كبار المدينة.',
         textEn: 'Abdulsamad began forming a full squad aiming to topple Fahad. But the seasoned commander was no easy prey; he took precautions and united ranks with the city\'s elders.',
-        pos: 'center 45%',
+        pos: 'center 0%',
         zoom: 1.1,
     },
     {
         photo: 5,
         img: '/album3/05.jpg',
-        vertical: true,
         kickerAr: 'الفصل 6', kickerEn: 'Chapter 6',
         headAr: 'خناجر الكواليس',
         headEn: 'Backstage daggers',
         textAr: 'كثرت الشكاوى الكيدية وتصيد الأخطاء. لم تكن الحرب في الميدان بل في الغرف المغلقة.',
         textEn: 'Malicious complaints and fault-finding multiplied. The war was no longer on the field but behind closed doors.',
         pos: 'center 30%',
-        zoom: 1.06,
+        zoom: 1.12,
     },
     {
         photo: 13,
@@ -103,8 +102,8 @@ const CHAPTERS: Chapter[] = [
         headEn: 'The mountain\'s isolation',
         textAr: 'مهما كان الجبل قوياً، فإن رياح الغدر تنحت فيه. ترك القائد وحيداً يواجه مصيراً نسجته خيوط الحقد.',
         textEn: 'However strong the mountain, the winds of betrayal carve into it. The commander was left alone to face a fate woven by spite.',
-        pos: 'center 55%',
-        zoom: 1.11,
+        pos: 'center 5%',
+        zoom: 1.04,
     },
     {
         photo: 10,
@@ -136,8 +135,8 @@ const CHAPTERS: Chapter[] = [
         headEn: 'The immortality of legends (The end)',
         textAr: 'في مشهد تقشعر له الأبدان، نُفذ حكم الإعدام الجائر بحق القائد فهد المطيري ليروي بدمائه قصة غدر لن تنساها المدينة.',
         textEn: 'In a chilling scene, the unjust execution sentence was carried out against Commander Fahad Al-Mutairi, narrating with his blood a story of betrayal the city will never forget.',
-        pos: 'center 50%',
-        zoom: 1.15,
+        pos: 'center 0%',
+        zoom: 1.03,
     },
 ];
 
