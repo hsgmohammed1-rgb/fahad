@@ -7,28 +7,30 @@ import type { Language } from '../types';
    swipe, filmstrip, keyboard, autoplay and a full lightbox.
    ============================================================ */
 
-const PHOTOS = Array.from({ length: 17 }, (_, i) => ({
-    src: `/album/${String(i + 1).padStart(2, '0')}.jpg`,
+const PHOTOS = Array.from({ length: 19 }, (_, i) => ({
+    src: `/album3/${String(i + 1).padStart(2, '0')}.jpg`,
     n: i + 1,
 }));
 
 /* ---------- EDITABLE COPY — replace the text here when the final version arrives ---------- */
 const IDENTITY = {
     ar: {
-        kicker: 'حارس مملكة الذهب',
-        name: 'فهد',
-        latin: 'FAHAD',
-        short: 'صانع محتوى سعودي، بنى مملكته من الصفر — بثوث أسطورية وتحديات ما تنسى.',
-        date: 'FAHAD ERA',
-        chips: ['بث مباشر', 'تحديات', 'مجتمع', 'FAHAD'],
+        kicker: 'درع العدالة المغدور',
+        name: 'القائد فهد',
+        latin: 'CMDR. FAHAD AL-MUTAIRI',
+        short: 'عسكريٌ كافح حتى تربع على قيادة قطاع الشيرف لفرض النظام. واجه مؤامرات الكواليس، وتلفيق التهم، وخيانة الزملاء، لتنتهي مسيرته الأسطورية بإعدامٍ جائر خلّده في صفحات التاريخ.',
+        date: 'سقوط الشيرف',
+        dateSmall: 'نهاية الحقبة',
+        chips: ['قيادة', 'غدر', 'قطاع الشيرف', 'العدالة'],
     },
     en: {
-        kicker: 'The character of FAHAD',
-        name: 'FAHAD',
+        kicker: 'Shield of Betrayed Justice',
+        name: 'CMDR. FAHAD AL-MUTAIRI',
         latin: 'FAHAD',
-        short: 'A Saudi creator who built his kingdom from zero — epic streams and unforgettable challenges.',
-        date: 'FAHAD ERA',
-        chips: ['Live', 'Challenges', 'Community', 'FAHAD'],
+        short: 'A soldier who fought until he took command of the sheriff sector to enforce order. He faced backstage conspiracies, fabricated charges, and colleague betrayal, until his legendary career ended with an unjust execution immortalized in the pages of history.',
+        date: "Sheriff's Fall",
+        dateSmall: 'End of Era',
+        chips: ['Command', 'Betrayal', 'Sheriff Sector', 'Justice'],
     },
 } as const;
 
@@ -354,7 +356,7 @@ export const AlbumSection: React.FC<{ lang: Language }> = ({ lang }) => {
                         <div className="relative border-t border-white/[0.07] bg-black/35">
                             <div className="px-4 sm:px-6 pt-4 pb-3 flex items-center justify-between gap-3">
                                 <span className="text-[10px] font-black uppercase text-white/30">
-                                    {isAr ? 'كل الصور' : 'All frames'}
+                                    {isAr ? 'أرشيف الصور' : 'Archive Photos'}
                                 </span>
                                 <span className="text-[10px] font-black text-[#B8862B]/80" dir="ltr">{pad(total)}</span>
                             </div>
@@ -427,7 +429,7 @@ export const AlbumSection: React.FC<{ lang: Language }> = ({ lang }) => {
                                 </span>
                                 <div className="min-w-0">
                                     <p className="text-[10px] font-black uppercase text-white/35">
-                                        {isAr ? 'تاريخ التنفيذ' : 'Date of execution'}
+                                        {isAr ? copy.dateSmall : 'End of Era'}
                                     </p>
                                     <p className="text-[15px] sm:text-base font-black text-[#F2CE7C] mt-0.5" dir="ltr">{copy.date}</p>
                                 </div>
@@ -451,7 +453,7 @@ export const AlbumSection: React.FC<{ lang: Language }> = ({ lang }) => {
                                     <span className="alb-prime-ic" aria-hidden="true">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="#08060A" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
                                     </span>
-                                    {isAr ? 'السيرة السينمائية' : 'The cinematic story'}
+                                    {isAr ? 'استعرض القصة الوثائقية' : 'The cinematic story'}
                                 </a>
 
                                 <div className="flex flex-wrap items-center gap-3">
@@ -461,7 +463,7 @@ export const AlbumSection: React.FC<{ lang: Language }> = ({ lang }) => {
                                         <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#F2B33D]/20 text-[#F2CE7C]" aria-hidden="true">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                                         </span>
-                                        {isAr ? 'شاهد البث' : 'Watch Live'}
+                                        {isAr ? 'تفاصيل المؤامرة' : 'Watch Live'}
                                     </a>
 
                                     <button
@@ -472,7 +474,7 @@ export const AlbumSection: React.FC<{ lang: Language }> = ({ lang }) => {
                                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" aria-hidden="true">
                                             <rect x="3" y="5" width="18" height="14" rx="3" /><circle cx="9" cy="11" r="2" /><path d="M21 16l-4.5-4.5L7 19" />
                                         </svg>
-                                        {isAr ? `كل الصور (${total})` : `All photos (${total})`}
+                                        {isAr ? `أرشيف الصور (${total})` : `All photos (${total})`}
                                     </button>
                                 </div>
                             </div>
