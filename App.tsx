@@ -1214,14 +1214,17 @@ export default function App() {
                             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-l from-transparent via-[#F2B33D]/80 to-transparent" />
                             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[280px] max-w-[90vw] rounded-full bg-[#F2B33D]/[0.09] blur-[90px] pointer-events-none" aria-hidden="true" />
                             <div className="px-8 pt-8 pb-16 md:px-12 md:pt-12 md:pb-24 text-center relative">
-                                {/* emblem */}
-                                <div className="relative mx-auto w-fit mb-5">
+                                {/* giant outlined wordmark — sits at the very top of the footer */}
+                                <p className="font-gaming text-[22vw] md:text-[150px] leading-none text-stroke opacity-40 select-none -mb-2 md:-mb-4" dir="ltr" aria-hidden="true">FAHAD</p>
+
+                                {/* emblem — right under the wordmark */}
+                                <div className="relative mx-auto w-fit mt-4 md:mt-6">
                                     <span className="halo-conic -inset-2.5" aria-hidden="true" />
                                     <img src={branding.profileImage} alt="FAHAD" className="relative w-16 h-16 rounded-full object-cover border-2 border-[#FDEFC9]/70 shadow-[0_0_44px_rgba(242,179,61,0.5)]" loading="lazy" />
                                 </div>
 
-                                <p className="font-gaming text-[22vw] md:text-[150px] leading-none text-stroke opacity-40 select-none" dir="ltr" aria-hidden="true">FAHAD</p>
-                                <p className="fahad-text text-2xl md:text-3xl font-black tracking-[0.30em] -mt-3 md:-mt-6 relative" dir="ltr">FAHAD</p>
+                                {/* solid name */}
+                                <p className="fahad-text text-2xl md:text-3xl font-black tracking-[0.30em] mt-4 relative" dir="ltr">FAHAD</p>
 
                                 {/* every social */}
                                 <div className="flex flex-wrap justify-center gap-2.5 mt-7 relative">
@@ -1243,11 +1246,11 @@ export default function App() {
                                     <a href={FAHAD_LINKS.support} target="_blank" rel="noopener noreferrer" className="hover:text-[#F2B33D] transition-colors" dir="ltr">{SUPPORT_HOST}</a>
                                 </div>
 
-                                <div className="rule-radiant my-9 opacity-50" />
-                                <p className="text-[11px] text-white/35">{t.footer}</p>
+                                {/* ===== RIGHTS BLOCK ===== */}
+                                <div className="mt-12 md:mt-16 flex flex-col items-center gap-5">
+                                    <div className="rule-radiant w-full max-w-md opacity-50" />
 
-                                {/* trusted license — sits well below the copyright line */}
-                                <div className="mt-10 md:mt-14 flex flex-col items-center gap-3">
+                                    {/* 1 — trusted license */}
                                     <div className="inline-flex items-center gap-3 rounded-2xl border border-[#B8862B]/30 bg-[#B8862B]/[0.07] px-5 py-3 shadow-[0_18px_44px_-22px_rgba(242,179,61,0.55)]">
                                         <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-[#B8862B]/15 border border-[#B8862B]/40 shrink-0" aria-hidden="true">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F2CE7C" strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round">
@@ -1259,12 +1262,15 @@ export default function App() {
                                             <span className="text-[9.5px] font-black tracking-[0.22em] uppercase text-white/40">{t.licenseLabel}</span>
                                             <span className="text-[15px] font-black text-[#F2CE7C] tabular-nums" dir="ltr">{t.licenseNo}</span>
                                         </span>
+                                        <span className="text-[9.5px] font-black tracking-[0.18em] uppercase text-white/25 ms-2 ps-3 border-s border-white/10" dir="ltr">VERIFIED</span>
                                     </div>
-                                    <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-white/25" dir="ltr">VERIFIED &amp; LICENSED</p>
-                                </div>
 
-                                {/* powered by — the last line in the footer */}
-                                <p className="mt-10 md:mt-14 text-[11px] font-black tracking-[0.3em] text-white/50 uppercase" dir="ltr">{t.poweredBy}</p>
+                                    {/* 2 — copyright */}
+                                    <p className="text-[11px] text-white/35">{t.footer}</p>
+
+                                    {/* 3 — powered by */}
+                                    <p className="text-[11px] font-black tracking-[0.3em] text-white/50 uppercase" dir="ltr">{t.poweredBy}</p>
+                                </div>
                             </div>
                         </footer>
                     </div>
