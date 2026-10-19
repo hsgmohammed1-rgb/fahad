@@ -470,7 +470,7 @@ export const StoryPage: React.FC<{ lang: Language }> = ({ lang }) => {
             .st-begin:hover{transform:translateY(-2px) scale(1.02)}.st-begin:active{transform:scale(.97)}
             /* end screen — bold quote over the final image */
             .st-end{position:absolute;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem 1.5rem;animation:st-in .8s ease both;background-size:cover;background-position:center}
-            .st-end-scrim{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(110% 70% at 50% 90%, rgba(0,0,0,.55), rgba(0,0,0,.92) 70%, rgba(0,0,0,.99) 100%)}
+            .st-end-scrim{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(120% 80% at 50% 92%, rgba(0,0,0,.18), rgba(0,0,0,.45) 62%, rgba(0,0,0,.62) 100%)}
             .st-end-quote{position:relative;z-index:2;font-size:clamp(1.5rem,5vw,2.6rem);line-height:1.8;font-weight:900;max-width:34ch;color:#fff;text-shadow:0 14px 56px rgba(0,0,0,1);margin-top:4rem}
             [dir="rtl"] .st-end-quote{letter-spacing:0!important}
             .st-end-meta{position:relative;z-index:2;margin-top:1.4rem;display:flex;align-items:center;justify-content:center;gap:.8rem;font-size:10.5px;font-weight:900;letter-spacing:.24em;color:rgba(255,255,255,.45);text-transform:uppercase}
