@@ -63,7 +63,7 @@ const CHAPTERS: Chapter[] = [
     },
     {
         photo: 11,
-        img: '/album3/19.jpg',
+        img: '/album3/04.jpg',
         kickerAr: 'الفصل 4', kickerEn: 'Chapter 4',
         headAr: 'كبرياء القائد وتأديب المتخاذل',
         headEn: 'The commander\'s pride and disciplining the slacker',
@@ -80,7 +80,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'Alliance of the strong',
         textAr: 'بدأ عبدالصمد بتكوين فرقة كاملة هدفها إسقاط فهد. لكن القائد المحنك لم يكن فريسة سهلة؛ أخذ احتياطاته ووحّد الصفوف مع كبار المدينة.',
         textEn: 'Abdulsamad began forming a full squad aiming to topple Fahad. But the seasoned commander was no easy prey; he took precautions and united ranks with the city\'s elders.',
-        pos: 'center 5%',
+        pos: 'center 0%',
         zoom: 1.1,
     },
     {
@@ -91,7 +91,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'Backstage daggers',
         textAr: 'كثرت الشكاوى الكيدية وتصيد الأخطاء. لم تكن الحرب في الميدان بل في الغرف المغلقة.',
         textEn: 'Malicious complaints and fault-finding multiplied. The war was no longer on the field but behind closed doors.',
-        pos: 'center 5%',
+        pos: 'center 45%',
         zoom: 1.12,
     },
     {
@@ -102,7 +102,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'The mountain\'s isolation',
         textAr: 'مهما كان الجبل قوياً، فإن رياح الغدر تنحت فيه. ترك القائد وحيداً يواجه مصيراً نسجته خيوط الحقد.',
         textEn: 'However strong the mountain, the winds of betrayal carve into it. The commander was left alone to face a fate woven by spite.',
-        pos: 'center 5%',
+        pos: 'center 20%',
         zoom: 1.04,
     },
     {
