@@ -57,7 +57,7 @@ const CHAPTERS: Chapter[] = [
         headEn: 'Guardian of the city nights',
         textAr: 'جاب شوارع المدينة المظلمة حتى تربع على قيادة قطاع الشيرف. لم تغيره المناصب، بل زادته صرامة ورغبة جامحة في تطهير القطاع من كل متخاذل.',
         textEn: 'He rode the dark streets of the city until he took command of the sheriff sector. Posts never changed him — they only sharpened him, and fed his fierce will to cleanse the sector of every slacker.',
-        pos: 'center 35%',
+        pos: 'center 100%',
         zoom: 1.12,
     },
     {
