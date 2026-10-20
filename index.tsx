@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+/* Tailwind + the custom theme layer, compiled once at build time.
+   (was a runtime CDN engine + an inline <style> block in index.html) */
+import './styles.css';
 
 /**
  * Catches a render crash and shows something instead of a black page.

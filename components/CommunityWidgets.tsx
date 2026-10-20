@@ -84,7 +84,7 @@ const DISCORD_JOIN_URL = 'https://discord.com/invite/HYByGx8mQA';
 /* FAHAD brand art for the Discord card — the guild icon from the API is
    only used if the local crest ever fails to load. */
 const DISCORD_CREST = '/discord-logo.jpg';
-const DISCORD_BANNER = '/discord-banner.png';
+const DISCORD_BANNER = '/discord-banner.jpg';
 
 interface DiscordLive {
    name: string;
@@ -149,7 +149,7 @@ export const DiscordWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
          }
       };
       fetchDiscord();
-      const interval = setInterval(fetchDiscord, 60000);
+      const interval = setInterval(() => { if (!document.hidden) fetchDiscord(); }, 60000);
       return () => { dead = true; clearInterval(interval); };
    }, []);
 
@@ -427,7 +427,7 @@ export const YoutubeWidget: React.FC<CommunityWidgetsProps> = ({ lang }) => {
       };
       fetchVideo();
       fetchSubs();
-      const interval = setInterval(() => { fetchVideo(); fetchSubs(); }, 5 * 60 * 1000);
+      const interval = setInterval(() => { if (!document.hidden) { fetchVideo(); fetchSubs(); } }, 5 * 60 * 1000);
       return () => { dead = true; clearInterval(interval); };
       // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [lang]);

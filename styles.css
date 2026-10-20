@@ -1,0 +1,462 @@
+/* ============================================================
+   FAHAD — global stylesheet.
+   Tailwind is compiled ONCE at build time (no CDN runtime engine),
+   so the browser no longer downloads and runs a full CSS engine.
+   The custom layer below was previously an inline <style> block
+   inside index.html — same rules, now cached and minified.
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+    /* ============================================================
+       FAHAD — "OBSIDIAN GOLD"
+       Deep obsidian black + radiant gold, tuned to the gold F emblem
+       and the cinematic gold-fortress artwork.
+       ============================================================ */
+    :root {
+      color-scheme: dark;
+      /* radiant gold — primary */
+      --gold-light: #F7E3B0;
+      --gold: #B8862B;
+      --gold-dark: #6B4E17;
+      --gold-glow: rgba(184,134,43,0.35);
+      --radiant: #F2B33D;
+      --radiant-deep: #0C0906;
+      --radiant-glow: rgba(242,179,61,0.35);
+      --ember: #E07B12;
+      --obsidian: #08060A;
+      --obsidian-800: #14100B;
+      --ease-out: cubic-bezier(0.16,1,0.3,1);
+    }
+    * { -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body { background: #08060A; overflow-x: hidden; font-feature-settings: "ss01"; }
+    ::selection { background: #F2B33D; color: #08060A; }
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #08060A; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(#F7E3B0, #B07C1A); border-radius: 99px; border: 2px solid #08060A; }
+
+    /* ============================================================
+       FAHAD — cinematic backdrop stage
+       The artwork (1983x793, ratio 2.5) is built as a symmetrical
+       frame: a burning fortress on each side, a deliberately empty
+       black corridor down the middle where the headline lives.
+       Painting it as a plain background-size:cover scaled it past
+       both fortresses on any 16:9 screen and showed nothing but that
+       empty middle — the page read as a black void.
+
+       The stage now reproduces cover inside a box locked to the
+       artwork's own ratio, so the art always fills the viewport and
+       every light layer (braziers, god rays, embers) is a child of
+       that box: the shading stays welded to the painting at any
+       window size instead of drifting around the screen.
+       ============================================================ */
+    /* Anchored to the hero, not the viewport: the stage scrolls away with
+       the artwork instead of floating over the whole page. */
+    .fortress-stage { position: absolute; left: 0; right: 0; top: 0; overflow: hidden; }
+
+    /* Cover-fit box: tall enough to span the viewport, never narrower. */
+    .fortress-art {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      height: max(100%, calc(100vw / 2.5));
+      aspect-ratio: 2.5;
+      isolation: isolate;
+    }
+    .fortress-art-img {
+      position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+      filter: saturate(1.10) contrast(1.05) brightness(1.02);
+    }
+    /* Portrait: the box is far wider than the screen, so zoom in a little
+       and slide left — the golden horizon drops clear of the headline
+       while the frame keeps its corridor of dark sky. */
+    @media (max-aspect-ratio: 1/1) {
+      .fortress-art { left: 45%; transform: translate(-50%, -50%) scale(1.3); }
+    }
+
+    /* The painting's own light sources, in artwork coordinates: the two
+       braziers were measured at 24.5% / 71% x and 52% y (the artwork is
+       not perfectly mirrored), the golden horizon sits at 50% / 66%.
+
+       The flame licks upward: --rise is how far the glow climbs over one
+       flicker, --dx the small sideways lean (the right brazier drifts a
+       little harder, but the motion reads as rising, not as wind). */
+    .fortress-fire {
+      position: absolute; pointer-events: none;
+      mix-blend-mode: screen; filter: blur(9px);
+      will-change: transform, opacity;
+      animation: fireFlicker 7.5s ease-in-out infinite;
+    }
+    .fortress-fire-l {
+      left: 16.5%; top: 37%; width: 16%; height: 30%;
+      --dx: 4px; --rise: -6%;
+      background: radial-gradient(ellipse 50% 56% at 50% 50%,
+        rgba(255,238,196,0.62) 0%, rgba(242,179,61,0.34) 30%, rgba(224,123,18,0.16) 58%, transparent 80%);
+    }
+    .fortress-fire-r {
+      left: 63%; top: 37%; width: 16%; height: 30%;
+      --dx: 9px; --rise: -8%;
+      background: radial-gradient(ellipse 50% 56% at 50% 50%,
+        rgba(255,238,196,0.58) 0%, rgba(242,179,61,0.32) 30%, rgba(224,123,18,0.16) 58%, transparent 80%);
+      animation-duration: 9.5s; animation-delay: -3.2s;
+    }
+    .fortress-fire-c {
+      left: 26%; top: 50%; width: 48%; height: 34%;
+      --dx: 6px; --rise: -4%;
+      background: radial-gradient(ellipse 50% 50% at 50% 56%,
+        rgba(255,228,168,0.62) 0%, rgba(242,179,61,0.34) 36%, rgba(224,123,18,0.16) 62%, transparent 86%);
+      animation-duration: 12s; animation-delay: -5s;
+    }
+    @keyframes fireFlicker {
+      0%, 100% { opacity: 0.82; transform: translate(0, 0) scale(0.99); }
+      26%      { opacity: 1;    transform: translate(var(--dx), var(--rise)) scale(1.03); }
+      52%      { opacity: 0.78; transform: translate(calc(var(--dx) * 0.4), calc(var(--rise) * 0.3)) scale(1); }
+      76%      { opacity: 0.94; transform: translate(calc(var(--dx) * 0.75), calc(var(--rise) * 0.7)) scale(1.015); }
+    }
+
+    /* God rays running down the two gold columns (30% / 70%) */
+    .fortress-shaft {
+      position: absolute; top: 16%; height: 54%; width: 8%;
+      background: linear-gradient(to bottom, rgba(247,227,176,0.17), rgba(242,179,61,0.07) 55%, transparent);
+      filter: blur(8px); pointer-events: none; transform: rotate(4deg);
+      animation: shaftPulse 16s ease-in-out infinite alternate;
+    }
+    .fortress-shaft-l { left: 27%; }
+    .fortress-shaft-r { left: 65%; animation-delay: -8s; }
+    @keyframes shaftPulse {
+      0%   { opacity: 0.55; transform: rotate(4deg) scaleY(1); }
+      100% { opacity: 0.8;  transform: rotate(6deg) scaleY(1.03); }
+    }
+
+    /* Heat rising off the golden horizon */
+    .fortress-heat {
+      position: absolute; left: 28%; right: 28%; bottom: 20%; height: 26%;
+      pointer-events: none; mix-blend-mode: screen; filter: blur(3px);
+      background-image: repeating-linear-gradient(90deg,
+        rgba(255,214,150,0.16) 0 2px, transparent 2px 12px);
+      -webkit-mask-image: radial-gradient(ellipse 58% 100% at 50% 100%, black 8%, transparent 78%);
+      mask-image: radial-gradient(ellipse 58% 100% at 50% 100%, black 8%, transparent 78%);
+      animation: heatRise 14s ease-in-out infinite;
+    }
+    @keyframes heatRise {
+      0%   { transform: translateX(-2%) scaleY(1);    opacity: 0.12; }
+      50%  { transform: translateX(1%)  scaleY(1.04); opacity: 0.32; }
+      100% { transform: translateX(2%)  scaleY(1);    opacity: 0.16; }
+    }
+
+    /* Slow gold sheen travelling across the metal of the frame */
+    .fortress-shimmer {
+      position: absolute; inset: 0; pointer-events: none;
+      mix-blend-mode: overlay; opacity: 0.38;
+      background: linear-gradient(100deg,
+        transparent 34%, rgba(255,244,214,0.28) 46%, rgba(242,179,61,0.42) 50%,
+        rgba(255,244,214,0.28) 54%, transparent 66%);
+      background-size: 260% 100%; background-position: 150% 0;
+      animation: goldShimmer 22s ease-in-out infinite;
+    }
+    @keyframes goldShimmer {
+      0%, 15%   { background-position: 150% 0; }
+      60%, 100% { background-position: -60% 0; }
+    }
+
+    /* Final grade: seats the painting under the page, sinks the top edge
+       behind the header, and pools shade over the empty sky the headline
+       sits in — without flattening the lit horizon and gold floor. */
+    .fortress-grade {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 38% 30% at 50% 28%, rgba(8,6,10,0.84) 0%, rgba(8,6,10,0.44) 56%, transparent 80%),
+        linear-gradient(to bottom, rgba(8,6,10,0.88) 0%, rgba(8,6,10,0.28) 11%, transparent 26%),
+        linear-gradient(to top, #08060A 0%, rgba(8,6,10,0.75) 6%, transparent 20%);
+    }
+
+    /* Flat aliases, kept for anything else that paints the fortress art. */
+    .fortress_bg, .xtroet_bg, .fahad_bg, .responsive_bg {
+      background-image: url('/fahad-bg.jpg');
+      background-size: cover; background-position: center 42%; background-repeat: no-repeat;
+      filter: saturate(1.1) contrast(1.05);
+    }
+    .fortress_overlay, .xtroet_overlay, .fahad_overlay {
+      background:
+        linear-gradient(to bottom, rgba(8,6,10,0.52) 0%, rgba(8,6,10,0.22) 22%, rgba(8,6,10,0.38) 48%, rgba(8,6,10,0.86) 78%, rgba(8,6,10,0.96) 100%),
+        radial-gradient(ellipse 70% 46% at 50% 34%, transparent 45%, rgba(8,6,10,0.58) 100%);
+    }
+    .card-fortress {
+      background: rgba(8,6,10,0.62);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fortress-fire, .fortress-shaft, .fortress-heat, .fortress-shimmer { animation: none; }
+    }
+
+    .grain::after {
+      content: ""; position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0.06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .grid-lines {
+      background-image: linear-gradient(rgba(242,179,61,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(242,179,61,0.055) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 75%);
+    }
+    .text-stroke { -webkit-text-stroke: 1.5px rgba(255,255,255,0.20); color: transparent; }
+    .text-stroke-red { -webkit-text-stroke: 1.5px rgba(242,179,61,0.62); color: transparent; }
+    .text-stroke-emerald { -webkit-text-stroke: 1.5px rgba(242,179,61,0.58); color: transparent; }
+    .text-stroke-gold { -webkit-text-stroke: 1.5px rgba(242,179,61,0.6); color: transparent; }
+    @media (min-width: 768px) { .text-stroke, .text-stroke-red, .text-stroke-emerald, .text-stroke-gold { -webkit-text-stroke-width: 2px; } }
+
+    .glass { background: linear-gradient(180deg, rgba(20,16,11,0.82), rgba(8,6,10,0.86)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .glass-soft { background: rgba(242,179,61,0.06); backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px); }
+
+    /* Arabic must never be letter-spaced — tracking is for latin only.
+       Kills tracking on any tracked element that is not explicitly LTR. */
+    html[dir="rtl"] [class*="tracking-"]:not([dir="ltr"]) { letter-spacing: normal !important; }
+    html[dir="rtl"] .kicker { letter-spacing: normal; }
+
+    /* Obsidian gold panel: hairline antique-gold border + top inner highlight + deep body */
+    .citadel-frame {
+      position: relative;
+      background: linear-gradient(180deg, rgba(26,21,14,0.88), rgba(8,6,10,0.92));
+      border: 1px solid rgba(184,134,43,0.25);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(247,227,176,0.18), 0 0 60px -30px rgba(242,179,61,0.4);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .citadel-frame::before {
+      content: ""; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(247,227,176,0.9), rgba(242,179,61,0.7), transparent);
+      pointer-events: none;
+    }
+    .eyebrow-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(184,134,43,0.4); background: rgba(242,179,61,0.08);
+      border-radius: 999px; padding: 6px 16px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.85);
+    }
+    .divider-gold { height: 1px; background: linear-gradient(to left, rgba(184,134,43,0.7), rgba(242,179,61,0.2), transparent); }
+    .sec-index {
+      font-family: '"Bangers"', cursive; line-height: 1;
+      color: transparent; -webkit-text-stroke: 1.5px rgba(184,134,43,0.55);
+      letter-spacing: 0.04em; user-select: none;
+    }
+
+    .reveal { opacity: 0; transform: translateY(24px); filter: blur(4px); transition: opacity 1.1s cubic-bezier(0.16,1,0.3,1), transform 1.1s cubic-bezier(0.16,1,0.3,1), filter 1.1s cubic-bezier(0.16,1,0.3,1); will-change: opacity, transform, filter; }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      *, *::before, *::after { animation-duration: 0.01s !important; animation-iteration-count: 1 !important; transition-duration: 0.01s !important; }
+      html { scroll-behavior: auto; }
+    }
+
+    .card-sheen { position: relative; overflow: hidden; }
+    .card-sheen::before {
+      content: ""; position: absolute; top: -60%; bottom: -60%; width: 45%; left: -60%; z-index: 2; pointer-events: none;
+      background: linear-gradient(105deg, transparent, rgba(255,255,255,0.10), transparent);
+      transform: skewX(-18deg); animation: shinePeriodic 8.5s cubic-bezier(0.4,0,0.2,1) infinite;
+    }
+
+    .btn-arena { position: relative; isolation: isolate; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s, background 0.35s, border-color 0.35s, filter 0.35s; will-change: transform; }
+    .btn-arena:hover { transform: translateY(-2px); }
+    .btn-arena:active { transform: translateY(1px) scale(0.99); }
+    .btn-arena:focus-visible, a:focus-visible, button:focus-visible { outline: 2px solid #F2B33D; outline-offset: 3px; border-radius: 12px; }
+    .btn-gold { background: linear-gradient(180deg, #F7E3B0 0%, #F7E3B0 22%, #B8862B 55%, #6B4E17 100%); color: #08060A; box-shadow: 0 14px 40px -10px rgba(184,134,43,0.55), inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -3px 0 rgba(0,0,0,0.3); }
+    .btn-gold:hover { filter: brightness(1.07); box-shadow: 0 18px 50px -10px rgba(184,134,43,0.7), 0 0 30px -8px rgba(242,179,61,0.5), inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -3px 0 rgba(0,0,0,0.3); }
+    .btn-emerald { background: linear-gradient(180deg, #F2CE7C 0%, #F2B33D 45%, #5C4310 100%); color: #08060A; box-shadow: 0 14px 40px -10px rgba(242,179,61,0.6), inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -3px 0 rgba(0,0,0,0.3); }
+    .btn-emerald:hover { filter: brightness(1.08); box-shadow: 0 18px 50px -10px rgba(242,179,61,0.75), inset 0 1px 0 rgba(255,255,255,0.55); }
+    .btn-ghost-gold { background: rgba(242,179,61,0.07); border: 1px solid rgba(184,134,43,0.45); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+    .btn-ghost-gold:hover { background: rgba(242,179,61,0.14); border-color: rgba(247,227,176,0.8); }
+
+    /* Hero watch button — obsidian glass + antique gold frame + gold text */
+    .btn-watch { position: relative; overflow: hidden; isolation: isolate;
+      background: linear-gradient(180deg, rgba(30,24,16,.96), rgba(8,6,10,.98));
+      border: 1px solid rgba(184,134,43,.55);
+      color: #FBEBC4;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.7), 0 18px 48px -14px rgba(0,0,0,.85), 0 0 34px -10px rgba(184,134,43,.45), inset 0 1px 0 rgba(255,248,232,.22), inset 0 -10px 20px -12px rgba(184,134,43,.3);
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), border-color 0.35s, filter 0.35s;
+      animation: watch-pulse 3.4s ease-in-out infinite; }
+    @keyframes watch-pulse {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(0,0,0,.7), 0 18px 48px -14px rgba(0,0,0,.85), 0 0 30px -12px rgba(184,134,43,.4), inset 0 1px 0 rgba(255,248,232,.22), inset 0 -10px 20px -12px rgba(184,134,43,.3); }
+      50% { box-shadow: 0 0 0 1px rgba(0,0,0,.7), 0 20px 56px -12px rgba(0,0,0,.9), 0 0 52px -8px rgba(184,134,43,.6), inset 0 1px 0 rgba(255,248,232,.3), inset 0 -10px 20px -12px rgba(184,134,43,.4); } }
+    .btn-watch:hover { border-color: rgba(247,227,176,.9); filter: brightness(1.08); transform: translateY(-2px); }
+    .btn-watch:active { transform: translateY(1px) scale(0.99); }
+    .btn-watch::after { content: ""; position: absolute; top: -30%; bottom: -30%; width: 38%; left: -60%; z-index: 1; pointer-events: none;
+      background: linear-gradient(105deg, transparent, rgba(247,227,176,0.28), transparent); transform: skewX(-18deg);
+      animation: watch-shine 4.5s ease-in-out infinite; }
+    @keyframes watch-shine { 0% { left: -60%; opacity: 0; } 12% { opacity: 1; } 32%, 100% { left: 135%; opacity: 0; } }
+    .btn-watch .watch-label { background: linear-gradient(180deg, #FFFCF5 0%, #F7E3B0 45%, #E7C888 75%, #B08A2E 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,0.6)); }
+    .btn-watch .play-badge { position: relative; width: 32px; height: 32px; border-radius: 999px;
+      background: linear-gradient(180deg, #FBEBC4, #B8862B 60%, #8F6C10); color: #08060A;
+      display: inline-flex; align-items: center; justify-content: center; flex: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 0 16px rgba(184,134,43,0.55); }
+    .btn-watch .play-badge::after { content: ""; position: absolute; inset: -4px; border-radius: 999px;
+      border: 1.5px solid rgba(184,134,43,0.65); animation: badge-sonar 2.6s ease-out infinite; pointer-events: none; }
+    @keyframes badge-sonar { 0% { transform: scale(0.75); opacity: 0.9; } 100% { transform: scale(1.45); opacity: 0; } }
+
+    /* Hero discord button — radiant gold glass */
+    .btn-discord { position: relative; overflow: hidden; isolation: isolate;
+      background: linear-gradient(180deg, rgba(242,179,61,0.16), rgba(242,179,61,0.06));
+      border: 1px solid rgba(242,179,61,0.4); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 14px 36px -14px rgba(242,179,61,0.4);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s, background 0.35s, border-color 0.35s; }
+    .btn-discord:hover { transform: translateY(-2px); background: linear-gradient(180deg, rgba(242,179,61,0.24), rgba(242,179,61,0.1));
+      border-color: rgba(242,206,124,0.7); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 18px 44px -14px rgba(242,179,61,0.55); }
+    .btn-discord:active { transform: translateY(1px) scale(0.99); }
+
+    /* Subtle FAHAD mark under hero title + beauty line */
+    .xt-sub { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px; }
+    .xt-sub-text { font-family: '"Bangers"', cursive; font-size: clamp(1rem, 3.4vw, 1.5rem); letter-spacing: 0.42em; text-indent: 0.42em;
+      color: rgba(247,227,176,0.62); text-shadow: 0 0 18px rgba(242,179,61,0.28); user-select: none; }
+    .xt-line { position: relative; display: block; width: min(220px, 55vw); height: 1px; overflow: visible;
+      background: linear-gradient(90deg, transparent, rgba(247,227,176,0.75) 30%, rgba(242,179,61,0.85) 50%, rgba(247,227,176,0.75) 70%, transparent); }
+    .xt-line::before, .xt-line::after { content: ""; position: absolute; top: 50%; width: 5px; height: 5px; transform: translateY(-50%) rotate(45deg);
+      background: #FDEFC9; box-shadow: 0 0 10px rgba(242,179,61,0.85); opacity: 0.9; }
+    .xt-line::before { left: 8%; } .xt-line::after { right: 8%; }
+    .xt-line-dot { position: absolute; top: 50%; left: 0; width: 42px; height: 1px; transform: translateY(-50%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent);
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.9));
+      animation: xt-dot 3.8s ease-in-out infinite; }
+    @keyframes xt-dot { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 42px); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .btn-watch, .btn-watch::after, .btn-watch .play-badge::after, .xt-line-dot, .dock-cta::after { animation: none; } }
+    .gold-text { background: linear-gradient(135deg, #FFF4DC 0%, #F7E3B0 40%, #B8862B 65%, #6B4E17 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .emerald-text { background: linear-gradient(135deg, #F7E3B0 0%, #F2B33D 50%, #5C4310 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Hero FAHAD — radiant gold with a slow shine sweep */
+    .hero-firas, .hero-xtroet, .hero-fahad {
+      background: linear-gradient(110deg, #6B4E17 0%, #B8862B 14%, #FFFCF5 32%, #FDEFC9 46%, #FFFCF5 60%, #B8862B 80%, #5C4310 100%);
+      background-size: 220% auto;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,0.9)) drop-shadow(0 6px 26px rgba(242,179,61,0.34));
+      animation: heroShine 8s ease-in-out infinite;
+      letter-spacing: 0.05em;
+    }
+    @keyframes heroShine { 0%, 100% { background-position: 0% center; } 50% { background-position: 100% center; } }
+
+    /* Gold halo: slow conic orbit around the emblem */
+    .halo-conic { position: absolute; border-radius: 9999px; pointer-events: none;
+      background: conic-gradient(from 0deg, transparent 0 60%, rgba(242,179,61,0.9) 74%, rgba(247,227,176,0.9) 82%, rgba(242,179,61,0.15) 90%, transparent 100%);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 2px));
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 2px));
+      animation: spin 18s linear infinite; }
+    .profile-3d-ring { position: absolute; inset: -14px; border-radius: 9999px; border: 1px solid transparent; border-top-color: rgba(247,227,176,0.9); border-bottom-color: rgba(242,179,61,0.6); animation: spin 12s linear infinite; pointer-events: none; opacity: 0.7; }
+    .profile-3d-ring-inner { position: absolute; inset: -7px; border-radius: 9999px; border: 1px dashed rgba(184,134,43,0.4); animation: spin 26s linear infinite reverse; pointer-events: none; }
+    .profile-scanner { position: absolute; inset: 0; height: 22%; width: 100%; top: -22%; background: linear-gradient(to bottom, transparent, rgba(242,179,61,0.22), transparent); animation: scanMove 5s ease-in-out infinite; pointer-events: none; z-index: 20; }
+    @keyframes scanMove { 0% { top: -22%; opacity: 0; } 15% { opacity: 0.8; } 85% { opacity: 0.8; } 100% { top: 104%; opacity: 0; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .tech-corner { position: absolute; width: 14px; height: 14px; border-color: #B8862B; opacity: 0.7; z-index: 25; }
+    .tech-corner-tl { top: -6px; left: -6px; border-top-width: 2px; border-left-width: 2px; }
+    .tech-corner-tr { top: -6px; right: -6px; border-top-width: 2px; border-right-width: 2px; }
+    .tech-corner-bl { bottom: -6px; left: -6px; border-bottom-width: 2px; border-left-width: 2px; }
+    .tech-corner-br { bottom: -6px; right: -6px; border-bottom-width: 2px; border-right-width: 2px; }
+
+    .glitch-active { animation: glitchFx 0.35s steps(2) infinite; filter: brightness(1.25) contrast(1.15); }
+    .marquee-mask { mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent); }
+
+    /* Broadcast deck: angled CTA buttons + mono kickers (esports console language) */
+    .cut-btn { clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+    .cut-tag { clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+    .kicker { font-size: 10px; font-weight: 800; letter-spacing: 0.32em; text-transform: uppercase; }
+    .jersey { font-family: '"Bangers"', cursive; letter-spacing: 0.05em; line-height: 1; }
+    .led { width: 7px; height: 7px; border-radius: 999px; }
+
+    /* Gold ribbon: double-rule antique strip with diamond separators */
+    .citadel-ribbon { border-top: 1px solid rgba(184,134,43,0.35); border-bottom: 1px solid rgba(242,179,61,0.30);
+      background: linear-gradient(180deg, rgba(184,134,43,0.10), rgba(0,0,0,0.55) 55%, rgba(242,179,61,0.08)); }
+    /* Social ledger rows */
+    .ledger-row { position: relative; transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s, background 0.3s; }
+    .ledger-row:hover { transform: translateY(-3px); }
+    .ledger-row::after { content: ""; position: absolute; inset-inline-start: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 99px;
+      background: var(--ledger, #B8862B); box-shadow: 0 0 14px var(--ledger, #B8862B); opacity: 0.85; }
+    /* Theater frame */
+    .theater-frame { position: relative; background: #060509; border: 1px solid rgba(184,134,43,0.3);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 60px -20px rgba(242,179,61,0.35), inset 0 1px 0 rgba(247,227,176,0.2); }
+    .theater-frame::before { content: ""; position: absolute; top: -1px; left: 10%; right: 10%; height: 2px; z-index: 2;
+      background: linear-gradient(90deg, transparent, #F7E3B0, #F2B33D, transparent); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .perspective-1000 { perspective: 1200px; }
+    .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* ===== Alert tiers: smooth metal bars grow ===== */
+    .tier-bar { transform-origin: bottom; transform: scaleY(0); animation: tier-grow 1.2s cubic-bezier(0.16,1,0.3,1) forwards; will-change: transform; }
+    @keyframes tier-grow { 0% { transform: scaleY(0); } 60% { transform: scaleY(1.02); } 100% { transform: scaleY(1); } }
+    /* ===== Leaderboard progress bars grow ===== */
+    .bar-grow { transform: scaleX(0); animation: bar-grow 1.4s cubic-bezier(0.16,1,0.3,1) forwards; will-change: transform; }
+    @keyframes bar-grow { 0% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
+
+    /* ===== Watermark hero mark: radiant-gold metallic engraving ===== */
+    .wm-mark::before { content: ""; position: absolute; inset: -12% -6%; background: radial-gradient(ellipse 55% 45% at 50% 55%, rgba(242,179,61,0.18), transparent 70%); filter: blur(30px); animation: wm-aura 7s ease-in-out infinite; pointer-events: none; }
+    @keyframes wm-aura { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.05); } }
+    .wm-stroke { color: transparent; -webkit-text-stroke: 2px rgba(247,227,176,0.95); paint-order: stroke fill; animation: wm-glow 5s ease-in-out infinite; }
+    @media (min-width: 768px) { .wm-stroke { -webkit-text-stroke-width: 2.5px; } }
+    @keyframes wm-glow { 0%, 100% { filter: drop-shadow(0 0 8px rgba(242,179,61,0.3)); } 50% { filter: drop-shadow(0 0 20px rgba(184,134,43,0.5)); } }
+    .wm-depth { position: absolute; inset: 0; display: block; pointer-events: none; color: transparent; paint-order: stroke fill; user-select: none; }
+    .wm-depth-1 { transform: translate(3px, 3px); -webkit-text-stroke: 2px rgba(184,134,43,0.22); }
+    .wm-depth-2 { transform: translate(7px, 7px); -webkit-text-stroke: 2px rgba(242,179,61,0.14); }
+    .wm-letter { display: inline-block; opacity: 0; animation: wm-in 0.8s cubic-bezier(0.16,1,0.3,1) forwards, wm-wave 6s ease-in-out infinite; will-change: opacity, transform; }
+    .wm-mark .wm-letter:nth-child(1) { animation-delay: 0ms, 0ms; }
+    .wm-mark .wm-letter:nth-child(2) { animation-delay: 90ms, 0.45s; }
+    .wm-mark .wm-letter:nth-child(3) { animation-delay: 180ms, 0.9s; }
+    .wm-mark .wm-letter:nth-child(4) { animation-delay: 270ms, 1.35s; }
+    .wm-mark .wm-letter:nth-child(5) { animation-delay: 360ms, 1.8s; }
+    .wm-mark .wm-letter:nth-child(6) { animation-delay: 450ms, 2.25s; }
+    @keyframes wm-in { 0% { opacity: 0; transform: translateY(18px) scale(0.97); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes wm-wave { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-7px) rotate(-1deg); } }
+    .wm-mark:hover .wm-stroke { color: rgba(242,179,61,0.14); -webkit-text-stroke-color: rgba(247,227,176,1); }
+    .wm-sheen { position: absolute; inset: 0; display: block; color: transparent; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.4) 46%, rgba(242,179,61,0.5) 50%, rgba(255,255,255,0.4) 54%, transparent 70%); background-size: 280% 100%; -webkit-background-clip: text; background-clip: text; animation: wm-sheen 7s ease-in-out infinite; pointer-events: none; }
+    @keyframes wm-sheen { 0% { background-position: 130% 0; } 55%, 100% { background-position: -130% 0; } }
+
+    /* ===== FAHAD additions: radiant gold surfaces + fahad-text alias ===== */
+    .fahad-text, .emerald-text {
+      background: linear-gradient(135deg, #FFFCF5 0%, #F7E3B0 32%, #F2B33D 58%, #B8862B 82%, #6B4E17 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,0.55));
+    }
+    .emerald-text { background: linear-gradient(135deg, #F7E3B0 0%, #F2B33D 50%, #5C4310 100%); }
+
+    /* Gold hairline card — the default surface of the Fahad kingdom */
+    .gold-panel {
+      position: relative;
+      background: linear-gradient(180deg, rgba(26,21,14,0.82), rgba(8,6,10,0.90));
+      border: 1px solid rgba(184,134,43,0.28);
+      box-shadow: 0 24px 70px -28px rgba(0,0,0,0.85), inset 0 1px 0 rgba(247,227,176,0.16), 0 0 70px -34px rgba(242,179,61,0.55);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    }
+    .gold-panel::after {
+      content: ""; position: absolute; top: 0; left: 10%; right: 10%; height: 1px; pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(247,227,176,0.85), rgba(242,179,61,0.75), transparent);
+    }
+
+    /* Radiant gold CTA — the strongest action on the page */
+    .btn-radiant {
+      position: relative; overflow: hidden; isolation: isolate;
+      background: linear-gradient(180deg, #FDEFC9 0%, #F2B33D 42%, #B8862B 78%, #6B4E17 100%);
+      color: #08060A;
+      box-shadow: 0 16px 42px -12px rgba(242,179,61,0.72), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -3px 0 rgba(0,0,0,0.28);
+      transition: transform 0.35s var(--ease-out), box-shadow 0.35s, filter 0.35s;
+    }
+    .btn-radiant:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 22px 56px -12px rgba(242,179,61,0.85), 0 0 40px -10px rgba(242,179,61,0.5), inset 0 1px 0 rgba(255,255,255,0.6); }
+    .btn-radiant:active { transform: translateY(1px) scale(0.99); }
+    .btn-radiant::after {
+      content: ""; position: absolute; top: -40%; bottom: -40%; width: 36%; left: -65%; z-index: 1; pointer-events: none;
+      background: linear-gradient(105deg, transparent, rgba(255,255,255,0.62), transparent);
+      transform: skewX(-18deg); animation: radiant-shine 5.2s ease-in-out infinite;
+    }
+    @keyframes radiant-shine { 0% { left: -65%; opacity: 0; } 13% { opacity: 1; } 34%, 100% { left: 140%; opacity: 0; } }
+
+    /* Soft gold ring used on emblem / featured cards */
+    .ring-radiant {
+      box-shadow: 0 0 0 1px rgba(184,134,43,0.35), 0 0 0 4px rgba(242,179,61,0.10),
+                  0 0 60px -12px rgba(242,179,61,0.65), inset 0 1px 0 rgba(247,227,176,0.25);
+    }
+    .text-fahad { color: #F2B33D; text-shadow: 0 0 26px rgba(242,179,61,0.45); }
+    .rule-radiant { height: 1px; background: linear-gradient(to left, rgba(242,179,61,0.85), rgba(247,227,176,0.35), transparent); }
+    @media (prefers-reduced-motion: reduce) { .btn-radiant::after { animation: none; } }
+  

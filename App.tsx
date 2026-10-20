@@ -4,9 +4,9 @@ import { SocialLink, Language } from './types';
 import { StreamPlayer } from './components/StreamPlayer';
 import { SiteHeader } from './components/SiteHeader';
 import CommunityInviteCard from './components/CommunityInviteCard';
-import { DiscordWidget, YoutubeWidget } from './components/CommunityWidgets';
-
 // Heavy below-fold / on-demand chunks — split out of the first paint
+const DiscordWidget = lazy(() => import('./components/CommunityWidgets').then(m => ({ default: m.DiscordWidget })));
+const YoutubeWidget = lazy(() => import('./components/CommunityWidgets').then(m => ({ default: m.YoutubeWidget })));
 const HonorSection = lazy(() => import('./components/StatsSection').then(m => ({ default: m.HonorSection })));
 const ArchiveSection = lazy(() => import('./components/StatsSection').then(m => ({ default: m.ArchiveSection })));
 const AlbumSection = lazy(() => import('./components/AlbumSection').then(m => ({ default: m.AlbumSection })));
@@ -187,6 +187,38 @@ const SparkField: React.FC = () => {
         type S = { src: number; x: number; y: number; r: number; vy: number; vx: number; lift: number; sway: number; phase: number; life: number; max: number; heat: number };
         let w = 0, h = 0, raf = 0, t = 0, sparks: S[] = [];
 
+        /* ---- pre-rendered sprites ----------------------------------------
+           Building a gradient per spark per frame is what made this
+           canvas heavy. The tail and the glow are static shapes, so
+           they are drawn ONCE into offscreen canvases and then
+           blitted with drawImage — the per-frame cost becomes a
+           single textured quad instead of a fresh gradient object. */
+        const COLOURS = ['255,246,224', '242,179,61', '224,123,18'];
+        const tailSprites = COLOURS.map((col) => {
+            const c = document.createElement('canvas');
+            c.width = 1; c.height = 32;
+            const g = c.getContext('2d')!;
+            const grad = g.createLinearGradient(0, 0, 0, 32);
+            grad.addColorStop(0, `rgba(${col},0.9)`);
+            grad.addColorStop(1, `rgba(${col},0)`);
+            g.fillStyle = grad;
+            g.fillRect(0, 0, 1, 32);
+            return c;
+        });
+        const glowSprites = COLOURS.map((col) => {
+            const S = 64;
+            const c = document.createElement('canvas');
+            c.width = S; c.height = S;
+            const g = c.getContext('2d')!;
+            const grad = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+            grad.addColorStop(0, `rgba(${col},0.55)`);
+            grad.addColorStop(0.45, `rgba(${col},0.16)`);
+            grad.addColorStop(1, `rgba(${col},0)`);
+            g.fillStyle = grad;
+            g.fillRect(0, 0, S, S);
+            return c;
+        });
+
         const seed = (src?: number): S => {
             const i = src === undefined ? (Math.random() * FIRE_SOURCES.length) | 0 : src;
             const f = FIRE_SOURCES[i];
@@ -209,6 +241,8 @@ const SparkField: React.FC = () => {
             };
         };
 
+        const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
+
         const resize = () => {
             const pw = w, ph = h;
             w = host.clientWidth; h = host.clientHeight;
@@ -216,7 +250,9 @@ const SparkField: React.FC = () => {
             canvas.width = Math.round(w * DPR); canvas.height = Math.round(h * DPR);
             canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
             ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-            const n = Math.max(16, Math.min(40, Math.round(w / 52)));
+            // fewer embers on phones — the art is small there anyway
+            const cap = isMobile() ? 24 : 40;
+            const n = Math.max(12, Math.min(cap, Math.round(w / 52)));
             if (sparks.length) {
                 // keep the existing embers where they are instead of popping
                 if (pw && ph) sparks.forEach((s) => { s.x = (s.x / pw) * w; s.y = (s.y / ph) * h; });
@@ -230,18 +266,31 @@ const SparkField: React.FC = () => {
         const ro = new ResizeObserver(resize);
         ro.observe(host);
 
-        const tick = () => {
-            t += 0.016;
+        /* ---- frame pacing ----------------------------------------------
+           30fps is plenty for drifting embers and halves the GPU work
+           on long scrolls. The accumulator keeps the motion smooth. */
+        const FRAME_MS = 1000 / 30;
+        let last = performance.now();
+        let acc = 0;
+
+        const tick = (now: number) => {
+            raf = requestAnimationFrame(tick);
+            const dt = now - last;
+            last = now;
+            if (dt < FRAME_MS) return;
+            const step = Math.min(0.05, dt / 1000);
+            acc += step;
+            t += step;
+
             ctx.clearRect(0, 0, w, h);
             ctx.globalCompositeOperation = 'lighter';
-            ctx.lineCap = 'round';
             for (const s of sparks) {
                 s.life++;
                 // Buoyancy against air drag: the burst decays, then the
                 // ember settles into a steady climb instead of falling.
                 s.vy = s.vy * 0.996 - s.lift;
-                s.y += s.vy;
-                s.x += s.vx + Math.sin(t * s.sway + s.phase) * 0.3;
+                s.y += s.vy * step * 60;
+                s.x += (s.vx + Math.sin(t * s.sway + s.phase) * 0.3) * step * 60;
                 if (s.life > s.max || s.y < -12) Object.assign(s, seed(s.src));
 
                 const k = s.life / s.max;
@@ -253,24 +302,28 @@ const SparkField: React.FC = () => {
                 const a = Math.max(0, Math.min(1, fade)) * (0.72 + 0.28 * Math.sin(t * 1.4 + s.phase));
                 if (a <= 0.015) continue;
 
-                const col = s.heat > 0.82 ? '255,246,224' : s.heat > 0.45 ? '242,179,61' : '224,123,18';
-                const tail = Math.min(26, Math.abs(s.vy) * 9);
-                const grad = ctx.createLinearGradient(s.x, s.y, s.x, s.y + tail);
-                grad.addColorStop(0, `rgba(${col},${a * 0.9})`);
-                grad.addColorStop(1, `rgba(${col},0)`);
-                ctx.strokeStyle = grad;
-                ctx.lineWidth = s.r;
-                ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y + tail); ctx.stroke();
+                const tier = s.heat > 0.82 ? 0 : s.heat > 0.45 ? 1 : 2;
+                const col = COLOURS[tier];
 
-                if (s.heat > 0.82) {
-                    ctx.fillStyle = `rgba(${col},${a * 0.26})`;
-                    ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 5, 0, Math.PI * 2); ctx.fill();
+                // tail — one pre-rendered strip, stretched
+                const tail = Math.min(26, Math.abs(s.vy) * 9);
+                ctx.globalAlpha = a;
+                ctx.drawImage(tailSprites[tier], s.x - s.r / 2, s.y, Math.max(1, s.r), tail);
+
+                // hot embers get a soft glow halo
+                if (tier === 0) {
+                    const gs = s.r * 10;
+                    ctx.globalAlpha = a * 0.5;
+                    ctx.drawImage(glowSprites[tier], s.x - gs / 2, s.y - gs / 2, gs, gs);
                 }
-                ctx.fillStyle = `rgba(${col},${a})`;
+
+                // the ember itself
+                ctx.globalAlpha = a;
+                ctx.fillStyle = `rgb(${col})`;
                 ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (1 - k * 0.4), 0, Math.PI * 2); ctx.fill();
             }
+            ctx.globalAlpha = 1;
             ctx.globalCompositeOperation = 'source-over';
-            raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
 
@@ -278,24 +331,44 @@ const SparkField: React.FC = () => {
         // once it is off screen — same as the tab-visibility pause.
         const onVisibility = () => {
             cancelAnimationFrame(raf);
-            if (!document.hidden && visible) raf = requestAnimationFrame(tick);
+            if (!document.hidden && visible && !scrolling) { last = performance.now(); raf = requestAnimationFrame(tick); }
         };
         let visible = true;
+        let scrolling = false;
+        let scrollEnd = 0;
+        const onScroll = () => {
+            // an active scroll means the user is reading — pause the embers
+            // until the gesture settles so the page never fights the finger
+            if (!scrolling) {
+                scrolling = true;
+                cancelAnimationFrame(raf);
+            }
+            scrollEnd = performance.now() + 180;
+        };
+        const pollScroll = () => {
+            if (scrolling && performance.now() > scrollEnd) {
+                scrolling = false;
+                if (visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(tick); }
+            }
+            if (scrolling) requestAnimationFrame(pollScroll);
+        };
         const io = new IntersectionObserver(
             ([e]) => {
                 visible = e.isIntersecting;
                 cancelAnimationFrame(raf);
-                if (visible && !document.hidden) raf = requestAnimationFrame(tick);
+                if (visible && !document.hidden && !scrolling) { last = performance.now(); raf = requestAnimationFrame(tick); }
             },
             { threshold: 0 }
         );
         io.observe(canvas);
         document.addEventListener('visibilitychange', onVisibility);
+        window.addEventListener('scroll', onScroll, { passive: true });
         return () => {
             cancelAnimationFrame(raf);
             io.disconnect();
             ro.disconnect();
             document.removeEventListener('visibilitychange', onVisibility);
+            window.removeEventListener('scroll', onScroll);
         };
     }, []);
     return <canvas ref={canvasRef} className="absolute inset-0 opacity-90" />;
@@ -864,7 +937,7 @@ export default function App() {
        shows the right title, description and the gold banner.        */
     useEffect(() => {
         const SITE = 'https://fahad89.vercel.app/';
-        const BANNER = `${SITE}og-banner.png`;
+        const BANNER = `${SITE}og-banner.jpg`;
         const isAr = lang === 'ar';
         const title = isAr
             ? 'فهد المطيري | FAHAD Official — مملكة الذهب 💛'
@@ -933,7 +1006,9 @@ export default function App() {
             getAllSocialMediaStats().then(stats => { if (!dead) apply(stats); }).catch(() => {});
         };
         refreshSocials();
-        const socialInterval = setInterval(refreshSocials, SOCIAL_TTL_MS);
+        /* A hidden tab must not keep hammering the counters — the visitor
+           is not looking, and the requests cost bandwidth for nothing. */
+        const socialInterval = setInterval(() => { if (!document.hidden) refreshSocials(); }, SOCIAL_TTL_MS);
         return () => { dead = true; clearInterval(socialInterval); };
     }, []);
 
@@ -981,7 +1056,7 @@ export default function App() {
 
     useEffect(() => {
         fetchKickStatus();
-        const kickInterval = setInterval(fetchKickStatus, 60000);
+        const kickInterval = setInterval(() => { if (!document.hidden) fetchKickStatus(); }, 60000);
         return () => clearInterval(kickInterval);
     }, [fetchKickStatus]);
 
@@ -1232,8 +1307,8 @@ export default function App() {
                         <section id="community" className="pt-12 md:pt-16 scroll-mt-28">
                             <Reveal><SectionHeading no="03" title={t.communityTitle} en="COMMUNITY HQ" /></Reveal>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5">
-                                <Reveal delay={0}><DiscordWidget lang={lang} /></Reveal>
-                                <Reveal delay={100}><YoutubeWidget lang={lang} /></Reveal>
+                                <Reveal delay={0}><Suspense fallback={<div className="h-72 rounded-[26px] border border-white/10 bg-white/[0.02] animate-pulse" />}><DiscordWidget lang={lang} /></Suspense></Reveal>
+                                <Reveal delay={100}><Suspense fallback={<div className="h-72 rounded-[26px] border border-white/10 bg-white/[0.02] animate-pulse" />}><YoutubeWidget lang={lang} /></Suspense></Reveal>
                             </div>
                         </section>
 
